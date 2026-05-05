@@ -12,6 +12,7 @@ const navItems = [
   { href: '/explore', label: '탐색' },
   { href: '/action', label: '실행' },
   { href: '/history', label: '히스토리' },
+  { href: '/pricing', label: '요금제' },
 ]
 
 export function Navbar() {

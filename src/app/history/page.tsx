@@ -11,7 +11,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts'
-import { TrendingUp, CheckCircle2, AlertCircle, Clock, ArrowRight, Link2, Hash, Type } from 'lucide-react'
+import { TrendingUp, CheckCircle2, AlertCircle, Clock, ArrowRight, Link2, Hash, Type, ImageIcon, X } from 'lucide-react'
 import { useStore } from '@/lib/store'
 import { AREAS } from '@/data/constants'
 import { getActionById } from '@/data/actions'
@@ -84,6 +84,7 @@ export default function HistoryPage() {
   const { scoreHistory, actionRecords, diagnosisCompleted } = useStore()
   const [visibleAreas, setVisibleAreas] = useState<Set<AreaId>>(new Set(SELECTED_LINES))
   const [viewMode, setViewMode] = useState<'chart' | 'list'>('chart')
+  const [lightboxSrc, setLightboxSrc] = useState<string | null>(null)
 
   const isSample = !diagnosisCompleted || scoreHistory.length < 2
 
@@ -122,6 +123,26 @@ export default function HistoryPage() {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
+      {/* 이미지 라이트박스 */}
+      {lightboxSrc && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+          onClick={() => setLightboxSrc(null)}
+        >
+          <button
+            className="absolute top-4 right-4 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+            onClick={() => setLightboxSrc(null)}
+          >
+            <X className="w-5 h-5" />
+          </button>
+          <img
+            src={lightboxSrc}
+            alt="증거 이미지"
+            className="max-w-full max-h-[85vh] rounded-xl object-contain shadow-2xl"
+            onClick={e => e.stopPropagation()}
+          />
+        </div>
+      )}
       <div className="max-w-4xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
@@ -379,6 +400,28 @@ export default function HistoryPage() {
                                 {record.evidence && record.evidence.length > 0 && (
                                   <div className="flex flex-wrap gap-1.5 mt-2">
                                     {record.evidence.map((ev, idx) => {
+                                      if (ev.type === 'image') {
+                                        return (
+                                          <button
+                                            key={idx}
+                                            onClick={() => setLightboxSrc(ev.value)}
+                                            className="relative w-12 h-12 rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700 hover:opacity-80 transition-opacity flex-shrink-0"
+                                            title="클릭해서 확대"
+                                          >
+                                            {ev.value ? (
+                                              <img
+                                                src={ev.value}
+                                                alt="증거 이미지"
+                                                className="w-full h-full object-cover"
+                                              />
+                                            ) : (
+                                              <div className="w-full h-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
+                                                <ImageIcon className="w-4 h-4 text-slate-400" />
+                                              </div>
+                                            )}
+                                          </button>
+                                        )
+                                      }
                                       if (ev.type === 'link') {
                                         return (
                                           <a

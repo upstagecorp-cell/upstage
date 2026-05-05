@@ -2,7 +2,7 @@
 
 import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
-import { IndustryId, StageId, AreaId, ActionRecord, ScoreSnapshot, SubIndustryId, WeeklyGoal, BusinessMetricEntry } from '@/data/types'
+import { IndustryId, StageId, AreaId, ActionRecord, ScoreSnapshot, SubIndustryId, WeeklyGoal, BusinessMetricEntry, LoopPhase, MonthlyReport, StageUnlockStatus } from '@/data/types'
 import { ACTION_POOL, getActionById } from '@/data/actions'
 
 interface AppStore {
@@ -33,6 +33,13 @@ interface AppStore {
   streak: number
   lastActionDate: string | null
 
+  // 14일 루프
+  loopPhase: LoopPhase
+  loopStartDate: string | null
+
+  // 월간 리포트
+  monthlyReports: MonthlyReport[]
+
   // 액션
   setIndustry: (industry: IndustryId) => void
   setStage: (stage: StageId) => void
@@ -48,6 +55,10 @@ interface AppStore {
   setWeeklyGoal: (goal: WeeklyGoal) => void
   addBusinessMetric: (entry: BusinessMetricEntry) => void
   calculateStreak: () => void
+  setLoopPhase: (phase: LoopPhase) => void
+  startNewLoop: () => void
+  generateMonthlyReport: () => void
+  checkStageUnlock: () => StageUnlockStatus
 }
 
 const defaultScores: Record<AreaId, number> = {
@@ -111,6 +122,9 @@ export const useStore = create<AppStore>()(
       businessMetrics: [],
       streak: 0,
       lastActionDate: null,
+      loopPhase: 'execute',
+      loopStartDate: null,
+      monthlyReports: [],
 
       setIndustry: (industry) => set({ industry }),
       setStage: (stage) => set({ stage }),
@@ -175,6 +189,9 @@ export const useStore = create<AppStore>()(
           businessMetrics: [],
           streak: 0,
           lastActionDate: null,
+          loopPhase: 'execute',
+          loopStartDate: null,
+          monthlyReports: [],
         }),
       setWeeklyGoal: (goal) =>
         set(state => {
@@ -247,6 +264,96 @@ export const useStore = create<AppStore>()(
         }
 
         set({ streak, lastActionDate: mostRecent })
+      },
+      setLoopPhase: (phase) => set({ loopPhase: phase }),
+      startNewLoop: () =>
+        set({
+          loopPhase: 'execute',
+          loopStartDate: new Date().toISOString().split('T')[0],
+        }),
+      generateMonthlyReport: () => {
+        const state = get()
+        const now = new Date()
+        const monthStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
+        const existing = state.monthlyReports.find(r => r.month === monthStr)
+        if (existing) return
+
+        const monthStart = `${monthStr}-01`
+        const monthRecords = state.actionRecords.filter(r => r.date >= monthStart)
+        const totalActions = monthRecords.filter(r => r.status === 'completed').length
+
+        // score change: compare earliest snapshot in month vs latest
+        const monthHistory = state.scoreHistory.filter(s => s.date >= monthStart)
+        const scoreChange: Record<AreaId, number> = {
+          customer: 0, validation: 0, product: 0,
+          acquisition: 0, revenue: 0, operation: 0, growth: 0,
+        }
+        if (monthHistory.length >= 2) {
+          const first = monthHistory[0].scores
+          const last = monthHistory[monthHistory.length - 1].scores
+          for (const areaId of Object.keys(scoreChange) as AreaId[]) {
+            scoreChange[areaId] = (last[areaId] ?? 0) - (first[areaId] ?? 0)
+          }
+        }
+
+        const topArea = (Object.entries(scoreChange).sort((a, b) => b[1] - a[1])[0]?.[0] ?? 'customer') as AreaId
+
+        const topGain = scoreChange[topArea]
+        const insight =
+          totalActions === 0
+            ? '이번 달은 실행 기록이 없습니다. 다음 달에는 꼭 첫 액션을 시작해보세요!'
+            : topGain > 0
+            ? `이번 달 ${totalActions}개 액션을 완료하고 ${topArea} 영역에서 가장 많이 성장했습니다.`
+            : `이번 달 ${totalActions}개 액션을 완료했습니다. 다음 달에는 증거 기록을 더 충실히 해보세요.`
+
+        const report: MonthlyReport = { month: monthStr, totalActions, scoreChange, topArea, insight }
+        set(state => ({ monthlyReports: [...state.monthlyReports, report] }))
+      },
+      checkStageUnlock: (): StageUnlockStatus => {
+        const state = get()
+        const { stage, scores, actionRecords } = state
+        const completedCount = actionRecords.filter(r => r.status === 'completed').length
+
+        const STAGE_ORDER: StageId[] = ['idea', 'preparing', 'pre-open', 'operating', 'plateau', 'expansion']
+        const currentIdx = stage ? STAGE_ORDER.indexOf(stage) : -1
+        const nextStage = currentIdx >= 0 && currentIdx < STAGE_ORDER.length - 1
+          ? STAGE_ORDER[currentIdx + 1]
+          : null
+
+        if (!nextStage) return { canUnlock: false, targetStage: null, conditions: [] }
+
+        type UnlockRule = { label: string; met: boolean }
+        const rulesMap: Partial<Record<StageId, UnlockRule[]>> = {
+          preparing: [
+            { label: `고객이해도 40점 이상 (현재 ${scores.customer}점)`, met: scores.customer >= 40 },
+            { label: `문제검증도 30점 이상 (현재 ${scores.validation}점)`, met: scores.validation >= 30 },
+            { label: `완료 액션 3개 이상 (현재 ${completedCount}개)`, met: completedCount >= 3 },
+          ],
+          'pre-open': [
+            { label: `고객이해도 50점 이상 (현재 ${scores.customer}점)`, met: scores.customer >= 50 },
+            { label: `상품경쟁력 50점 이상 (현재 ${scores.product}점)`, met: scores.product >= 50 },
+            { label: `완료 액션 7개 이상 (현재 ${completedCount}개)`, met: completedCount >= 7 },
+          ],
+          operating: [
+            { label: `고객이해도 60점 이상 (현재 ${scores.customer}점)`, met: scores.customer >= 60 },
+            { label: `문제검증도 50점 이상 (현재 ${scores.validation}점)`, met: scores.validation >= 50 },
+            { label: `완료 액션 5개 이상 (현재 ${completedCount}개)`, met: completedCount >= 5 },
+          ],
+          plateau: [
+            { label: `수익성 60점 이상 (현재 ${scores.revenue}점)`, met: scores.revenue >= 60 },
+            { label: `운영지속성 55점 이상 (현재 ${scores.operation}점)`, met: scores.operation >= 55 },
+            { label: `완료 액션 10개 이상 (현재 ${completedCount}개)`, met: completedCount >= 10 },
+          ],
+          expansion: [
+            { label: `성장가능성 65점 이상 (현재 ${scores.growth}점)`, met: scores.growth >= 65 },
+            { label: `수익성 65점 이상 (현재 ${scores.revenue}점)`, met: scores.revenue >= 65 },
+            { label: `완료 액션 15개 이상 (현재 ${completedCount}개)`, met: completedCount >= 15 },
+          ],
+        }
+
+        const conditions: UnlockRule[] = rulesMap[nextStage] ?? []
+        const canUnlock = conditions.length > 0 && conditions.every(c => c.met)
+        return { canUnlock, targetStage: nextStage, conditions }
       },
     }),
     {

@@ -155,3 +155,19 @@ export interface BusinessMetricEntry {
   returnVisitors?: number
   inquiries?: number
 }
+
+export type LoopPhase = 'execute' | 'verify'
+
+export interface MonthlyReport {
+  month: string
+  totalActions: number
+  scoreChange: Record<AreaId, number>
+  topArea: AreaId
+  insight: string
+}
+
+export interface StageUnlockStatus {
+  canUnlock: boolean
+  targetStage: StageId | null
+  conditions: { label: string; met: boolean }[]
+}

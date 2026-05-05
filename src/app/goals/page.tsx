@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
@@ -11,11 +11,18 @@ import {
   X,
   Plus,
   ChevronRight,
+  Play,
+  ClipboardCheck,
+  FileBarChart,
+  Trophy,
+  Sparkles,
+  AlertTriangle,
 } from 'lucide-react'
 import { useStore } from '@/lib/store'
 import { useMounted } from '@/lib/use-mounted'
 import { AREAS } from '@/data/constants'
 import { AreaId, WeeklyGoal } from '@/data/types'
+import { generateWeeklyInsight } from '@/lib/ai-feedback'
 
 const AREA_COLORS: Record<AreaId, string> = {
   customer: '#6366f1',
@@ -25,6 +32,11 @@ const AREA_COLORS: Record<AreaId, string> = {
   revenue: '#10b981',
   operation: '#3b82f6',
   growth: '#14b8a6',
+}
+
+const STAGE_LABEL: Record<string, string> = {
+  idea: '아이디어', preparing: '준비', 'pre-open': '오픈 준비',
+  operating: '운영', plateau: '정체', expansion: '확장',
 }
 
 function GoalModal({ onClose, onSave }: { onClose: () => void; onSave: (goal: WeeklyGoal) => void }) {
@@ -133,25 +145,57 @@ function GoalModal({ onClose, onSave }: { onClose: () => void; onSave: (goal: We
 }
 
 export default function GoalsPage() {
-  const { weeklyGoal, setWeeklyGoal, actionRecords, scoreHistory } = useStore()
+  const {
+    weeklyGoal,
+    setWeeklyGoal,
+    actionRecords,
+    scoreHistory,
+    loopPhase,
+    loopStartDate,
+    monthlyReports,
+    stage,
+    startNewLoop,
+    setLoopPhase,
+    generateMonthlyReport,
+    checkStageUnlock,
+    diagnosisCompleted,
+  } = useStore()
   const [showModal, setShowModal] = useState(false)
+  const [showMonthlyReport, setShowMonthlyReport] = useState(false)
   const mounted = useMounted()
+
+  useEffect(() => {
+    if (mounted && diagnosisCompleted) {
+      generateMonthlyReport()
+    }
+  }, [mounted, diagnosisCompleted, generateMonthlyReport])
 
   if (!mounted) return null
 
-  // 주간 목표 진척률
+  const today = new Date()
+  const todayStr = today.toISOString().split('T')[0]
+
+  // ── 14일 루프 계산 ──────────────────────────────────────────────────────────
+  const loopStart = loopStartDate ?? todayStr
+  const loopDayNum = Math.max(1, Math.ceil((today.getTime() - new Date(loopStart).getTime()) / 86400000) + 1)
+  const loopDayClamped = Math.min(loopDayNum, 14)
+  const phaseLabel = loopPhase === 'execute' ? '실행 기간' : '검증 기간'
+  const phaseIcon = loopPhase === 'execute' ? Play : ClipboardCheck
+  const PhaseIcon = phaseIcon
+
+  const shouldSwitchToVerify = loopPhase === 'execute' && loopDayClamped > 7
+  const loopComplete = loopDayClamped >= 14
+
+  // ── 주간 목표 ───────────────────────────────────────────────────────────────
   const progressPct = weeklyGoal && weeklyGoal.targetActions.length > 0
     ? Math.round((weeklyGoal.completedActions.length / weeklyGoal.targetActions.length) * 100)
-    : weeklyGoal
-    ? 0
     : 0
 
-  // 남은 일수
-  // 30일 성장 리포트
-  const today = new Date()
   const daysLeft = weeklyGoal
     ? Math.max(0, Math.ceil((new Date(weeklyGoal.endDate).getTime() - today.getTime()) / 86400000))
     : 0
+
+  // ── 30일 성장 리포트 ────────────────────────────────────────────────────────
   const thirtyDaysAgo = new Date(today)
   thirtyDaysAgo.setDate(today.getDate() - 29)
   const thirtyDaysAgoStr = thirtyDaysAgo.toISOString().split('T')[0]
@@ -160,9 +204,7 @@ export default function GoalsPage() {
   const totalCompleted = recent30Records.filter(r => r.status === 'completed').length
   const totalScoreGain = recent30Records.reduce((sum, r) => sum + r.scoreGain, 0)
 
-  // 가장 많이 성장한 영역
   const areaGainMap: Record<string, number> = {}
-  // Use scoreHistory to detect area improvements over last 30 days
   const recent30History = scoreHistory.filter(s => s.date >= thirtyDaysAgoStr)
   if (recent30History.length >= 2) {
     const first = recent30History[0].scores
@@ -175,14 +217,12 @@ export default function GoalsPage() {
   const topArea = topAreaId ? AREAS.find(a => a.id === topAreaId) : null
   const topAreaGain = topAreaId ? areaGainMap[topAreaId] : 0
 
-  // 실행 캘린더 (최근 30일)
+  // ── 실행 캘린더 ─────────────────────────────────────────────────────────────
   const activeDates = new Set(
     actionRecords
       .filter(r => r.status === 'completed' && r.date >= thirtyDaysAgoStr)
       .map(r => r.date)
   )
-
-  // 캘린더 날짜 배열 생성 (오래된 것 → 최신 순)
   const calendarDays: string[] = []
   for (let i = 29; i >= 0; i--) {
     const d = new Date(today)
@@ -190,13 +230,88 @@ export default function GoalsPage() {
     calendarDays.push(d.toISOString().split('T')[0])
   }
 
+  // ── AI 주간 인사이트 ─────────────────────────────────────────────────────────
+  const weeklyInsight = generateWeeklyInsight(actionRecords, scoreHistory)
+
+  // ── 단계 해금 ──────────────────────────────────────────────────────────────
+  const stageUnlock = diagnosisCompleted ? checkStageUnlock() : null
+
   const targetArea = weeklyGoal ? AREAS.find(a => a.id === weeklyGoal.targetAreaId) : null
+  const latestMonthlyReport = monthlyReports.length > 0 ? monthlyReports[monthlyReports.length - 1] : null
 
   return (
     <>
       <AnimatePresence>
         {showModal && (
           <GoalModal onClose={() => setShowModal(false)} onSave={setWeeklyGoal} />
+        )}
+        {showMonthlyReport && latestMonthlyReport && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+            onClick={() => setShowMonthlyReport(false)}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.92, y: 16 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.92, y: 16 }}
+              transition={{ type: 'spring', duration: 0.35 }}
+              className="w-full max-w-md bg-white dark:bg-slate-900 rounded-2xl shadow-2xl p-6"
+              onClick={e => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+                  {latestMonthlyReport.month} 월간 리포트
+                </h3>
+                <button
+                  onClick={() => setShowMonthlyReport(false)}
+                  className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 mb-4">
+                <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800 text-center">
+                  <div className="text-2xl font-black text-emerald-600 dark:text-emerald-400">{latestMonthlyReport.totalActions}</div>
+                  <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">완료 액션</div>
+                </div>
+                <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800 text-center">
+                  {(() => {
+                    const topMonthArea = AREAS.find(a => a.id === latestMonthlyReport.topArea)
+                    return (
+                      <>
+                        <div className="text-2xl">{topMonthArea?.icon ?? '🏆'}</div>
+                        <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">최고 성장</div>
+                        <div className="text-xs font-semibold text-slate-700 dark:text-slate-300">{topMonthArea?.label}</div>
+                      </>
+                    )
+                  })()}
+                </div>
+              </div>
+
+              <div className="space-y-2 mb-4">
+                {AREAS.map(area => {
+                  const change = latestMonthlyReport.scoreChange[area.id] ?? 0
+                  if (change === 0) return null
+                  return (
+                    <div key={area.id} className="flex items-center justify-between">
+                      <span className="text-sm text-slate-700 dark:text-slate-300">{area.icon} {area.label}</span>
+                      <span className={`text-sm font-bold ${change > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500 dark:text-red-400'}`}>
+                        {change > 0 ? '+' : ''}{change}점
+                      </span>
+                    </div>
+                  )
+                })}
+              </div>
+
+              <div className="p-3 rounded-xl bg-indigo-50 dark:bg-indigo-950 border border-indigo-100 dark:border-indigo-900">
+                <p className="text-xs text-indigo-700 dark:text-indigo-300 leading-relaxed">{latestMonthlyReport.insight}</p>
+              </div>
+            </motion.div>
+          </motion.div>
         )}
       </AnimatePresence>
 
@@ -205,7 +320,185 @@ export default function GoalsPage() {
           {/* Header */}
           <div className="mb-8">
             <h1 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white">목표 & 성장</h1>
-            <p className="text-slate-500 dark:text-slate-400 mt-1 text-sm">7일 실행 루프와 30일 성장 리포트</p>
+            <p className="text-slate-500 dark:text-slate-400 mt-1 text-sm">14일 실행 루프와 월간 성장 리포트</p>
+          </div>
+
+          {/* 단계 해금 배너 */}
+          {stageUnlock?.canUnlock && stageUnlock.targetStage && (
+            <div className="mb-6 p-4 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg shadow-emerald-500/20">
+              <div className="flex items-start gap-3">
+                <Trophy className="w-6 h-6 flex-shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <p className="font-bold">다음 단계로 성장할 준비가 되었습니다!</p>
+                  <p className="text-emerald-50 text-sm mt-0.5">
+                    현재 {stage ? (STAGE_LABEL[stage] ?? stage) : '?'} 단계 →{' '}
+                    <strong>{STAGE_LABEL[stageUnlock.targetStage] ?? stageUnlock.targetStage}</strong> 단계 전환을 고려해보세요
+                  </p>
+                </div>
+              </div>
+              <div className="mt-3 space-y-1">
+                {stageUnlock.conditions.map((c, i) => (
+                  <div key={i} className="flex items-center gap-2 text-xs">
+                    <CheckCircle2 className={`w-3.5 h-3.5 flex-shrink-0 ${c.met ? 'text-white' : 'text-emerald-200/50'}`} />
+                    <span className={c.met ? 'text-white' : 'text-emerald-100/70'}>{c.label}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* 단계 해금 미달 (일부 충족) */}
+          {stageUnlock && !stageUnlock.canUnlock && stageUnlock.targetStage && stageUnlock.conditions.some(c => c.met) && (
+            <div className="mb-6 p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+              <div className="flex items-center gap-2 mb-3">
+                <Trophy className="w-4 h-4 text-amber-500" />
+                <p className="text-sm font-bold text-slate-900 dark:text-white">
+                  {STAGE_LABEL[stageUnlock.targetStage] ?? stageUnlock.targetStage} 단계 전환 조건
+                </p>
+              </div>
+              <div className="space-y-1.5">
+                {stageUnlock.conditions.map((c, i) => (
+                  <div key={i} className="flex items-center gap-2 text-xs">
+                    <div className={`w-3.5 h-3.5 rounded-full flex-shrink-0 border-2 flex items-center justify-center ${c.met ? 'bg-emerald-500 border-emerald-500' : 'border-slate-300 dark:border-slate-600'}`}>
+                      {c.met && <CheckCircle2 className="w-2.5 h-2.5 text-white" />}
+                    </div>
+                    <span className={c.met ? 'text-emerald-700 dark:text-emerald-400 line-through' : 'text-slate-600 dark:text-slate-400'}>{c.label}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* 14일 루프 카드 */}
+          <div className="mb-6 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <PhaseIcon className="w-5 h-5 text-indigo-500" />
+                14일 검증 루프
+              </h2>
+              <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${
+                loopPhase === 'execute'
+                  ? 'bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300'
+                  : 'bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300'
+              }`}>
+                {phaseLabel}
+              </span>
+            </div>
+
+            {/* 루프 진행 바 */}
+            {loopStartDate ? (
+              <>
+                <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 mb-2">
+                  <span>Day {loopDayClamped} / 14</span>
+                  <span>{loopPhase === 'execute' ? '1~7일: 실행' : '8~14일: 검증'}</span>
+                </div>
+                <div className="relative h-3 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden mb-3">
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${(loopDayClamped / 14) * 100}%` }}
+                    transition={{ duration: 0.7, ease: 'easeOut' }}
+                    className={`h-full rounded-full ${loopPhase === 'execute' ? 'bg-blue-500' : 'bg-purple-500'}`}
+                  />
+                  {/* 7일 마커 */}
+                  <div className="absolute top-0 bottom-0 w-0.5 bg-white/70 dark:bg-slate-700" style={{ left: '50%' }} />
+                </div>
+
+                {/* 단계 설명 */}
+                <div className="grid grid-cols-2 gap-2 mb-3">
+                  <div className={`p-2.5 rounded-lg text-center text-xs ${loopPhase === 'execute' ? 'bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800' : 'bg-slate-50 dark:bg-slate-800'}`}>
+                    <Play className="w-3.5 h-3.5 mx-auto mb-0.5 text-blue-500" />
+                    <p className="font-semibold text-slate-700 dark:text-slate-300">1~7일: 실행</p>
+                    <p className="text-slate-500 dark:text-slate-400">매일 액션 실행</p>
+                  </div>
+                  <div className={`p-2.5 rounded-lg text-center text-xs ${loopPhase === 'verify' ? 'bg-purple-50 dark:bg-purple-950 border border-purple-200 dark:border-purple-800' : 'bg-slate-50 dark:bg-slate-800'}`}>
+                    <ClipboardCheck className="w-3.5 h-3.5 mx-auto mb-0.5 text-purple-500" />
+                    <p className="font-semibold text-slate-700 dark:text-slate-300">8~14일: 검증</p>
+                    <p className="text-slate-500 dark:text-slate-400">지표 측정 & 재진단</p>
+                  </div>
+                </div>
+
+                {/* 검증 기간 안내 */}
+                {loopPhase === 'verify' && (
+                  <div className="mb-3 p-3 rounded-xl bg-purple-50 dark:bg-purple-950 border border-purple-100 dark:border-purple-900">
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <AlertTriangle className="w-3.5 h-3.5 text-purple-500" />
+                      <p className="text-xs font-semibold text-purple-700 dark:text-purple-300">검증 기간 안내</p>
+                    </div>
+                    <p className="text-xs text-purple-600 dark:text-purple-400">
+                      7일 실행 결과를 측정하세요. 매출, 방문자, 고객 반응 등 구체적인 지표를 기록하고 필요하면 재진단을 받으세요.
+                    </p>
+                    <Link href="/onboarding" className="inline-flex items-center gap-1 mt-2 text-xs text-purple-600 dark:text-purple-400 font-semibold hover:underline">
+                      재진단 받기 <ChevronRight className="w-3 h-3" />
+                    </Link>
+                  </div>
+                )}
+
+                {/* 알림: 실행→검증 전환 권고 */}
+                {shouldSwitchToVerify && (
+                  <div className="mb-3 p-3 rounded-xl bg-amber-50 dark:bg-amber-950 border border-amber-100 dark:border-amber-900">
+                    <p className="text-xs text-amber-700 dark:text-amber-300 mb-2">7일이 지났습니다. 검증 기간으로 전환하세요.</p>
+                    <button
+                      onClick={() => setLoopPhase('verify')}
+                      className="text-xs px-3 py-1.5 rounded-lg bg-amber-600 text-white font-semibold hover:bg-amber-700 transition-colors"
+                    >
+                      검증 기간으로 전환
+                    </button>
+                  </div>
+                )}
+
+                {/* 루프 완료 → 새 루프 시작 */}
+                {loopComplete && (
+                  <div className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950 border border-emerald-200 dark:border-emerald-800 text-center">
+                    <CheckCircle2 className="w-5 h-5 text-emerald-500 mx-auto mb-1.5" />
+                    <p className="text-sm font-semibold text-emerald-800 dark:text-emerald-200 mb-2">14일 루프 완료!</p>
+                    <button
+                      onClick={startNewLoop}
+                      className="text-xs px-4 py-2 rounded-lg bg-emerald-600 text-white font-semibold hover:bg-emerald-700 transition-colors"
+                    >
+                      새 루프 시작
+                    </button>
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="text-center py-4">
+                <p className="text-sm text-slate-500 dark:text-slate-400 mb-3">14일 실행-검증 루프를 시작하세요</p>
+                <button
+                  onClick={startNewLoop}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold transition-colors"
+                >
+                  <Play className="w-4 h-4" />
+                  루프 시작
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* 주간 AI 인사이트 카드 */}
+          <div className="mb-6 bg-white dark:bg-slate-900 rounded-2xl border border-indigo-200 dark:border-indigo-800 p-6 shadow-sm">
+            <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2 mb-4">
+              <Sparkles className="w-5 h-5 text-indigo-500" />
+              주간 AI 인사이트
+            </h2>
+            <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed mb-3">{weeklyInsight.summary}</p>
+            {weeklyInsight.risk && (
+              <div className="mb-3 p-3 rounded-xl bg-red-50 dark:bg-red-950 border border-red-100 dark:border-red-900 flex items-start gap-2">
+                <AlertTriangle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
+                <p className="text-xs text-red-700 dark:text-red-300">{weeklyInsight.risk}</p>
+              </div>
+            )}
+            {weeklyInsight.suggestions.length > 0 && (
+              <div className="space-y-2">
+                {weeklyInsight.suggestions.map((s, i) => (
+                  <div key={i} className="flex items-start gap-2 text-xs text-slate-600 dark:text-slate-400">
+                    <span className="w-4 h-4 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-400 text-[9px] font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
+                      {i + 1}
+                    </span>
+                    {s}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* 주간 목표 카드 */}
@@ -276,6 +569,58 @@ export default function GoalsPage() {
             )}
           </div>
 
+          {/* 월간 리포트 카드 */}
+          <div className="mb-6 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <FileBarChart className="w-5 h-5 text-emerald-500" />
+                월간 리포트
+              </h2>
+              {latestMonthlyReport && (
+                <button
+                  onClick={() => setShowMonthlyReport(true)}
+                  className="text-xs text-indigo-600 dark:text-indigo-400 hover:underline font-semibold"
+                >
+                  상세 보기
+                </button>
+              )}
+            </div>
+
+            {latestMonthlyReport ? (
+              <div>
+                <div className="grid grid-cols-2 gap-3 mb-3">
+                  <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800 text-center">
+                    <div className="text-2xl font-black text-emerald-600 dark:text-emerald-400">{latestMonthlyReport.totalActions}</div>
+                    <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">이번 달 완료</div>
+                  </div>
+                  <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800 text-center">
+                    {(() => {
+                      const topMonthArea = AREAS.find(a => a.id === latestMonthlyReport.topArea)
+                      return (
+                        <>
+                          <div className="text-2xl">{topMonthArea?.icon ?? '🏆'}</div>
+                          <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{topMonthArea?.label ?? '—'}</div>
+                        </>
+                      )
+                    })()}
+                  </div>
+                </div>
+                <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">{latestMonthlyReport.insight}</p>
+              </div>
+            ) : (
+              <div className="text-center py-4">
+                <p className="text-sm text-slate-500 dark:text-slate-400 mb-3">이번 달 리포트가 아직 생성되지 않았습니다</p>
+                <button
+                  onClick={() => generateMonthlyReport()}
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                >
+                  <FileBarChart className="w-4 h-4" />
+                  리포트 생성
+                </button>
+              </div>
+            )}
+          </div>
+
           {/* 30일 성장 리포트 */}
           <div className="mb-6 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm">
             <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2 mb-4">
@@ -336,7 +681,7 @@ export default function GoalsPage() {
             <div className="grid grid-cols-10 gap-1.5">
               {calendarDays.map(dateStr => {
                 const isActive = activeDates.has(dateStr)
-                const isToday = dateStr === today.toISOString().split('T')[0]
+                const isToday = dateStr === todayStr
                 const dayNum = new Date(dateStr).getDate()
                 return (
                   <div

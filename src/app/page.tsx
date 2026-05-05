@@ -79,6 +79,12 @@ export default function LandingPage() {
             >
               샘플 대시보드 보기
             </Link>
+            <Link
+              href="/pricing"
+              className="inline-flex items-center gap-2 px-8 py-4 rounded-xl border border-indigo-200 dark:border-indigo-800 bg-indigo-50 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 font-semibold text-lg hover:border-indigo-400 dark:hover:border-indigo-600 transition-all"
+            >
+              요금제 보기
+            </Link>
           </div>
 
           <div className="mt-16 grid grid-cols-3 gap-8 max-w-lg mx-auto">

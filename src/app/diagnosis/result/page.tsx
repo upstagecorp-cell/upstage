@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { ChevronRight } from 'lucide-react'
+import { ChevronRight, Sparkles } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useStore } from '@/lib/store'
 import { AREAS } from '@/data/constants'
@@ -10,6 +10,7 @@ import { getQuestionsForContext } from '@/data/questions'
 import { SCORE_MESSAGES } from '@/data/score-messages'
 import { getStatusLevel, getTotalScore } from '@/lib/scoring'
 import { AreaId } from '@/data/types'
+import { generateDiagnosisFeedback } from '@/lib/ai-feedback'
 
 export default function DiagnosisResultPage() {
   const router = useRouter()
@@ -26,7 +27,8 @@ export default function DiagnosisResultPage() {
   const questions = getQuestionsForContext(industry, subIndustry, stage)
   const totalScore = getTotalScore(scores)
 
-  // 영역별로 질문 그룹핑
+  const aiFeedbackList = generateDiagnosisFeedback(answers, scores, industry, subIndustry)
+
   const areaGroups: Record<AreaId, typeof questions> = {
     customer: [],
     validation: [],
@@ -42,7 +44,6 @@ export default function DiagnosisResultPage() {
     }
   }
 
-  // 점수 낮은 영역부터 표시
   const sortedAreas = AREAS.map(a => ({ ...a, score: scores[a.id] ?? 0 })).sort(
     (a, b) => a.score - b.score,
   )
@@ -50,7 +51,6 @@ export default function DiagnosisResultPage() {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
       <div className="max-w-2xl mx-auto px-4 py-8">
-        {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -16 }}
           animate={{ opacity: 1, y: 0 }}
@@ -67,7 +67,6 @@ export default function DiagnosisResultPage() {
             각 질문에 대한 답변이 점수에 어떻게 반영됐는지 확인하세요
           </p>
 
-          {/* 총점 배너 */}
           <div className="mt-5 p-5 rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/20">
             <div className="flex items-center justify-between">
               <div>
@@ -81,6 +80,34 @@ export default function DiagnosisResultPage() {
             </div>
           </div>
         </motion.div>
+
+        {/* AI 분석 섹션 */}
+        {aiFeedbackList.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.15 }}
+            className="mb-8 bg-white dark:bg-slate-900 rounded-2xl border border-indigo-200 dark:border-indigo-800 overflow-hidden shadow-sm"
+          >
+            <div className="p-5 border-b border-indigo-100 dark:border-indigo-900 bg-indigo-50 dark:bg-indigo-950/50">
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-indigo-500" />
+                <h2 className="font-bold text-indigo-900 dark:text-indigo-100">AI 맞춤 분석</h2>
+              </div>
+              <p className="text-xs text-indigo-600 dark:text-indigo-400 mt-1">답변 패턴과 업종을 분석해 생성한 개인화 피드백입니다</p>
+            </div>
+            <div className="divide-y divide-indigo-50 dark:divide-indigo-900/50">
+              {aiFeedbackList.map((fb, i) => (
+                <div key={i} className="p-4 flex items-start gap-3">
+                  <span className="flex-shrink-0 w-5 h-5 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-400 text-[10px] font-bold flex items-center justify-center mt-0.5">
+                    {i + 1}
+                  </span>
+                  <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">{fb}</p>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        )}
 
         {/* 영역별 섹션 */}
         <div className="space-y-6">
@@ -104,7 +131,6 @@ export default function DiagnosisResultPage() {
                 transition={{ duration: 0.35, delay: areaIdx * 0.07 }}
                 className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm"
               >
-                {/* 영역 헤더 */}
                 <div className="p-5 border-b border-slate-100 dark:border-slate-800">
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
@@ -115,21 +141,17 @@ export default function DiagnosisResultPage() {
                       <span className="text-xl font-bold" style={{ color: area.color }}>
                         {area.score}점
                       </span>
-                      <span
-                        className={`text-xs px-2.5 py-1 rounded-full font-semibold ${status.bg} ${status.color}`}
-                      >
+                      <span className={`text-xs px-2.5 py-1 rounded-full font-semibold ${status.bg} ${status.color}`}>
                         {status.label}
                       </span>
                     </div>
                   </div>
-                  {/* 점수 바 */}
                   <div className="h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
                     <div
                       className="h-full rounded-full transition-all duration-700"
                       style={{ width: `${area.score}%`, backgroundColor: area.color }}
                     />
                   </div>
-                  {/* 영역 메시지 */}
                   {areaMessage && (
                     <p className="mt-3 text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
                       {areaMessage.message}
@@ -137,7 +159,6 @@ export default function DiagnosisResultPage() {
                   )}
                 </div>
 
-                {/* 질문별 카드 */}
                 <div className="divide-y divide-slate-100 dark:divide-slate-800">
                   {areaQuestions.map(q => {
                     const selectedScore = answers[q.id]
@@ -145,12 +166,10 @@ export default function DiagnosisResultPage() {
 
                     return (
                       <div key={q.id} className="p-5">
-                        {/* 질문 텍스트 */}
                         <p className="font-medium text-slate-900 dark:text-white text-sm mb-3 leading-relaxed">
                           {q.text}
                         </p>
 
-                        {/* 이 질문이 중요한 이유 */}
                         <div className="mb-3 p-3 rounded-xl bg-indigo-50 dark:bg-indigo-950 border border-indigo-100 dark:border-indigo-900">
                           <p className="text-xs font-semibold text-indigo-700 dark:text-indigo-300 mb-1">
                             이 질문이 중요한 이유
@@ -162,7 +181,6 @@ export default function DiagnosisResultPage() {
 
                         {selectedOption ? (
                           <>
-                            {/* 사용자 답변 */}
                             <div className="mb-2 flex items-start gap-2">
                               <div className="flex-shrink-0 mt-0.5 w-2 h-2 rounded-full bg-indigo-500" />
                               <div>
@@ -175,14 +193,12 @@ export default function DiagnosisResultPage() {
                               </div>
                             </div>
 
-                            {/* 상태 해석 */}
                             <div className="mb-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700">
                               <p className="text-xs text-slate-600 dark:text-slate-400 italic leading-relaxed">
                                 {selectedOption.interpretation}
                               </p>
                             </div>
 
-                            {/* 점수 반영 이유 */}
                             <div className="mb-3 flex items-center gap-2 text-xs">
                               <span
                                 className="font-bold text-white px-2 py-0.5 rounded-full"
@@ -207,7 +223,6 @@ export default function DiagnosisResultPage() {
                           </div>
                         )}
 
-                        {/* 개선 시 변화 */}
                         <div className="flex items-start gap-2 p-3 rounded-xl bg-amber-50 dark:bg-amber-950 border border-amber-100 dark:border-amber-900">
                           <span className="text-amber-500 flex-shrink-0 mt-0.5">→</span>
                           <div>
@@ -228,7 +243,6 @@ export default function DiagnosisResultPage() {
           })}
         </div>
 
-        {/* 대시보드 이동 버튼 */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
