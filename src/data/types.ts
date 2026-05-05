@@ -3,6 +3,30 @@ export type StageId = 'idea' | 'preparing' | 'pre-open' | 'operating' | 'plateau
 export type AreaId = 'customer' | 'validation' | 'product' | 'acquisition' | 'revenue' | 'operation' | 'growth'
 export type StatusLevel = 'danger' | 'warning' | 'good' | 'excellent'
 
+export type SubIndustryId =
+  | 'shopping'
+  | 'saas'
+  | 'content'
+  | 'education'
+  | 'marketplace'
+  | 'b2c'
+  | 'b2b'
+  | 'reservation'
+  | 'visit'
+  | 'subscription'
+  | 'hall'
+  | 'delivery'
+  | 'takeout'
+  | 'general_cafe'
+  | 'dessert'
+  | 'bakery'
+  | 'hotel'
+  | 'pension'
+  | 'airbnb'
+  | 'guesthouse'
+
+export type ActionType = 'research' | 'create' | 'test' | 'operate' | 'measure' | 'improve' | 'learn'
+
 export interface Industry {
   id: IndustryId
   label: string
@@ -67,6 +91,14 @@ export interface ActionItem {
   criteria: string
   nextActionId?: string
   scoreImpact: number
+  actionType: ActionType
+  stageFilter?: StageId[]
+  industryFilter?: IndustryId[]
+  feedback: {
+    completed: string
+    partial: string
+    skipped: string
+  }
 }
 
 export interface ActionRecord {
@@ -77,10 +109,39 @@ export interface ActionRecord {
   memo: string
   link: string
   scoreGain: number
+  evidence?: { type: 'link' | 'image' | 'number' | 'text'; value: string }[]
 }
 
 export interface ScoreSnapshot {
   date: string
   scores: Record<AreaId, number>
   totalScore: number
+}
+
+export interface SubIndustry {
+  id: SubIndustryId
+  label: string
+  parentIndustry: IndustryId
+}
+
+export interface WeeklyGoal {
+  id: string
+  title: string
+  targetAreaId: AreaId
+  startDate: string
+  endDate: string
+  targetActions: string[]
+  completedActions: string[]
+}
+
+export interface BusinessMetricEntry {
+  date: string
+  revenue?: number
+  customers?: number
+  visitors?: number
+  reservations?: number
+  conversionRate?: number
+  reviews?: number
+  returnVisitors?: number
+  inquiries?: number
 }

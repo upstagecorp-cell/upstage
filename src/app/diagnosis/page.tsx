@@ -44,7 +44,7 @@ export default function DiagnosisPage() {
       // 완료
       const scores = calculateScores(answers, questions)
       completeDiagnosis(scores)
-      router.push('/dashboard')
+      router.push('/diagnosis/result')
     }
   }
 

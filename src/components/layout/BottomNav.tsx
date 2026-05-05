@@ -2,12 +2,13 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { BarChart2, Compass, Zap, Clock } from 'lucide-react'
+import { LayoutDashboard, Compass, Zap, Clock, Target, TrendingUp } from 'lucide-react'
 
 const navItems = [
-  { href: '/dashboard', label: '대시보드', icon: BarChart2 },
-  { href: '/explore', label: '탐색', icon: Compass },
+  { href: '/dashboard', label: '대시보드', icon: LayoutDashboard },
   { href: '/action', label: '실행', icon: Zap },
+  { href: '/goals', label: '목표', icon: Target },
+  { href: '/metrics', label: '지표', icon: TrendingUp },
   { href: '/history', label: '히스토리', icon: Clock },
 ]
 
@@ -15,6 +16,7 @@ export function BottomNav() {
   const pathname = usePathname()
 
   const showNav = navItems.some(item => pathname.startsWith(item.href))
+    || pathname.startsWith('/explore')
   if (!showNav) return null
 
   return (
@@ -27,7 +29,7 @@ export function BottomNav() {
             <Link
               key={item.href}
               href={item.href}
-              className={`flex-1 flex flex-col items-center gap-1 py-3 text-xs font-medium transition-colors ${
+              className={`flex-1 flex flex-col items-center gap-0.5 py-2.5 text-[10px] font-medium transition-colors ${
                 isActive
                   ? 'text-red-600 dark:text-red-400'
                   : 'text-slate-500 dark:text-slate-400'

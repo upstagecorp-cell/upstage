@@ -12,9 +12,9 @@ import {
   ResponsiveContainer,
   Tooltip,
 } from 'recharts'
-import { ArrowRight, X, TrendingUp, AlertTriangle, CheckCircle2, Zap } from 'lucide-react'
+import { ArrowRight, X, TrendingUp, AlertTriangle, CheckCircle2, Zap, Flame, Star } from 'lucide-react'
 import { useStore } from '@/lib/store'
-import { AREAS } from '@/data/constants'
+import { AREAS, LEVEL_CONFIG } from '@/data/constants'
 import { getTotalScore, getStatusLevel } from '@/lib/scoring'
 import { AreaId } from '@/data/types'
 
@@ -151,16 +151,34 @@ const SAMPLE_SCORES: Record<AreaId, number> = {
 
 export default function DashboardPage() {
   const router = useRouter()
-  const { scores, diagnosisCompleted, industry } = useStore()
+  const { scores, diagnosisCompleted, industry, actionRecords, streak, calculateStreak } = useStore()
   const [selectedArea, setSelectedArea] = useState<AreaId | null>(null)
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
     setMounted(true)
+    calculateStreak()
   }, [])
 
   const isSample = !diagnosisCompleted
   const displayScores = isSample ? SAMPLE_SCORES : scores
+
+  // 레벨 계산
+  const completedCount = actionRecords.filter(r => r.status === 'completed').length
+  const currentLevelData = (() => {
+    let lvl = LEVEL_CONFIG[0]
+    for (const cfg of LEVEL_CONFIG) {
+      if (completedCount >= cfg.requiredActions) lvl = cfg
+    }
+    return lvl
+  })()
+  const nextLevelData = LEVEL_CONFIG.find(c => c.level === currentLevelData.level + 1)
+  const levelPct = nextLevelData
+    ? Math.min(100, Math.round(
+        ((completedCount - currentLevelData.requiredActions) /
+         (nextLevelData.requiredActions - currentLevelData.requiredActions)) * 100
+      ))
+    : 100
 
   const totalScore = getTotalScore(displayScores)
   const totalStatus = getStatusLevel(totalScore)
@@ -198,6 +216,49 @@ export default function DashboardPage() {
             </Link>
           </div>
         )}
+
+        {/* 스트릭 + 레벨 배지 */}
+        <div className="mb-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {/* 스트릭 배지 */}
+          <div className={`flex items-center gap-4 p-4 rounded-2xl border ${streak > 0 ? 'bg-orange-50 dark:bg-orange-950 border-orange-200 dark:border-orange-800' : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800'} shadow-sm`}>
+            <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${streak > 0 ? 'bg-orange-100 dark:bg-orange-900' : 'bg-slate-100 dark:bg-slate-800'}`}>
+              <Flame className={`w-6 h-6 ${streak > 0 ? 'text-orange-500' : 'text-slate-400'}`} />
+            </div>
+            <div>
+              <div className="flex items-baseline gap-1">
+                <span className={`text-2xl font-black ${streak > 0 ? 'text-orange-600 dark:text-orange-400' : 'text-slate-400 dark:text-slate-600'}`}>{streak}</span>
+                <span className="text-sm font-medium text-slate-500 dark:text-slate-400">일 연속</span>
+              </div>
+              <p className="text-xs text-slate-500 dark:text-slate-400">{streak > 0 ? `연속 ${streak}일 실행 중!` : '오늘 첫 실행을 해보세요'}</p>
+            </div>
+          </div>
+
+          {/* 레벨 배지 */}
+          <div className="flex items-center gap-4 p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+            <div className="w-12 h-12 rounded-xl bg-indigo-100 dark:bg-indigo-950 flex items-center justify-center flex-shrink-0">
+              <Star className="w-6 h-6 text-indigo-500" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-sm font-bold text-slate-900 dark:text-white">
+                  Lv.{currentLevelData.level} {currentLevelData.label}
+                </span>
+                {nextLevelData && (
+                  <span className="text-xs text-slate-400 dark:text-slate-500">
+                    다음 레벨까지 {nextLevelData.requiredActions - completedCount}개
+                  </span>
+                )}
+              </div>
+              <div className="h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                <div
+                  className="h-full rounded-full bg-indigo-500 transition-all duration-700"
+                  style={{ width: `${levelPct}%` }}
+                />
+              </div>
+              <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">{completedCount}개 완료</p>
+            </div>
+          </div>
+        </div>
 
         {/* Header */}
         <div className="flex items-start justify-between mb-8 gap-4 flex-wrap">

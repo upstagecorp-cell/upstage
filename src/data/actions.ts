@@ -11,6 +11,12 @@ export const ACTION_POOL: ActionItem[] = [
     criteria: '3명 이상에게 연락하고 최소 1명의 응답을 받으면 완료',
     nextActionId: 'act_customer_2',
     scoreImpact: 5,
+    actionType: 'research',
+    feedback: {
+      completed: '잠재 고객과 첫 연결을 만들었습니다. 이 작은 시작이 진짜 인사이트로 이어집니다!',
+      partial: '일부만 완료했어도 훌륭한 시작입니다. 조금씩 이어가다 보면 반드시 응답이 옵니다.',
+      skipped: '지금 당장 사람을 찾기 어려울 수 있어요. SNS 댓글이나 커뮤니티 글로 먼저 시작해보는 것도 좋습니다.',
+    },
   },
   {
     id: 'act_customer_2',
@@ -21,6 +27,12 @@ export const ACTION_POOL: ActionItem[] = [
     criteria: '1회 인터뷰 완료 및 3가지 이상 인사이트 메모',
     nextActionId: 'act_customer_3',
     scoreImpact: 8,
+    actionType: 'research',
+    feedback: {
+      completed: '실제 고객의 목소리를 들었습니다. 이 인사이트가 사업의 방향을 바꿀 수도 있어요!',
+      partial: '인터뷰를 시도한 것만으로도 대단합니다. 다음에 더 깊은 대화를 나눠보세요.',
+      skipped: '인터뷰가 부담스럽다면 짧은 카카오톡 질문 3개로 시작해도 됩니다.',
+    },
   },
   {
     id: 'act_customer_3',
@@ -30,6 +42,12 @@ export const ACTION_POOL: ActionItem[] = [
     estimatedTime: '1시간',
     criteria: '페르소나 문서 1개 완성 (디지털 또는 종이)',
     scoreImpact: 7,
+    actionType: 'create',
+    feedback: {
+      completed: '고객이 이제 추상적인 존재가 아니라 구체적인 인물이 되었습니다. 앞으로의 결정에 큰 도움이 됩니다!',
+      partial: '완벽하지 않아도 괜찮아요. 있는 정보만으로 일단 만들고 나중에 보완하세요.',
+      skipped: '페르소나 대신 "내 고객은 이런 사람이다" 3줄 요약을 먼저 써보는 것도 좋은 출발입니다.',
+    },
   },
   // 문제검증도
   {
@@ -41,6 +59,12 @@ export const ACTION_POOL: ActionItem[] = [
     criteria: '설문지 완성 및 링크 공유 (10명 이상)',
     nextActionId: 'act_validation_2',
     scoreImpact: 4,
+    actionType: 'create',
+    feedback: {
+      completed: '설문을 통해 데이터를 모으기 시작했습니다. 응답이 쌓일수록 확신이 생깁니다!',
+      partial: '설문을 만든 것만으로도 큰 진전입니다. 배포 범위를 조금씩 넓혀가세요.',
+      skipped: '설문이 어렵다면 주변 지인 5명에게 "이런 문제 겪어봤어?"라고 직접 물어보세요.',
+    },
   },
   {
     id: 'act_validation_2',
@@ -50,6 +74,12 @@ export const ACTION_POOL: ActionItem[] = [
     estimatedTime: '30분',
     criteria: '공통 패턴 3가지를 문서로 정리',
     scoreImpact: 6,
+    actionType: 'measure',
+    feedback: {
+      completed: '데이터에서 패턴을 찾아냈습니다. 이 인사이트가 다음 전략의 근거가 됩니다!',
+      partial: '일부 분석만 해도 시작은 충분합니다. 패턴 1개라도 찾아서 기록해두세요.',
+      skipped: '응답 수가 적어도 걱정하지 마세요. 소수 응답에서도 유의미한 공통점을 찾을 수 있어요.',
+    },
   },
   {
     id: 'act_validation_3',
@@ -59,6 +89,12 @@ export const ACTION_POOL: ActionItem[] = [
     estimatedTime: '반나절',
     criteria: '1명에게 실제 판매 또는 서비스 제공 완료',
     scoreImpact: 10,
+    actionType: 'test',
+    feedback: {
+      completed: '실제로 해냈습니다! 첫 번째 실전 테스트는 어떤 분석보다도 값진 경험입니다.',
+      partial: '테스트를 시도한 용기가 대단합니다. 완벽하지 않아도 배운 것들을 꼭 기록하세요.',
+      skipped: '지금 당장 판매가 어렵다면 무료로 서비스를 제공하며 반응을 먼저 살펴보세요.',
+    },
   },
   // 상품경쟁력
   {
@@ -70,6 +106,12 @@ export const ACTION_POOL: ActionItem[] = [
     criteria: '3곳 비교표 완성',
     nextActionId: 'act_product_2',
     scoreImpact: 5,
+    actionType: 'research',
+    feedback: {
+      completed: '시장을 객관적으로 바라보는 눈이 생겼습니다. 차별화 전략의 토대가 완성됐어요!',
+      partial: '1~2곳만 조사해도 소중한 데이터입니다. 나머지는 천천히 보완하세요.',
+      skipped: '경쟁사가 명확하지 않다면 "비슷한 고객 문제를 해결하는 서비스"를 기준으로 찾아보세요.',
+    },
   },
   {
     id: 'act_product_2',
@@ -79,6 +121,12 @@ export const ACTION_POOL: ActionItem[] = [
     estimatedTime: '30분',
     criteria: '차별화 한 문장 완성',
     scoreImpact: 7,
+    actionType: 'create',
+    feedback: {
+      completed: '나만의 무기가 생겼습니다. 이 한 문장이 앞으로 모든 마케팅의 핵심이 됩니다!',
+      partial: '아직 명확하지 않아도 괜찮아요. 지금 떠오르는 것을 일단 적고 다듬어 나가세요.',
+      skipped: '차별화가 어렵게 느껴진다면 "우리는 누구에게 제일 잘 맞는가?"라는 질문부터 시작해보세요.',
+    },
   },
   // 유입구조
   {
@@ -90,6 +138,12 @@ export const ACTION_POOL: ActionItem[] = [
     criteria: '프로필 사진/소개/링크까지 완성',
     nextActionId: 'act_acquisition_2',
     scoreImpact: 3,
+    actionType: 'operate',
+    feedback: {
+      completed: '온라인 존재감의 첫 발을 내딛었습니다. 이제 고객이 우리를 찾을 수 있어요!',
+      partial: '프로필이 완벽하지 않아도 시작이 중요합니다. 지금 있는 것부터 공유해보세요.',
+      skipped: 'SNS가 부담스럽다면 네이버 블로그나 카카오 채널처럼 간단한 것부터 시작해보세요.',
+    },
   },
   {
     id: 'act_acquisition_2',
@@ -100,6 +154,12 @@ export const ACTION_POOL: ActionItem[] = [
     criteria: 'SNS에 게시물 1개 업로드',
     nextActionId: 'act_acquisition_3',
     scoreImpact: 4,
+    actionType: 'create',
+    feedback: {
+      completed: '첫 콘텐츠를 세상에 내놓았습니다. 꾸준히 쌓다 보면 팔로워가 자연스럽게 늘어납니다!',
+      partial: '완성도보다 꾸준함이 중요합니다. 짧더라도 계속 올리는 습관을 만들어보세요.',
+      skipped: '콘텐츠 제작이 어렵다면 기존 고객 후기나 제품 사진부터 공유해보세요.',
+    },
   },
   {
     id: 'act_acquisition_3',
@@ -109,6 +169,12 @@ export const ACTION_POOL: ActionItem[] = [
     estimatedTime: '1시간',
     criteria: '20명 이상에게 개별 메시지 발송',
     scoreImpact: 5,
+    actionType: 'operate',
+    feedback: {
+      completed: '주변에서부터 입소문이 시작됩니다. 지인들이 첫 번째 응원단이 될 거예요!',
+      partial: '20명이 부담스럽다면 10명부터 시작해도 충분합니다. 진심이 담긴 메시지가 중요해요.',
+      skipped: '직접 연락이 어렵다면 단체 카카오톡 메시지나 인스타 스토리로 먼저 알려보세요.',
+    },
   },
   // 수익성
   {
@@ -120,6 +186,12 @@ export const ACTION_POOL: ActionItem[] = [
     criteria: '고정비 목록 완성 및 합계 계산',
     nextActionId: 'act_revenue_2',
     scoreImpact: 4,
+    actionType: 'measure',
+    feedback: {
+      completed: '숫자를 직시하는 용기가 있습니다. 이제 무엇을 줄이고 무엇을 늘릴지 보이기 시작합니다!',
+      partial: '일부 비용만 파악해도 시작입니다. 모르는 것은 빈칸으로 두고 하나씩 채워가세요.',
+      skipped: '비용이 복잡하게 느껴진다면 "이번 달 내가 쓴 돈" 통장 내역부터 살펴보세요.',
+    },
   },
   {
     id: 'act_revenue_2',
@@ -129,6 +201,12 @@ export const ACTION_POOL: ActionItem[] = [
     estimatedTime: '1시간',
     criteria: 'BEP 수량/금액 계산 완료',
     scoreImpact: 7,
+    actionType: 'measure',
+    feedback: {
+      completed: '목표가 생겼습니다! BEP를 아는 것과 모르는 것은 사업의 방향성 자체가 달라집니다.',
+      partial: '계산이 어렵더라도 대략적인 수치라도 OK입니다. 정확도는 나중에 높여가세요.',
+      skipped: 'BEP 계산이 복잡하다면 "한 달에 몇 개를 팔아야 적자가 나지 않을까?"라는 질문부터 시작해보세요.',
+    },
   },
   // 운영지속성
   {
@@ -140,6 +218,12 @@ export const ACTION_POOL: ActionItem[] = [
     criteria: '하루 업무 타임라인 문서 완성',
     nextActionId: 'act_operation_2',
     scoreImpact: 3,
+    actionType: 'operate',
+    feedback: {
+      completed: '내 하루가 문서가 됐습니다. 이걸 보면 시간을 어디에 더 써야 할지 보이기 시작해요!',
+      partial: '일부만 기록해도 좋습니다. 습관이 중요하니 매일 조금씩 기록하는 것부터 시작해보세요.',
+      skipped: '정식 문서가 어렵다면 오늘 한 일 3가지를 메모장에 적는 것부터 시작해보세요.',
+    },
   },
   {
     id: 'act_operation_2',
@@ -149,6 +233,12 @@ export const ACTION_POOL: ActionItem[] = [
     estimatedTime: '1시간',
     criteria: '5단계 이상의 업무 매뉴얼 1개 완성',
     scoreImpact: 7,
+    actionType: 'create',
+    feedback: {
+      completed: '이제 누구든 이 업무를 대신할 수 있게 됐습니다. 시스템화의 첫 발을 내딛었어요!',
+      partial: '3단계만 작성했어도 괜찮습니다. 나머지는 실제로 해보면서 추가해나가세요.',
+      skipped: '매뉴얼 작성이 어렵다면 해당 업무를 하면서 각 단계를 바로 사진으로 찍어두는 것도 좋아요.',
+    },
   },
   // 성장가능성
   {
@@ -160,6 +250,12 @@ export const ACTION_POOL: ActionItem[] = [
     criteria: '수치가 있는 30일 목표 문서 완성',
     nextActionId: 'act_growth_2',
     scoreImpact: 4,
+    actionType: 'learn',
+    feedback: {
+      completed: '방향이 생겼습니다. 목표가 있는 사람과 없는 사람의 30일은 완전히 다릅니다!',
+      partial: '수치가 애매해도 괜찮습니다. "지금보다 나아지는" 방향만 잡아도 큰 진전이에요.',
+      skipped: '목표 설정이 부담스럽다면 "30일 후 내가 원하는 한 가지 변화"만 적어보세요.',
+    },
   },
   {
     id: 'act_growth_2',
@@ -169,6 +265,12 @@ export const ACTION_POOL: ActionItem[] = [
     estimatedTime: '1시간',
     criteria: '가설 1개 + 측정 방법 문서 완성',
     scoreImpact: 6,
+    actionType: 'improve',
+    feedback: {
+      completed: '과학적으로 성장을 접근하고 있습니다. 가설-실험-검증의 사이클이 빠른 성장을 만듭니다!',
+      partial: '가설이 완벽하지 않아도 됩니다. 틀려도 배울 수 있는 것이 가설 실험의 가장 큰 장점이에요.',
+      skipped: '가설 설계가 어렵다면 "지금 내가 가장 궁금한 것 하나"를 먼저 질문 형태로 적어보세요.',
+    },
   },
 ]
 

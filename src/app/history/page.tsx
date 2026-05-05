@@ -12,7 +12,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts'
-import { TrendingUp, CheckCircle2, AlertCircle, Clock, ArrowRight } from 'lucide-react'
+import { TrendingUp, CheckCircle2, AlertCircle, Clock, ArrowRight, Link2, Hash, Type } from 'lucide-react'
 import { useStore } from '@/lib/store'
 import { AREAS } from '@/data/constants'
 import { getActionById } from '@/data/actions'
@@ -376,6 +376,46 @@ export default function HistoryPage() {
                                   <p className="text-xs text-slate-600 dark:text-slate-400 mt-1.5 italic">
                                     &ldquo;{record.memo}&rdquo;
                                   </p>
+                                )}
+                                {record.evidence && record.evidence.length > 0 && (
+                                  <div className="flex flex-wrap gap-1.5 mt-2">
+                                    {record.evidence.map((ev, idx) => {
+                                      if (ev.type === 'link') {
+                                        return (
+                                          <a
+                                            key={idx}
+                                            href={ev.value}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 text-xs font-medium hover:bg-blue-100 dark:hover:bg-blue-900 transition-colors"
+                                          >
+                                            <Link2 className="w-3 h-3" />
+                                            링크
+                                          </a>
+                                        )
+                                      }
+                                      if (ev.type === 'number') {
+                                        return (
+                                          <span
+                                            key={idx}
+                                            className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 text-xs font-bold"
+                                          >
+                                            <Hash className="w-3 h-3" />
+                                            {ev.value}
+                                          </span>
+                                        )
+                                      }
+                                      return (
+                                        <span
+                                          key={idx}
+                                          className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-xs"
+                                        >
+                                          <Type className="w-3 h-3" />
+                                          {ev.value}
+                                        </span>
+                                      )
+                                    })}
+                                  </div>
                                 )}
                               </div>
                             </div>
