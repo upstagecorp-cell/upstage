@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
@@ -13,6 +13,7 @@ import {
   ChevronRight,
 } from 'lucide-react'
 import { useStore } from '@/lib/store'
+import { useMounted } from '@/lib/use-mounted'
 import { AREAS } from '@/data/constants'
 import { AreaId, WeeklyGoal } from '@/data/types'
 
@@ -134,9 +135,7 @@ function GoalModal({ onClose, onSave }: { onClose: () => void; onSave: (goal: We
 export default function GoalsPage() {
   const { weeklyGoal, setWeeklyGoal, actionRecords, scoreHistory } = useStore()
   const [showModal, setShowModal] = useState(false)
-  const [mounted, setMounted] = useState(false)
-
-  useEffect(() => { setMounted(true) }, [])
+  const mounted = useMounted()
 
   if (!mounted) return null
 
@@ -148,12 +147,11 @@ export default function GoalsPage() {
     : 0
 
   // 남은 일수
-  const daysLeft = weeklyGoal
-    ? Math.max(0, Math.ceil((new Date(weeklyGoal.endDate).getTime() - Date.now()) / 86400000))
-    : 0
-
   // 30일 성장 리포트
   const today = new Date()
+  const daysLeft = weeklyGoal
+    ? Math.max(0, Math.ceil((new Date(weeklyGoal.endDate).getTime() - today.getTime()) / 86400000))
+    : 0
   const thirtyDaysAgo = new Date(today)
   thirtyDaysAgo.setDate(today.getDate() - 29)
   const thirtyDaysAgoStr = thirtyDaysAgo.toISOString().split('T')[0]

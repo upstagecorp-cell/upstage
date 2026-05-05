@@ -3,6 +3,7 @@
 import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
 import { IndustryId, StageId, AreaId, ActionRecord, ScoreSnapshot, SubIndustryId, WeeklyGoal, BusinessMetricEntry } from '@/data/types'
+import { ACTION_POOL, getActionById } from '@/data/actions'
 
 interface AppStore {
   // 온보딩
@@ -59,6 +60,41 @@ const defaultScores: Record<AreaId, number> = {
   growth: 0,
 }
 
+function getTotalScore(scores: Record<AreaId, number>) {
+  return Math.round(Object.values(scores).reduce((a, b) => a + b, 0) / 7)
+}
+
+function buildScoreSnapshot(scores: Record<AreaId, number>): ScoreSnapshot {
+  return {
+    date: new Date().toISOString().split('T')[0],
+    scores,
+    totalScore: getTotalScore(scores),
+  }
+}
+
+function clampScore(score: number) {
+  return Math.max(0, Math.min(100, score))
+}
+
+function applyMetricSignals(
+  scores: Record<AreaId, number>,
+  entry: BusinessMetricEntry
+): Record<AreaId, number> {
+  const next = { ...scores }
+  const bump = (areaId: AreaId) => {
+    next[areaId] = clampScore((next[areaId] ?? 0) + 1)
+  }
+
+  if (entry.revenue !== undefined) bump('revenue')
+  if (entry.customers !== undefined || entry.returnVisitors !== undefined) bump('customer')
+  if (entry.visitors !== undefined || entry.inquiries !== undefined) bump('acquisition')
+  if (entry.conversionRate !== undefined) bump('validation')
+  if (entry.reservations !== undefined) bump('operation')
+  if (entry.reviews !== undefined) bump('growth')
+
+  return next
+}
+
 export const useStore = create<AppStore>()(
   persist(
     (set, get) => ({
@@ -83,11 +119,7 @@ export const useStore = create<AppStore>()(
         set(state => ({ answers: { ...state.answers, [questionId]: score } })),
       setScores: (scores) => set({ scores }),
       completeDiagnosis: (scores) => {
-        const snapshot: ScoreSnapshot = {
-          date: new Date().toISOString().split('T')[0],
-          scores,
-          totalScore: Math.round(Object.values(scores).reduce((a, b) => a + b, 0) / 7),
-        }
+        const snapshot = buildScoreSnapshot(scores)
         set(state => ({
           scores,
           diagnosisCompleted: true,
@@ -96,13 +128,31 @@ export const useStore = create<AppStore>()(
       },
       setTodayActions: (actionIds) => set({ todayActionIds: actionIds }),
       addActionRecord: (record) =>
-        set(state => ({ actionRecords: [record, ...state.actionRecords] })),
+        set(state => {
+          const action = getActionById(record.actionId)
+          const weeklyGoal = state.weeklyGoal
+          const shouldUpdateGoal =
+            record.status === 'completed' &&
+            action &&
+            weeklyGoal &&
+            weeklyGoal.targetAreaId === action.areaId &&
+            !weeklyGoal.completedActions.includes(record.actionId)
+
+          return {
+            actionRecords: [record, ...state.actionRecords],
+            weeklyGoal: shouldUpdateGoal
+              ? {
+                  ...weeklyGoal,
+                  targetActions: weeklyGoal.targetActions.includes(record.actionId)
+                    ? weeklyGoal.targetActions
+                    : [...weeklyGoal.targetActions, record.actionId],
+                  completedActions: [...weeklyGoal.completedActions, record.actionId],
+                }
+              : weeklyGoal,
+          }
+        }),
       updateScores: (newScores) => {
-        const snapshot: ScoreSnapshot = {
-          date: new Date().toISOString().split('T')[0],
-          scores: newScores,
-          totalScore: Math.round(Object.values(newScores).reduce((a, b) => a + b, 0) / 7),
-        }
+        const snapshot = buildScoreSnapshot(newScores)
         set(state => ({
           scores: newScores,
           scoreHistory: [...state.scoreHistory, snapshot],
@@ -126,9 +176,35 @@ export const useStore = create<AppStore>()(
           streak: 0,
           lastActionDate: null,
         }),
-      setWeeklyGoal: (goal) => set({ weeklyGoal: goal }),
+      setWeeklyGoal: (goal) =>
+        set(state => {
+          const completedIds = new Set(state.actionRecords.map(record => record.actionId))
+          const targetActions = ACTION_POOL
+            .filter(action => action.areaId === goal.targetAreaId && !completedIds.has(action.id))
+            .slice(0, 3)
+            .map(action => action.id)
+
+          return {
+            weeklyGoal: {
+              ...goal,
+              targetActions,
+              completedActions: goal.completedActions.filter(actionId => targetActions.includes(actionId)),
+            },
+          }
+        }),
       addBusinessMetric: (entry) =>
-        set(state => ({ businessMetrics: [...state.businessMetrics, entry] })),
+        set(state => {
+          if (!state.diagnosisCompleted) {
+            return { businessMetrics: [...state.businessMetrics, entry] }
+          }
+
+          const newScores = applyMetricSignals(state.scores, entry)
+          return {
+            businessMetrics: [...state.businessMetrics, entry],
+            scores: newScores,
+            scoreHistory: [...state.scoreHistory, buildScoreSnapshot(newScores)],
+          }
+        }),
       calculateStreak: () => {
         const { actionRecords } = get()
         if (actionRecords.length === 0) {

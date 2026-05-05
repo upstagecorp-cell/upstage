@@ -26,6 +26,7 @@ export type SubIndustryId =
   | 'guesthouse'
 
 export type ActionType = 'research' | 'create' | 'test' | 'operate' | 'measure' | 'improve' | 'learn'
+export type EvidenceType = 'link' | 'image' | 'number' | 'text'
 
 export interface Industry {
   id: IndustryId
@@ -55,6 +56,8 @@ export interface Question {
   areaId: AreaId
   improvementHint: string
   nextAction?: string
+  stageFilter?: StageId[]
+  subIndustryFilter?: SubIndustryId[]
 }
 
 export interface Area {
@@ -94,6 +97,12 @@ export interface ActionItem {
   actionType: ActionType
   stageFilter?: StageId[]
   industryFilter?: IndustryId[]
+  subIndustryFilter?: SubIndustryId[]
+  impact?: number
+  difficulty?: number
+  urgency?: number
+  prerequisiteActionIds?: string[]
+  requiredEvidenceTypes?: EvidenceType[]
   feedback: {
     completed: string
     partial: string
@@ -109,7 +118,8 @@ export interface ActionRecord {
   memo: string
   link: string
   scoreGain: number
-  evidence?: { type: 'link' | 'image' | 'number' | 'text'; value: string }[]
+  evidence?: { type: EvidenceType; value: string }[]
+  evidenceQuality?: 'none' | 'partial' | 'complete'
 }
 
 export interface ScoreSnapshot {

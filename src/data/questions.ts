@@ -1,4 +1,4 @@
-import { Question, IndustryId } from './types'
+import { Question, IndustryId, StageId, SubIndustryId } from './types'
 
 const commonQuestions: Question[] = [
   {
@@ -366,4 +366,97 @@ export const QUESTIONS_BY_INDUSTRY: Record<IndustryId, Question[]> = {
   service: [...commonQuestions, ...serviceQuestions],
   online: [...commonQuestions, ...onlineQuestions],
   other: [...commonQuestions, ...otherQuestions],
+}
+
+const contextualQuestions: Question[] = [
+  {
+    id: 'ctx_saas_activation',
+    text: '신규 사용자가 첫 가치를 경험하는 핵심 행동을 정의했나요?',
+    why: 'SaaS는 가입보다 활성화가 중요합니다. 사용자가 처음으로 가치를 느끼는 행동이 명확해야 온보딩과 제품 개선의 기준을 잡을 수 있습니다.',
+    areaId: 'product',
+    subIndustryFilter: ['saas'],
+    improvementHint: '첫 가치 행동을 1개로 정하고, 가입 후 10분 안에 그 행동을 하도록 온보딩을 줄여보세요.',
+    options: [
+      { label: '핵심 행동과 측정 지표가 명확하다', score: 10, interpretation: '제품 개선의 기준이 명확한 상태입니다.' },
+      { label: '대략적인 행동은 있지만 지표가 없다', score: 6, interpretation: '좋은 출발이지만 측정 기준이 필요합니다.' },
+      { label: '여러 행동이 섞여 있어 하나로 말하기 어렵다', score: 3, interpretation: '온보딩이 흐려질 수 있는 상태입니다.' },
+      { label: '아직 정의하지 않았다', score: 0, interpretation: '제품 진단에서 먼저 잡아야 할 핵심 과제입니다.' },
+    ],
+  },
+  {
+    id: 'ctx_shopping_repeat',
+    text: '재구매를 유도하는 상품/쿠폰/메시지 흐름이 있나요?',
+    why: '쇼핑몰은 첫 구매보다 반복 구매 구조가 수익성을 좌우합니다. 재구매 흐름이 없으면 광고비 의존도가 계속 높아집니다.',
+    areaId: 'growth',
+    subIndustryFilter: ['shopping'],
+    improvementHint: '구매 후 7일 이내 재구매 메시지와 추천 상품 1개를 연결해보세요.',
+    options: [
+      { label: '구매 후 재구매 흐름을 자동으로 운영한다', score: 10, interpretation: '반복 매출을 만들 기반이 있습니다.' },
+      { label: '가끔 쿠폰이나 메시지를 보낸다', score: 6, interpretation: '루틴화하면 더 강해질 수 있습니다.' },
+      { label: '아이디어만 있고 실행하지 않았다', score: 3, interpretation: '성장 구조가 아직 약합니다.' },
+      { label: '재구매를 고려하지 않았다', score: 0, interpretation: '광고 효율이 악화될 위험이 큽니다.' },
+    ],
+  },
+  {
+    id: 'ctx_delivery_platform',
+    text: '배달앱 노출, 리뷰, 대표 메뉴 사진을 주기적으로 관리하나요?',
+    why: '배달 중심 매장은 플랫폼 내 노출 품질이 유입과 전환을 직접 좌우합니다. 메뉴 사진과 리뷰 관리는 매장 앞 유동인구만큼 중요합니다.',
+    areaId: 'acquisition',
+    subIndustryFilter: ['delivery'],
+    improvementHint: '대표 메뉴 사진 3개와 최근 리뷰 답변 상태를 먼저 점검하세요.',
+    options: [
+      { label: '주 1회 이상 노출/리뷰/사진을 점검한다', score: 10, interpretation: '배달 유입 관리가 체계적입니다.' },
+      { label: '문제가 생길 때만 확인한다', score: 6, interpretation: '정기 점검 루틴이 필요합니다.' },
+      { label: '거의 관리하지 않는다', score: 2, interpretation: '플랫폼 전환율 손실이 생길 수 있습니다.' },
+      { label: '배달앱 전략이 없다', score: 0, interpretation: '유입 구조를 다시 세워야 합니다.' },
+    ],
+  },
+  {
+    id: 'ctx_preopen_launch',
+    text: '오픈 전 첫 고객을 모을 사전 홍보 리스트가 있나요?',
+    why: '오픈 직전에는 완벽한 전략보다 첫 방문/첫 구매를 만드는 명단이 중요합니다. 초기 반응이 있어야 이후 개선 속도가 빨라집니다.',
+    areaId: 'acquisition',
+    stageFilter: ['pre-open'],
+    improvementHint: '지인, 지역 커뮤니티, SNS 팔로워를 포함해 첫 알림 대상 30명을 리스트업하세요.',
+    options: [
+      { label: '30명 이상에게 알릴 리스트와 메시지가 있다', score: 10, interpretation: '초기 유입 준비가 잘 되어 있습니다.' },
+      { label: '리스트는 있지만 메시지가 없다', score: 6, interpretation: '실행 직전 단계까지 왔습니다.' },
+      { label: '몇 명만 떠오른다', score: 3, interpretation: '오픈 초반 유입이 약할 수 있습니다.' },
+      { label: '아직 준비하지 않았다', score: 0, interpretation: '오픈 전 최우선 과제입니다.' },
+    ],
+  },
+  {
+    id: 'ctx_plateau_bottleneck',
+    text: '매출 정체의 원인을 유입, 전환, 재구매 중 하나로 구분했나요?',
+    why: '매출 정체는 원인이 다르면 처방도 완전히 달라집니다. 유입 문제인지, 전환 문제인지, 재구매 문제인지 구분해야 액션이 정확해집니다.',
+    areaId: 'growth',
+    stageFilter: ['plateau'],
+    improvementHint: '최근 30일 데이터를 보고 방문자 수, 구매/예약 수, 재방문 수 중 가장 약한 지표를 고르세요.',
+    options: [
+      { label: '원인 영역과 근거 지표를 알고 있다', score: 10, interpretation: '개선 방향이 명확한 상태입니다.' },
+      { label: '짐작은 하지만 지표 확인은 부족하다', score: 6, interpretation: '데이터 확인으로 정확도를 높여야 합니다.' },
+      { label: '여러 원인이 섞여 보인다', score: 3, interpretation: '우선순위가 흐려질 수 있습니다.' },
+      { label: '아직 구분하지 못했다', score: 0, interpretation: '성장 액션 전에 병목 진단이 필요합니다.' },
+    ],
+  },
+]
+
+export function getQuestionsForContext(
+  industry: IndustryId,
+  subIndustry?: SubIndustryId | null,
+  stage?: StageId | null
+): Question[] {
+  const baseQuestions = QUESTIONS_BY_INDUSTRY[industry]
+  const extraQuestions = contextualQuestions.filter(question => {
+    const matchesSubIndustry =
+      !question.subIndustryFilter?.length ||
+      (subIndustry ? question.subIndustryFilter.includes(subIndustry) : false)
+    const matchesStage =
+      !question.stageFilter?.length ||
+      (stage ? question.stageFilter.includes(stage) : false)
+
+    return matchesSubIndustry && matchesStage
+  })
+
+  return [...baseQuestions, ...extraQuestions]
 }

@@ -1,19 +1,21 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { ChevronDown, ChevronUp, ArrowRight } from 'lucide-react'
 import { useStore } from '@/lib/store'
-import { QUESTIONS_BY_INDUSTRY } from '@/data/questions'
+import { getQuestionsForContext } from '@/data/questions'
 import { calculateScores } from '@/lib/scoring'
-import { Question } from '@/data/types'
 
 export default function DiagnosisPage() {
   const router = useRouter()
-  const { industry, setAnswer, answers, completeDiagnosis, resetDiagnosis } = useStore()
+  const { industry, subIndustry, stage, setAnswer, answers, completeDiagnosis, resetDiagnosis } = useStore()
   const [currentIndex, setCurrentIndex] = useState(0)
   const [showWhy, setShowWhy] = useState(false)
-  const [questions, setQuestions] = useState<Question[]>([])
+  const questions = useMemo(
+    () => (industry ? getQuestionsForContext(industry, subIndustry, stage) : []),
+    [industry, subIndustry, stage],
+  )
 
   useEffect(() => {
     if (!industry) {
@@ -21,8 +23,7 @@ export default function DiagnosisPage() {
       return
     }
     resetDiagnosis()
-    setQuestions(QUESTIONS_BY_INDUSTRY[industry])
-  }, [industry])
+  }, [industry, resetDiagnosis, router])
 
   if (!industry || questions.length === 0) return null
 

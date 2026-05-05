@@ -9,7 +9,6 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
   ResponsiveContainer,
 } from 'recharts'
 import { TrendingUp, CheckCircle2, AlertCircle, Clock, ArrowRight, Link2, Hash, Type } from 'lucide-react'

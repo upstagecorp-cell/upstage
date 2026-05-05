@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import {
   LineChart,
   Line,
@@ -13,6 +13,7 @@ import {
 } from 'recharts'
 import { BarChart2, Plus, Save, Check } from 'lucide-react'
 import { useStore } from '@/lib/store'
+import { useMounted } from '@/lib/use-mounted'
 import { BusinessMetricEntry } from '@/data/types'
 
 type MetricKey = keyof Omit<BusinessMetricEntry, 'date'>
@@ -47,7 +48,7 @@ const PERIOD_OPTIONS = [
 
 export default function MetricsPage() {
   const { businessMetrics, addBusinessMetric } = useStore()
-  const [mounted, setMounted] = useState(false)
+  const mounted = useMounted()
   const [saved, setSaved] = useState(false)
 
   const today = new Date().toISOString().split('T')[0]
@@ -55,8 +56,6 @@ export default function MetricsPage() {
   const [values, setValues] = useState<Partial<Record<MetricKey, string>>>({})
   const [selectedMetrics, setSelectedMetrics] = useState<Set<MetricKey>>(new Set(['revenue', 'customers', 'visitors']))
   const [period, setPeriod] = useState(30)
-
-  useEffect(() => { setMounted(true) }, [])
 
   if (!mounted) return null
 

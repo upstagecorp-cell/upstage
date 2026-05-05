@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, Compass, Zap, Clock, Target, TrendingUp } from 'lucide-react'
+import { LayoutDashboard, Zap, Clock, Target, TrendingUp } from 'lucide-react'
 
 const navItems = [
   { href: '/dashboard', label: '대시보드', icon: LayoutDashboard },

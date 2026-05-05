@@ -6,14 +6,14 @@ import { ChevronRight } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useStore } from '@/lib/store'
 import { AREAS } from '@/data/constants'
-import { QUESTIONS_BY_INDUSTRY } from '@/data/questions'
+import { getQuestionsForContext } from '@/data/questions'
 import { SCORE_MESSAGES } from '@/data/score-messages'
 import { getStatusLevel, getTotalScore } from '@/lib/scoring'
 import { AreaId } from '@/data/types'
 
 export default function DiagnosisResultPage() {
   const router = useRouter()
-  const { industry, answers, scores, diagnosisCompleted } = useStore()
+  const { industry, subIndustry, stage, answers, scores, diagnosisCompleted } = useStore()
 
   useEffect(() => {
     if (!diagnosisCompleted) {
@@ -23,7 +23,7 @@ export default function DiagnosisResultPage() {
 
   if (!diagnosisCompleted || !industry) return null
 
-  const questions = QUESTIONS_BY_INDUSTRY[industry] ?? []
+  const questions = getQuestionsForContext(industry, subIndustry, stage)
   const totalScore = getTotalScore(scores)
 
   // 영역별로 질문 그룹핑

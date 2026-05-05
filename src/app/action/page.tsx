@@ -26,11 +26,12 @@ import {
 } from 'lucide-react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useStore } from '@/lib/store'
-import { recommendActions } from '@/lib/actions'
+import { adjustScoreGainByEvidence, getEvidenceQuality, recommendActions } from '@/lib/actions'
 import { getActionById } from '@/data/actions'
 import { AREAS, ACTION_TYPE_CONFIG } from '@/data/constants'
 import { applyScoreGain } from '@/lib/scoring'
-import { ActionRecord, AreaId, ActionType } from '@/data/types'
+import { useMounted } from '@/lib/use-mounted'
+import { ActionRecord, AreaId, ActionType, EvidenceType } from '@/data/types'
 
 const STATUS_CONFIG = {
   completed: {
@@ -184,10 +185,10 @@ function FeedbackModal({
 
 // ─── ActionCard ───────────────────────────────────────────────────────────────
 
-type EvidenceType = 'link' | 'number' | 'text'
 type EvidenceItem = { type: EvidenceType; value: string }
+type VisibleEvidenceType = Exclude<EvidenceType, 'image'>
 
-const EVIDENCE_TYPE_CONFIG: Record<EvidenceType, { label: string; icon: React.ElementType; placeholder: string; inputType: string }> = {
+const EVIDENCE_TYPE_CONFIG: Record<VisibleEvidenceType, { label: string; icon: React.ElementType; placeholder: string; inputType: string }> = {
   link: { label: '링크', icon: Link2, placeholder: 'https://...', inputType: 'url' },
   number: { label: '숫자', icon: Hash, placeholder: '0', inputType: 'number' },
   text: { label: '텍스트', icon: Type, placeholder: '증거 내용을 입력하세요', inputType: 'text' },
@@ -337,7 +338,7 @@ function ActionCard({
                 </button>
                 {showEvidenceTypeSelect && (
                   <div className="absolute right-0 top-6 z-10 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-lg overflow-hidden min-w-[120px]">
-                    {(Object.entries(EVIDENCE_TYPE_CONFIG) as [EvidenceType, typeof EVIDENCE_TYPE_CONFIG[EvidenceType]][]).map(([type, cfg]) => {
+                    {(Object.entries(EVIDENCE_TYPE_CONFIG) as [VisibleEvidenceType, typeof EVIDENCE_TYPE_CONFIG[VisibleEvidenceType]][]).map(([type, cfg]) => {
                       const EIcon = cfg.icon
                       return (
                         <button
@@ -358,7 +359,8 @@ function ActionCard({
             {evidenceList.length > 0 && (
               <div className="space-y-2">
                 {evidenceList.map((ev, idx) => {
-                  const cfg = EVIDENCE_TYPE_CONFIG[ev.type]
+                  const cfg = EVIDENCE_TYPE_CONFIG[ev.type as VisibleEvidenceType]
+                  if (!cfg) return null
                   const EIcon = cfg.icon
                   return (
                     <div key={idx} className="flex items-center gap-2">
@@ -419,40 +421,51 @@ export default function ActionPage() {
     addActionRecord,
     updateScores,
     scores: currentScores,
+    stage,
+    industry,
+    subIndustry,
+    businessMetrics,
   } = useStore()
   const displayScores = diagnosisCompleted ? scores : SAMPLE_SCORES
-  const [mounted, setMounted] = useState(false)
+  const mounted = useMounted()
   const [feedbackData, setFeedbackData] = useState<FeedbackData | null>(null)
-
-  useEffect(() => {
-    setMounted(true)
-  }, [])
 
   useEffect(() => {
     if (!mounted) return
     if (todayActionIds.length === 0) {
       const completedIds = actionRecords.map(r => r.actionId)
-      const recommended = recommendActions(displayScores, completedIds, 3)
+      const lastCompletedActionId = actionRecords.find(r => r.status === 'completed')?.actionId ?? null
+      const latestMetric = businessMetrics.slice().sort((a, b) => b.date.localeCompare(a.date))[0] ?? null
+      const recommended = recommendActions(displayScores, completedIds, 3, stage, industry, lastCompletedActionId, subIndustry, latestMetric)
       setTodayActions(recommended.map(a => a.id))
     }
-  }, [mounted])
+  }, [
+    actionRecords,
+    businessMetrics,
+    displayScores,
+    industry,
+    mounted,
+    setTodayActions,
+    stage,
+    subIndustry,
+    todayActionIds.length,
+  ])
 
   const handleRefresh = () => {
     const completedIds = actionRecords.map(r => r.actionId)
-    const recommended = recommendActions(displayScores, completedIds, 3)
+    const lastCompletedActionId = actionRecords.find(r => r.status === 'completed')?.actionId ?? null
+    const latestMetric = businessMetrics.slice().sort((a, b) => b.date.localeCompare(a.date))[0] ?? null
+    const recommended = recommendActions(displayScores, completedIds, 3, stage, industry, lastCompletedActionId, subIndustry, latestMetric)
     setTodayActions(recommended.map(a => a.id))
   }
 
-  const handleRecord = (actionId: string, status: 'completed' | 'partial' | 'skipped', memo: string, evidence: { type: 'link' | 'number' | 'text'; value: string }[]) => {
+  const handleRecord = (actionId: string, status: 'completed' | 'partial' | 'skipped', memo: string, evidence: EvidenceItem[]) => {
     const action = getActionById(actionId)
     if (!action) return
 
-    const scoreGain =
-      status === 'completed'
-        ? action.scoreImpact
-        : status === 'partial'
-        ? Math.floor(action.scoreImpact / 2)
-        : 0
+    const evidenceQuality = getEvidenceQuality(action, evidence)
+    const baseScoreGain = status === 'completed' ? action.scoreImpact : Math.floor(action.scoreImpact / 2)
+    const scoreGain = adjustScoreGainByEvidence(baseScoreGain, status, evidenceQuality)
 
     const record: ActionRecord = {
       id: `rec_${Date.now()}`,
@@ -463,6 +476,7 @@ export default function ActionPage() {
       link: '',
       scoreGain,
       evidence: evidence.length > 0 ? evidence : undefined,
+      evidenceQuality,
     }
 
     addActionRecord(record)

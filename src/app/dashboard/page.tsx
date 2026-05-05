@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import {
   RadarChart,
@@ -12,10 +11,11 @@ import {
   ResponsiveContainer,
   Tooltip,
 } from 'recharts'
-import { ArrowRight, X, TrendingUp, AlertTriangle, CheckCircle2, Zap, Flame, Star } from 'lucide-react'
+import { ArrowRight, X, AlertTriangle, CheckCircle2, Zap, Flame, Star } from 'lucide-react'
 import { useStore } from '@/lib/store'
 import { AREAS, LEVEL_CONFIG } from '@/data/constants'
 import { getTotalScore, getStatusLevel } from '@/lib/scoring'
+import { useMounted } from '@/lib/use-mounted'
 import { AreaId } from '@/data/types'
 
 function DetailModal({
@@ -150,15 +150,13 @@ const SAMPLE_SCORES: Record<AreaId, number> = {
 }
 
 export default function DashboardPage() {
-  const router = useRouter()
-  const { scores, diagnosisCompleted, industry, actionRecords, streak, calculateStreak } = useStore()
+  const { scores, diagnosisCompleted, actionRecords, streak, calculateStreak } = useStore()
   const [selectedArea, setSelectedArea] = useState<AreaId | null>(null)
-  const [mounted, setMounted] = useState(false)
+  const mounted = useMounted()
 
   useEffect(() => {
-    setMounted(true)
     calculateStreak()
-  }, [])
+  }, [calculateStreak])
 
   const isSample = !diagnosisCompleted
   const displayScores = isSample ? SAMPLE_SCORES : scores
