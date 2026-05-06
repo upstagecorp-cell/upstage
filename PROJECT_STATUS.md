@@ -496,25 +496,18 @@ Implication:
 
 ## 9. Known Risks And Issues
 
-### 1. Korean text encoding is corrupted in several source files
+### 1. Korean text source encoding
 
-Observed in:
+Current source status:
 
-- `src/data/constants.ts`
-- `src/lib/store.ts`
-- `src/lib/scoring.ts`
-- `src/lib/ai-feedback.ts`
-- Parts of other data/UI files may also be affected.
+- Korean copy in the source files is stored as valid UTF-8.
+- A previous PowerShell `Get-Content` check displayed Korean as mojibake because of terminal/output encoding, not because the files themselves were corrupted.
+- Node.js UTF-8 reads confirm the source text in the main data and UI files is readable Korean.
 
 Impact:
 
-- Some UI labels, descriptions, feedback messages, and report messages may render as unreadable text.
-- This is currently the highest-priority product quality issue.
-
-Recommended next step:
-
-- Restore Korean copy from the original Verdent source or rewrite affected copy in UTF-8.
-- After restoring text, run lint/build again.
+- No source-level Korean text restoration is currently required.
+- If Korean appears broken in a terminal, set the terminal to UTF-8 or inspect with a UTF-8-aware reader.
 
 ### 2. Lint warnings remain
 
@@ -634,14 +627,13 @@ Requirements:
 
 ## 12. Recommended Next Work Order
 
-1. Restore corrupted Korean text encoding.
-2. Add `.env.example` if Supabase or external services will be used.
-3. Decide whether the MVP remains local-only or moves to Supabase persistence.
-4. Fix lint warnings.
-5. Fix Recharts container warning.
-6. Add basic tests for scoring, action recommendation, and store transitions.
-7. Replace placeholder/sample states with real empty states.
-8. Connect pricing page to a real payment flow only after auth and persistence are ready.
+1. Add `.env.example` if Supabase or external services will be used.
+2. Decide whether the MVP remains local-only or moves to Supabase persistence.
+3. Fix lint warnings.
+4. Fix Recharts container warning.
+5. Add basic tests for scoring, action recommendation, and store transitions.
+6. Replace placeholder/sample states with real empty states.
+7. Connect pricing page to a real payment flow only after auth and persistence are ready.
 
 ## 13. Current Overall Readiness
 
@@ -659,7 +651,6 @@ Production readiness:
 
 Primary blockers for production:
 
-- Corrupted Korean copy.
 - No backend persistence/auth.
 - No real payment integration.
 - Remaining lint/chart warnings.
