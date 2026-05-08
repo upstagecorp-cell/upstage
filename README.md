@@ -1,36 +1,227 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# UpStage 창업 실행 플랫폼 MVP
 
-## Getting Started
+업종별 창업자와 소상공인이 현재 사업 상태를 진단하고, 오늘 실행할 액션을 추천받고, 실행 기록을 통해 점수와 다음 추천을 개선해 나가는 Next.js 기반 MVP입니다.
 
-First, run the development server:
+현재 구현은 PDF 전략 문서의 방향성 중 **음식점 진단 DB / 추천 엔진 / 실행 기록 루프**를 중심으로 반영한 상태입니다. 서비스의 핵심은 단순한 분석 리포트가 아니라 아래 흐름입니다.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+```text
+진단 → 추천 → 실행 → 기록 → 피드백 → 재진단
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 현재 상태
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+마지막 점검일: 2026-05-08
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- Next.js App Router 기반 프론트엔드 MVP입니다.
+- 음식점 업종을 중심으로 진단 질문, 지표, 가중치, 액션 카드가 구현되어 있습니다.
+- Zustand persist를 사용해 브라우저 `localStorage`에 로컬 상태를 저장합니다.
+- Supabase, Auth, 결제, 서버 DB 연동은 아직 없습니다.
+- `npm.cmd run lint` 통과 확인.
+- `npm.cmd run build` 통과 확인.
 
-## Learn More
+## 기술 스택
 
-To learn more about Next.js, take a look at the following resources:
+- Next.js `16.2.4`
+- React `19.2.4`
+- TypeScript `5`
+- Tailwind CSS `4`
+- Zustand `5`
+- Recharts `3`
+- Framer Motion `12`
+- Lucide React `1`
+- next-themes `0.4`
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 실행 방법
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Windows PowerShell 기준:
 
-## Deploy on Vercel
+```powershell
+npm.cmd ci
+npm.cmd run dev
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+브라우저에서 아래 주소를 엽니다.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```text
+http://localhost:3000
+```
+
+빌드 확인:
+
+```powershell
+npm.cmd run build
+```
+
+린트 확인:
+
+```powershell
+npm.cmd run lint
+```
+
+## 주요 화면
+
+- `/` : 랜딩 페이지
+- `/guide` : 서비스 흐름과 화면 예시 가이드
+- `/onboarding` : 업종, 운영 유형, 창업 단계 선택
+- `/diagnosis` : 음식점 진단 질문
+- `/diagnosis/result` : 진단 결과, 위험 지표, 오늘 할 일, 이번 주 할 일
+- `/dashboard` : 점수 요약, 위험 지표, 추천 액션
+- `/action` : 오늘의 액션 실행 및 기록
+- `/history` : 점수 변화와 실행 기록
+- `/goals` : 주간 목표 설정
+- `/metrics` : 매출, 고객 수, 방문자 수 등 운영 지표 기록
+- `/explore` : 전략, 액션, 학습 콘텐츠 탐색
+- `/pricing` : 요금제 UI
+
+## 구현된 핵심 기능
+
+### 1. 음식점 진단 DB
+
+음식점 운영 상태를 11개 지표로 진단합니다.
+
+- 주 고객층
+- 상권 유동 인구
+- 점심/저녁/주말 매출 차이
+- 대표 메뉴 경쟁력
+- 메뉴 원가율
+- 객단가
+- 테이블 회전율
+- 배달앱 노출
+- 리뷰 수/평점
+- 네이버 플레이스 상태
+- 재방문율
+
+각 질문은 다음 정보를 포함합니다.
+
+- 질문 ID
+- 지표 카테고리
+- 답변 선택지
+- 답변별 점수
+- 상태 문장
+- 위험도
+- 추천 액션
+- 벤치마크 문장
+- 운영 유형별 가중치
+
+### 2. 운영 유형별 가중치
+
+음식점을 하나의 업종으로만 보지 않고 운영 유형별로 중요 지표를 다르게 봅니다.
+
+- 홀 중심
+- 배달 중심
+- 테이크아웃 중심
+
+예를 들어 홀 중심은 테이블 회전율과 상권 유동 인구가 중요하고, 배달 중심은 배달앱 노출과 리뷰/평점이 더 중요하게 반영됩니다.
+
+### 3. 액션 추천 엔진
+
+점수와 운영 유형 가중치를 기반으로 오늘 할 일을 추천합니다.
+
+점수별 기본 규칙:
+
+- 5점: 액션 없음
+- 4점: 유지 액션
+- 3점: 개선 액션 1개
+- 2점: 개선 액션 2개
+- 1점: 긴급 액션 3개
+
+현재 액션 카드는 대표 메뉴 원가 계산, 경쟁 음식점 분석, 배달앱 사진 교체, 리뷰 요청 문구 작성, 네이버 플레이스 정보 수정, 재방문 쿠폰 테스트 등으로 구성되어 있습니다.
+
+### 4. 실행 기록과 점수 반영
+
+사용자가 액션을 완료하면 실행 기록이 저장됩니다.
+
+기록 항목:
+
+- 실행한 액션
+- 실행 날짜
+- 소요 시간
+- 어려웠던 점
+- 결과 메모
+- 근거 자료
+- 다음 추천 액션
+
+액션 완료 시 관련 지표 점수가 자동으로 상승합니다.
+
+- 근거 자료 없음: +3점
+- 근거 자료 있음: +5점
+
+### 5. 벤치마크와 피드백
+
+각 지표는 좋음/보통/위험 상태 문장을 가지고 있습니다. 진단 결과와 액션 실행 후 피드백은 현재 로컬 규칙 기반으로 생성됩니다.
+
+외부 AI API와는 아직 연결되어 있지 않습니다.
+
+### 6. 학습 콘텐츠 분리
+
+진단 DB와 학습 콘텐츠를 분리했습니다.
+
+학습 콘텐츠 예시:
+
+- 디지털 지역주의와 검색 노출 전략
+- AI 검색 대응 전략
+- 네이버 플레이스 고도화 전략
+- 당근비즈니스 활용법
+- 리텐션 자동화 전략
+- 인플루언서 협업 전략
+- 슬로우데이 이벤트 전략
+- 메뉴 데이터 구조화 가이드
+
+## 현재 한계
+
+### 1. 음식점 외 업종은 아직 실제 진단 DB가 부족함
+
+온보딩에서는 카페, 숙박, 서비스업, 온라인 사업 등을 선택할 수 있지만 현재 진단 질문은 음식점 중심입니다. 다음 단계에서는 업종별 질문 DB를 추가하거나, MVP 범위를 음식점으로 명확히 제한해야 합니다.
+
+### 2. 서버 저장소가 없음
+
+현재 데이터는 브라우저 `localStorage`에만 저장됩니다.
+
+따라서:
+
+- 다른 기기와 동기화되지 않습니다.
+- 브라우저 데이터를 삭제하면 기록이 사라집니다.
+- 사용자 계정, 팀 관리, 관리자 분석이 불가능합니다.
+
+### 3. 실제 AI 피드백은 미연동
+
+현재 피드백은 로컬 규칙 기반입니다. 추후 OpenAI API 등과 연결하면 실행 기록, 점수 변화, 업종 맥락을 바탕으로 더 구체적인 피드백을 제공할 수 있습니다.
+
+### 4. 결제 기능 없음
+
+`/pricing` 페이지는 UI만 구현되어 있습니다. Stripe Checkout, 구독 관리, 결제 웹훅은 아직 없습니다.
+
+### 5. 자동 테스트 없음
+
+현재 별도의 테스트 스크립트는 없습니다. 추후 아래 영역은 테스트가 필요합니다.
+
+- 점수 계산
+- 액션 추천
+- 실행 기록 후 점수 변화
+- Zustand store 상태 전환
+- 진단 완료 플로우
+
+## 다음 작업 우선순위
+
+1. MVP 범위를 음식점으로 명확히 제한하거나 업종별 진단 DB를 추가합니다.
+2. `localStorage` 저장 구조 변경에 대비해 Zustand persist version/migration을 추가합니다.
+3. 액션/목표 ID 생성 방식을 중복 없는 방식으로 개선합니다.
+4. 비즈니스 지표 입력이 점수와 추천에 반영되도록 연결합니다.
+5. 추천 엔진에 창업 단계, 최근 실행 여부, 반복 주기, 난이도를 반영합니다.
+6. Supabase Auth/DB 연동 여부를 결정합니다.
+7. 결제 연동이 필요하면 Stripe Checkout을 추가합니다.
+8. 점수 계산과 추천 엔진 중심의 자동 테스트를 추가합니다.
+
+## 개발 메모
+
+이 프로젝트는 Next.js 16 기반입니다. Next.js 관련 코드를 수정할 때는 `node_modules/next/dist/docs/`의 현재 버전 문서를 먼저 확인해야 합니다.
+
+개발 서버는 Windows 안정성을 위해 아래처럼 webpack 모드로 실행합니다.
+
+```json
+{
+  "dev": "next dev --webpack"
+}
+```
+
+현재 소스 파일의 한글은 UTF-8 기준으로 정상입니다. PowerShell 출력 환경에 따라 한글이 깨져 보일 수 있지만, 실제 파일 인코딩 문제와는 별개입니다.
