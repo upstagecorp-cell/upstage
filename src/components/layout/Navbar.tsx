@@ -9,10 +9,10 @@ import { useMounted } from '@/lib/use-mounted'
 
 const navItems = [
   { href: '/dashboard', label: '대시보드' },
-  { href: '/explore', label: '탐색' },
   { href: '/action', label: '실행' },
   { href: '/history', label: '히스토리' },
-  { href: '/pricing', label: '요금제' },
+  { href: '/explore', label: '탐색' },
+  { href: '/guide', label: '이용 가이드' },
 ]
 
 export function Navbar() {

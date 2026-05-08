@@ -1,4 +1,4 @@
-import { Industry, Stage, Area, SubIndustry, ActionType } from './types'
+import { Industry, Stage, IndicatorInfo, OperationType, RestaurantIndicatorId } from './types'
 
 export const INDUSTRIES: Industry[] = [
   { id: 'restaurant', label: '음식점', icon: '🍽️', description: '한식/중식/일식/양식 등 식당' },
@@ -18,63 +18,65 @@ export const STAGES: Stage[] = [
   { id: 'expansion', label: '확장 준비', icon: '📈', description: '추가 성장/확장을 계획 중' },
 ]
 
-export const AREAS: Area[] = [
-  { id: 'customer', label: '고객이해도', description: '타깃 고객을 얼마나 잘 이해하고 있는지', icon: '👥', color: '#6366f1' },
-  { id: 'validation', label: '문제검증도', description: '실제 문제가 존재하는지 검증된 정도', icon: '✅', color: '#8b5cf6' },
-  { id: 'product', label: '상품경쟁력', description: '제품/서비스의 차별성과 품질 수준', icon: '🎯', color: '#ec4899' },
-  { id: 'acquisition', label: '유입구조', description: '고객을 어떻게 유입시킬지의 명확성', icon: '📣', color: '#f59e0b' },
-  { id: 'revenue', label: '수익성', description: '지속 가능한 수익 구조 여부', icon: '💰', color: '#10b981' },
-  { id: 'operation', label: '운영지속성', description: '장기적으로 운영 가능한 체계 여부', icon: '⚙️', color: '#3b82f6' },
-  { id: 'growth', label: '성장가능성', description: '미래 성장을 위한 잠재력과 전략', icon: '📈', color: '#14b8a6' },
+export const OPERATION_TYPES: { id: OperationType; label: string; description: string }[] = [
+  { id: 'hall', label: '홀 중심', description: '매장 내 식사 고객이 주요 매출원' },
+  { id: 'delivery', label: '배달 중심', description: '배달앱을 통한 주문이 주요 매출원' },
+  { id: 'takeout', label: '테이크아웃 중심', description: '포장 판매가 주요 매출원' },
 ]
 
-export const SUB_INDUSTRIES: SubIndustry[] = [
-  // online
-  { id: 'shopping', label: '쇼핑몰', parentIndustry: 'online' },
-  { id: 'saas', label: 'SaaS', parentIndustry: 'online' },
-  { id: 'content', label: '콘텐츠', parentIndustry: 'online' },
-  { id: 'education', label: '교육', parentIndustry: 'online' },
-  { id: 'marketplace', label: '마켓플레이스', parentIndustry: 'online' },
-  // service
-  { id: 'b2c', label: 'B2C', parentIndustry: 'service' },
-  { id: 'b2b', label: 'B2B', parentIndustry: 'service' },
-  { id: 'reservation', label: '예약형', parentIndustry: 'service' },
-  { id: 'visit', label: '방문형', parentIndustry: 'service' },
-  { id: 'subscription', label: '구독형', parentIndustry: 'service' },
-  // restaurant
-  { id: 'hall', label: '홀중심', parentIndustry: 'restaurant' },
-  { id: 'delivery', label: '배달중심', parentIndustry: 'restaurant' },
-  { id: 'takeout', label: '테이크아웃', parentIndustry: 'restaurant' },
-  // cafe
-  { id: 'general_cafe', label: '일반카페', parentIndustry: 'cafe' },
-  { id: 'dessert', label: '디저트전문', parentIndustry: 'cafe' },
-  { id: 'bakery', label: '베이커리', parentIndustry: 'cafe' },
-  // accommodation
-  { id: 'hotel', label: '호텔', parentIndustry: 'accommodation' },
-  { id: 'pension', label: '펜션', parentIndustry: 'accommodation' },
-  { id: 'airbnb', label: '에어비앤비', parentIndustry: 'accommodation' },
-  { id: 'guesthouse', label: '게스트하우스', parentIndustry: 'accommodation' },
+export const INDICATORS: IndicatorInfo[] = [
+  { id: 'main_customer', label: '주 고객층', description: '사람들이 어떻게 들어오는가', icon: '👥', color: '#6366f1' },
+  { id: 'commercial_traffic', label: '상권 유동 인구', description: '매장 주변 유동 인구 현황', icon: '🚶', color: '#8b5cf6' },
+  { id: 'sales_time_diff', label: '점심/저녁/주말 매출 차이', description: '시간대별 매출 분포 파악', icon: '📊', color: '#ec4899' },
+  { id: 'menu_competitiveness', label: '대표 메뉴 경쟁력', description: '대표 메뉴의 차별화 수준', icon: '⭐', color: '#f59e0b' },
+  { id: 'menu_cost_rate', label: '메뉴 원가율', description: '원재료 대비 판매가 비율', icon: '💰', color: '#10b981' },
+  { id: 'avg_spending_per_customer', label: '객단가', description: '1명당 평균 지출 금액', icon: '💳', color: '#3b82f6' },
+  { id: 'table_turnover', label: '테이블 회전율', description: '시간당 테이블 사용 효율', icon: '🔄', color: '#14b8a6' },
+  { id: 'delivery_app_exposure', label: '배달앱 노출', description: '배달앱에서의 검색 노출 상태', icon: '📱', color: '#f97316' },
+  { id: 'review_rating', label: '리뷰 수/평점', description: '고객 리뷰와 평점 관리 상태', icon: '⭐', color: '#eab308' },
+  { id: 'naver_place_status', label: '네이버 플레이스 상태', description: '네이버 플레이스 정보 관리 수준', icon: '📍', color: '#22c55e' },
+  { id: 'revisit_rate', label: '재방문율', description: '고객이 다시 방문하는 비율', icon: '🔁', color: '#a855f7' },
 ]
 
-export const ACTION_TYPE_CONFIG: Record<ActionType, { label: string; icon: string; color: string }> = {
-  research: { label: '조사형', icon: 'Search', color: 'blue' },
-  create: { label: '제작형', icon: 'PenTool', color: 'purple' },
-  test: { label: '테스트형', icon: 'FlaskConical', color: 'amber' },
-  operate: { label: '운영형', icon: 'Settings', color: 'slate' },
-  measure: { label: '측정형', icon: 'BarChart2', color: 'emerald' },
-  improve: { label: '개선형', icon: 'TrendingUp', color: 'rose' },
-  learn: { label: '학습형', icon: 'BookOpen', color: 'indigo' },
+// 운영 유형별 지표 가중치 (10=최중요, 1=최저)
+export const INDICATOR_WEIGHTS: Record<OperationType, Record<RestaurantIndicatorId, number>> = {
+  hall: {
+    table_turnover: 10,
+    commercial_traffic: 9,
+    sales_time_diff: 8,
+    naver_place_status: 7,
+    review_rating: 6,
+    avg_spending_per_customer: 5,
+    menu_competitiveness: 4,
+    menu_cost_rate: 3,
+    revisit_rate: 2,
+    delivery_app_exposure: 1,
+    main_customer: 5,
+  },
+  delivery: {
+    delivery_app_exposure: 10,
+    review_rating: 9,
+    menu_competitiveness: 8,
+    revisit_rate: 6,
+    avg_spending_per_customer: 5,
+    menu_cost_rate: 4,
+    sales_time_diff: 3,
+    naver_place_status: 2,
+    table_turnover: 1,
+    commercial_traffic: 2,
+    main_customer: 5,
+  },
+  takeout: {
+    commercial_traffic: 10,
+    naver_place_status: 9,
+    avg_spending_per_customer: 8,
+    sales_time_diff: 7,
+    revisit_rate: 6,
+    menu_competitiveness: 5,
+    menu_cost_rate: 4,
+    review_rating: 3,
+    delivery_app_exposure: 2,
+    table_turnover: 1,
+    main_customer: 5,
+  },
 }
-
-export const LEVEL_CONFIG: { level: number; label: string; requiredActions: number }[] = [
-  { level: 1, label: '시작', requiredActions: 0 },
-  { level: 2, label: '도전자', requiredActions: 3 },
-  { level: 3, label: '실행가', requiredActions: 7 },
-  { level: 4, label: '성장러', requiredActions: 12 },
-  { level: 5, label: '전략가', requiredActions: 18 },
-  { level: 6, label: '리더', requiredActions: 25 },
-  { level: 7, label: '전문가', requiredActions: 33 },
-  { level: 8, label: '혁신가', requiredActions: 40 },
-  { level: 9, label: '챔피언', requiredActions: 45 },
-  { level: 10, label: '마스터', requiredActions: 50 },
-]

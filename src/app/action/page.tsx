@@ -1,503 +1,434 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
-import Link from 'next/link'
+import { useState, useRef } from 'react'
+import { useRouter } from 'next/navigation'
+import { motion, AnimatePresence } from 'framer-motion'
 import {
-  CheckCircle2,
+  CheckCircle,
   Clock,
-  AlertCircle,
   ChevronDown,
   ChevronUp,
-  RefreshCw,
   ArrowRight,
-  Search,
-  PenTool,
-  FlaskConical,
-  Settings,
-  BarChart2,
-  TrendingUp,
-  BookOpen,
-  X,
-  Link2,
-  Hash,
-  Type,
-  Trash2,
+  Zap,
   Plus,
-  ImageIcon,
-  Sparkles,
+  X,
+  ImagePlus,
+  Trash2,
 } from 'lucide-react'
-import { AnimatePresence, motion } from 'framer-motion'
 import { useStore } from '@/lib/store'
-import { adjustScoreGainByEvidence, getEvidenceQuality, recommendActions } from '@/lib/actions'
-import { getActionById } from '@/data/actions'
-import { AREAS, ACTION_TYPE_CONFIG } from '@/data/constants'
-import { applyScoreGain } from '@/lib/scoring'
-import { useMounted } from '@/lib/use-mounted'
-import { ActionRecord, AreaId, ActionType, EvidenceType } from '@/data/types'
+import { getTodayActions } from '@/lib/actions'
 import { generateActionFeedback } from '@/lib/ai-feedback'
+import type { OperationType, ExecutionRecord } from '@/data/types'
 
-type StatusKey = 'completed' | 'partial' | 'skipped'
+const diffLabels: Record<string, string> = { easy: '쉬움', normal: '보통', hard: '어려움' }
+const impactLabels: Record<string, string> = { low: '낮음', medium: '중간', high: '높음' }
+const costLabels: Record<string, string> = { none: '무료', low: '소액', medium: '중간 비용' }
 
-const STATUS_CONFIG: Record<StatusKey, {
-  label: string
-  icon: React.ElementType
-  color: string
-  bg: string
-  border: string
-  modalBg: string
-  modalIcon: string
-}> = {
-  completed: {
-    label: '완료',
-    icon: CheckCircle2,
-    color: 'text-emerald-600 dark:text-emerald-400',
-    bg: 'bg-emerald-50 dark:bg-emerald-950',
-    border: 'border-emerald-200 dark:border-emerald-800',
-    modalBg: 'bg-emerald-100 dark:bg-emerald-900',
-    modalIcon: 'text-emerald-500',
-  },
-  partial: {
-    label: '일부 완료',
-    icon: AlertCircle,
-    color: 'text-amber-600 dark:text-amber-400',
-    bg: 'bg-amber-50 dark:bg-amber-950',
-    border: 'border-amber-200 dark:border-amber-800',
-    modalBg: 'bg-amber-100 dark:bg-amber-900',
-    modalIcon: 'text-amber-500',
-  },
-  skipped: {
-    label: '미완료',
-    icon: Clock,
-    color: 'text-slate-500 dark:text-slate-400',
-    bg: 'bg-slate-50 dark:bg-slate-800',
-    border: 'border-slate-200 dark:border-slate-700',
-    modalBg: 'bg-slate-100 dark:bg-slate-800',
-    modalIcon: 'text-slate-400',
-  },
-}
+export default function ActionPage() {
+  const router = useRouter()
+  const {
+    scores,
+    operationType,
+    diagnosisCompleted,
+    executionRecords,
+    addExecutionRecord,
+    calculateStreak,
+  } = useStore()
 
-const ACTION_TYPE_ICON_MAP: Record<ActionType, React.ElementType> = {
-  research: Search,
-  create: PenTool,
-  test: FlaskConical,
-  operate: Settings,
-  measure: BarChart2,
-  improve: TrendingUp,
-  learn: BookOpen,
-}
+  const effectiveOpType: OperationType = operationType ?? 'hall'
+  const completedIds = executionRecords.map((r) => r.action_id)
+  const todayActions = getTodayActions(scores, effectiveOpType, completedIds)
 
-const ACTION_TYPE_COLOR_MAP: Record<string, string> = {
-  blue: 'bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300',
-  purple: 'bg-purple-100 text-purple-700 dark:bg-purple-950 dark:text-purple-300',
-  amber: 'bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300',
-  slate: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300',
-  emerald: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300',
-  rose: 'bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300',
-  indigo: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300',
-}
-
-const SAMPLE_SCORES: Record<AreaId, number> = {
-  customer: 45,
-  validation: 30,
-  product: 60,
-  acquisition: 25,
-  revenue: 50,
-  operation: 70,
-  growth: 40,
-}
-
-// ─── Feedback Modal ───────────────────────────────────────────────────────────
-
-interface FeedbackData {
-  status: StatusKey
-  feedbackMessage: string
-  scoreGain: number
-  areaLabel: string
-  nextActionId?: string
-  aiFeedback?: string
-}
-
-function FeedbackModal({ data, onClose }: { data: FeedbackData; onClose: () => void }) {
-  const config = STATUS_CONFIG[data.status]
-  const Icon = config.icon
-  return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
-      onClick={onClose}
-    >
-      <motion.div
-        initial={{ opacity: 0, scale: 0.9, y: 16 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.9, y: 16 }}
-        transition={{ type: 'spring', duration: 0.35 }}
-        className="w-full max-w-sm bg-white dark:bg-slate-900 rounded-2xl shadow-2xl p-6 relative"
-        onClick={e => e.stopPropagation()}
-      >
-        <button onClick={onClose} className="absolute top-4 right-4 p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors">
-          <X className="w-4 h-4" />
-        </button>
-        <div className={`w-14 h-14 rounded-2xl ${config.modalBg} flex items-center justify-center mx-auto mb-4`}>
-          <Icon className={`w-7 h-7 ${config.modalIcon}`} />
-        </div>
-        <p className={`text-center text-sm font-semibold mb-2 ${config.color}`}>{config.label}</p>
-        <p className="text-center text-slate-800 dark:text-white font-medium leading-relaxed mb-4">{data.feedbackMessage}</p>
-        {data.scoreGain > 0 && (
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <span className="px-3 py-1.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 text-sm font-bold">+{data.scoreGain}점</span>
-            <span className="text-sm text-slate-500 dark:text-slate-400">{data.areaLabel} 점수 반영</span>
-          </div>
-        )}
-        {data.aiFeedback && (
-          <div className="mb-4 p-3 rounded-xl bg-indigo-50 dark:bg-indigo-950 border border-indigo-100 dark:border-indigo-900">
-            <div className="flex items-center gap-1.5 mb-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-indigo-500" />
-              <p className="text-xs font-semibold text-indigo-700 dark:text-indigo-300">AI 피드백</p>
-            </div>
-            <p className="text-xs text-indigo-600 dark:text-indigo-400 leading-relaxed">{data.aiFeedback}</p>
-          </div>
-        )}
-        {data.nextActionId && data.status === 'completed' && (
-          <div className="mb-4 p-3 rounded-xl bg-indigo-50 dark:bg-indigo-950 border border-indigo-100 dark:border-indigo-900">
-            <p className="text-xs text-indigo-700 dark:text-indigo-300 text-center">다음 추천 액션이 준비되어 있습니다</p>
-          </div>
-        )}
-        <button onClick={onClose} className="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold transition-colors">확인</button>
-      </motion.div>
-    </motion.div>
-  )
-}
-
-// ─── ActionCard ───────────────────────────────────────────────────────────────
-
-type EvidenceItem = { type: EvidenceType; value: string }
-type VisibleEvidenceType = Exclude<EvidenceType, 'image'>
-
-const EVIDENCE_TYPE_CONFIG: Record<VisibleEvidenceType, { label: string; icon: React.ElementType; placeholder: string; inputType: string }> = {
-  link: { label: '링크', icon: Link2, placeholder: 'https://...', inputType: 'url' },
-  number: { label: '숫자', icon: Hash, placeholder: '0', inputType: 'number' },
-  text: { label: '텍스트', icon: Type, placeholder: '증거 내용을 입력하세요', inputType: 'text' },
-}
-
-const IMAGE_SIZE_LIMIT_KB = 500
-
-function ActionCard({
-  actionId,
-  onRecord,
-}: {
-  actionId: string
-  onRecord: (actionId: string, status: StatusKey, memo: string, evidence: EvidenceItem[]) => void
-}) {
-  const action = getActionById(actionId)
-  const [expanded, setExpanded] = useState(false)
-  const [memo, setMemo] = useState('')
-  const [selectedStatus, setSelectedStatus] = useState<StatusKey | null>(null)
-  const [evidenceList, setEvidenceList] = useState<EvidenceItem[]>([])
-  const [showEvidenceTypeSelect, setShowEvidenceTypeSelect] = useState(false)
-  const [imageWarning, setImageWarning] = useState<string | null>(null)
+  const [expandedId, setExpandedId] = useState<string | null>(null)
+  const [formActionId, setFormActionId] = useState<string | null>(null)
+  const [formData, setFormData] = useState({
+    time_spent: '',
+    difficulty_note: '',
+    result_memo: '',
+    evidence: '',
+    next_recommended_action: '',
+  })
+  const [submittedId, setSubmittedId] = useState<string | null>(null)
+  const [feedbackMsg, setFeedbackMsg] = useState<string>('')
+  const [uploadedImages, setUploadedImages] = useState<string[]>([])
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const [recordCounter, setRecordCounter] = useState(1)
 
-  if (!action) return null
-  const area = AREAS.find(a => a.id === action.areaId)
-  const typeConfig = ACTION_TYPE_CONFIG[action.actionType]
-  const TypeIcon = ACTION_TYPE_ICON_MAP[action.actionType]
-  const typeColorClass = ACTION_TYPE_COLOR_MAP[typeConfig.color] ?? ACTION_TYPE_COLOR_MAP.slate
-
-  const addEvidence = (type: EvidenceType) => {
-    if (type === 'image') { fileInputRef.current?.click(); setShowEvidenceTypeSelect(false); return }
-    setEvidenceList(prev => [...prev, { type, value: '' }])
-    setShowEvidenceTypeSelect(false)
+  function openForm(actionId: string) {
+    setFormActionId(actionId)
+    setFormData({ time_spent: '', difficulty_note: '', result_memo: '', evidence: '', next_recommended_action: '' })
+    setUploadedImages([])
+    setSubmittedId(null)
+    setFeedbackMsg('')
   }
 
-  const handleImageFile = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-    const sizeKb = file.size / 1024
-    if (sizeKb > IMAGE_SIZE_LIMIT_KB) {
-      setImageWarning(`이미지가 너무 큽니다 (${Math.round(sizeKb)}KB). 500KB 이하를 권장합니다.`)
-    } else { setImageWarning(null) }
-    const reader = new FileReader()
-    reader.onload = (ev) => {
-      const base64 = ev.target?.result as string
-      setEvidenceList(prev => [...prev, { type: 'image', value: base64 }])
+  function closeForm() {
+    setFormActionId(null)
+  }
+
+  function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = e.target.files
+    if (!files) return
+    Array.from(files).forEach(file => {
+      if (!file.type.startsWith('image/')) return
+      const reader = new FileReader()
+      reader.onload = () => {
+        if (typeof reader.result === 'string') {
+          setUploadedImages(prev => [...prev, reader.result as string])
+        }
+      }
+      reader.readAsDataURL(file)
+    })
+    if (fileInputRef.current) fileInputRef.current.value = ''
+  }
+
+  function removeImage(index: number) {
+    setUploadedImages(prev => prev.filter((_, i) => i !== index))
+  }
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    if (!formActionId) return
+    // 근거 자료: 텍스트 + 업로드 이미지 모두 포함
+    const evidenceParts: string[] = []
+    if (formData.evidence.trim()) evidenceParts.push(formData.evidence.trim())
+    uploadedImages.forEach((_img, i) => evidenceParts.push(`[첨부 이미지 ${i + 1}]`))
+    const combinedEvidence = evidenceParts.join(' | ')
+
+    const record: ExecutionRecord = {
+      id: `rec_${recordCounter}`,
+      action_id: formActionId,
+      execution_date: new Date().toISOString().split('T')[0],
+      time_spent: formData.time_spent,
+      difficulty_note: formData.difficulty_note,
+      result_memo: formData.result_memo,
+      evidence: combinedEvidence || undefined,
+      next_recommended_action: formData.next_recommended_action || undefined,
     }
-    reader.readAsDataURL(file)
-    e.target.value = ''
+    addExecutionRecord(record)
+    setRecordCounter(c => c + 1)
+    calculateStreak()
+    const feedback = generateActionFeedback(record, scores)
+    setFeedbackMsg(feedback)
+    setSubmittedId(formActionId)
+    setFormActionId(null)
   }
 
-  const updateEvidence = (idx: number, value: string) =>
-    setEvidenceList(prev => prev.map((ev, i) => i === idx ? { ...ev, value } : ev))
-  const removeEvidence = (idx: number) =>
-    setEvidenceList(prev => prev.filter((_, i) => i !== idx))
-
-  const handleSubmit = () => {
-    if (!selectedStatus) return
-    const validEvidence = evidenceList.filter(ev => ev.value.trim() !== '')
-    onRecord(action.id, selectedStatus, memo, validEvidence)
-    setExpanded(false); setMemo(''); setSelectedStatus(null); setEvidenceList([]); setImageWarning(null)
+  if (!diagnosisCompleted) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4 px-4">
+        <p className="text-slate-500 dark:text-slate-400">먼저 진단을 완료해주세요.</p>
+        <button
+          onClick={() => router.push('/onboarding')}
+          className="px-6 py-3 rounded-2xl bg-indigo-600 text-white font-bold"
+        >
+          진단 시작하기
+        </button>
+      </div>
+    )
   }
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
-      <div className="p-5">
-        <div className="flex items-start gap-3 mb-3">
-          <span className="text-xl mt-0.5">{area?.icon}</span>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-1 flex-wrap">
-              <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{ backgroundColor: area?.color + '20', color: area?.color }}>{area?.label}</span>
-              <span className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-medium ${typeColorClass}`}>
-                <TypeIcon className="w-3 h-3" />{typeConfig.label}
-              </span>
-              <span className="text-xs text-slate-400 dark:text-slate-500 flex items-center gap-1">
-                <Clock className="w-3 h-3" />{action.estimatedTime}
-              </span>
-            </div>
-            <h3 className="font-semibold text-slate-900 dark:text-white">{action.title}</h3>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-amber-50 dark:from-slate-950 dark:to-slate-900 px-4 py-8">
+      <div className="max-w-2xl mx-auto flex flex-col gap-6">
+
+        {/* Header */}
+        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
+          <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+            <Zap className="w-6 h-6 text-amber-500" />
+            오늘의 액션
+          </h1>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+            추천된 액션을 실행하고 기록을 남겨보세요
+          </p>
+        </motion.div>
+
+        {/* Success Feedback Banner */}
+        <AnimatePresence>
+          {feedbackMsg && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="flex items-start gap-3 p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800"
+            >
+              <CheckCircle className="w-5 h-5 text-emerald-500 flex-shrink-0 mt-0.5" />
+              <p className="text-sm text-emerald-700 dark:text-emerald-400">{feedbackMsg}</p>
+              <button onClick={() => setFeedbackMsg('')} className="ml-auto">
+                <X className="w-4 h-4 text-emerald-500" />
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Action Cards */}
+        {todayActions.length === 0 ? (
+          <div className="bg-white dark:bg-slate-800 rounded-3xl shadow p-8 text-center">
+            <p className="text-slate-500 dark:text-slate-400 mb-4">오늘 추천된 액션이 없습니다.</p>
+            <button
+              onClick={() => router.push('/dashboard')}
+              className="px-6 py-3 rounded-2xl bg-indigo-600 text-white font-bold"
+            >
+              대시보드로 돌아가기
+            </button>
           </div>
-        </div>
-        <p className="text-sm text-slate-600 dark:text-slate-400 mb-3">{action.description}</p>
-        <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 mb-4">
-          <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mb-1">완료 기준</p>
-          <p className="text-xs text-slate-700 dark:text-slate-300">{action.criteria}</p>
-        </div>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2 text-xs text-emerald-600 dark:text-emerald-400 font-medium">
-            <span className="w-4 h-4 rounded-full bg-emerald-100 dark:bg-emerald-950 flex items-center justify-center text-[10px] font-bold">+</span>
-            완료 시 {area?.label} +{action.scoreImpact}점
-          </div>
-          <button onClick={() => setExpanded(!expanded)} className="flex items-center gap-1.5 text-sm font-medium text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 transition-colors">
-            기록하기{expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-          </button>
-        </div>
-      </div>
-      {expanded && (
-        <div className="border-t border-slate-100 dark:border-slate-800 p-5 bg-slate-50 dark:bg-slate-800/50">
-          <p className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-3">오늘 이 액션을 어디까지 했나요?</p>
-          <div className="grid grid-cols-3 gap-2 mb-4">
-            {(Object.keys(STATUS_CONFIG) as StatusKey[]).map(status => {
-              const config = STATUS_CONFIG[status]; const Icon = config.icon; const isSelected = selectedStatus === status
+        ) : (
+          <div className="flex flex-col gap-4">
+            {todayActions.map((action, i) => {
+              const isCompleted = completedIds.includes(action.action_id)
+              const isExpanded = expandedId === action.action_id
+              const isSubmittedNow = submittedId === action.action_id
+
               return (
-                <button key={status} onClick={() => setSelectedStatus(status)}
-                  className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 transition-all text-sm font-medium ${isSelected ? `${config.border} ${config.bg} ${config.color}` : 'border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400'}`}>
-                  <Icon className="w-5 h-5" />{config.label}
-                </button>
+                <motion.div
+                  key={action.action_id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.08 }}
+                  className={`bg-white dark:bg-slate-800 rounded-3xl shadow-xl overflow-hidden border-2 transition-colors ${
+                    isCompleted || isSubmittedNow
+                      ? 'border-emerald-200 dark:border-emerald-800'
+                      : 'border-transparent'
+                  }`}
+                >
+                  {/* Card Header */}
+                  <div className="p-5">
+                    <div className="flex items-start gap-3 mb-3">
+                      <div
+                        className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 ${
+                          isCompleted || isSubmittedNow
+                            ? 'bg-emerald-100 dark:bg-emerald-900'
+                            : 'bg-amber-100 dark:bg-amber-900'
+                        }`}
+                      >
+                        {isCompleted || isSubmittedNow ? (
+                          <CheckCircle className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                        ) : (
+                          <span className="text-sm font-bold text-amber-600 dark:text-amber-400">{i + 1}</span>
+                        )}
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-bold text-slate-900 dark:text-white">{action.title}</h3>
+                        <div className="flex flex-wrap items-center gap-2 mt-1">
+                          <span className="flex items-center gap-1 text-xs text-slate-500">
+                            <Clock className="w-3 h-3" />
+                            {action.expected_time}
+                          </span>
+                          <span className="text-xs text-slate-500">난이도: {diffLabels[action.difficulty]}</span>
+                          <span className="text-xs text-slate-500">효과: {impactLabels[action.impact]}</span>
+                          <span className="text-xs text-slate-500">비용: {costLabels[action.cost]}</span>
+                          {action.solo_possible && (
+                            <span className="text-xs bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded-full">혼자 가능</span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Expand / collapse steps */}
+                    <button
+                      onClick={() => setExpandedId(isExpanded ? null : action.action_id)}
+                      className="w-full flex items-center justify-between text-sm text-indigo-600 dark:text-indigo-400 font-semibold py-2 border-t border-slate-100 dark:border-slate-700"
+                    >
+                      실행 단계 보기
+                      {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                    </button>
+
+                    <AnimatePresence>
+                      {isExpanded && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: 'auto' }}
+                          exit={{ opacity: 0, height: 0 }}
+                          className="overflow-hidden"
+                        >
+                          <ol className="flex flex-col gap-2 mt-3">
+                            {action.execution_steps.map((step, si) => (
+                              <li key={si} className="flex items-start gap-3 text-sm">
+                                <span className="flex-shrink-0 w-5 h-5 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-300 text-xs font-bold flex items-center justify-center">
+                                  {si + 1}
+                                </span>
+                                <span className="text-slate-600 dark:text-slate-400 leading-relaxed">{step}</span>
+                              </li>
+                            ))}
+                          </ol>
+                          <div className="mt-3 p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800">
+                            <p className="text-xs text-emerald-700 dark:text-emerald-400">
+                              <span className="font-bold">성공 기준: </span>
+                              {action.success_condition}
+                            </p>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+
+                    {/* CTA */}
+                    {!isCompleted && !isSubmittedNow && (
+                      <button
+                        onClick={() => openForm(action.action_id)}
+                        className="mt-3 w-full flex items-center justify-center gap-2 py-2.5 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-sm transition-colors"
+                      >
+                        <Plus className="w-4 h-4" />
+                        실행 완료 기록하기
+                      </button>
+                    )}
+                    {(isCompleted || isSubmittedNow) && (
+                      <div className="mt-3 flex items-center justify-center gap-2 py-2.5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 text-sm font-bold">
+                        <CheckCircle className="w-4 h-4" />
+                        완료됨
+                      </div>
+                    )}
+                  </div>
+                </motion.div>
               )
             })}
           </div>
-          <textarea value={memo} onChange={e => setMemo(e.target.value)}
-            placeholder="메모 (선택사항) — 배운 점, 장벽, 다음 단계..."
-            className="w-full h-20 px-3 py-2 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white placeholder:text-slate-400 resize-none focus:outline-none focus:ring-2 focus:ring-red-500" />
-          <div className="mt-3">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-semibold text-slate-600 dark:text-slate-400">증거 첨부</span>
-              <div className="relative">
-                <button onClick={() => setShowEvidenceTypeSelect(prev => !prev)} className="flex items-center gap-1 text-xs text-indigo-600 dark:text-indigo-400 font-medium transition-colors">
-                  <Plus className="w-3.5 h-3.5" />증거 추가
-                </button>
-                {showEvidenceTypeSelect && (
-                  <div className="absolute right-0 top-6 z-10 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-lg overflow-hidden min-w-[130px]">
-                    {(Object.entries(EVIDENCE_TYPE_CONFIG) as [VisibleEvidenceType, typeof EVIDENCE_TYPE_CONFIG[VisibleEvidenceType]][]).map(([type, cfg]) => {
-                      const EIcon = cfg.icon
-                      return (
-                        <button key={type} onClick={() => addEvidence(type)} className="flex items-center gap-2 w-full px-3 py-2 text-xs text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
-                          <EIcon className="w-3.5 h-3.5" />{cfg.label}
-                        </button>
-                      )
-                    })}
-                    <button onClick={() => addEvidence('image')} className="flex items-center gap-2 w-full px-3 py-2 text-xs text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors border-t border-slate-100 dark:border-slate-700">
-                      <ImageIcon className="w-3.5 h-3.5" />이미지
-                    </button>
+        )}
+
+        {/* Record form modal */}
+        <AnimatePresence>
+          {formActionId && (
+            <>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40"
+                onClick={closeForm}
+              />
+              <motion.div
+                initial={{ opacity: 0, y: 60 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 60 }}
+                className="fixed inset-x-4 bottom-4 md:inset-x-auto md:left-1/2 md:-translate-x-1/2 md:w-full md:max-w-lg z-50 bg-white dark:bg-slate-800 rounded-3xl shadow-2xl p-6 max-h-[80vh] overflow-y-auto"
+              >
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-extrabold text-slate-900 dark:text-white">실행 기록</h3>
+                  <button onClick={closeForm} className="p-1 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700">
+                    <X className="w-5 h-5 text-slate-500" />
+                  </button>
+                </div>
+                <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                      실제 소요 시간 <span className="text-red-400">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="예: 45분"
+                      value={formData.time_spent}
+                      onChange={(e) => setFormData({ ...formData, time_spent: e.target.value })}
+                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-indigo-400"
+                    />
                   </div>
-                )}
-              </div>
-            </div>
-            {imageWarning && <p className="text-xs text-amber-600 dark:text-amber-400 mb-2">{imageWarning}</p>}
-            <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageFile} />
-            {evidenceList.length > 0 && (
-              <div className="space-y-2">
-                {evidenceList.map((ev, idx) => {
-                  if (ev.type === 'image') {
-                    return (
-                      <div key={idx} className="flex items-center gap-2">
-                        {ev.value
-                          ? <img src={ev.value} alt="증거 이미지" className="w-14 h-14 rounded-lg object-cover border border-slate-200 dark:border-slate-700 flex-shrink-0" />
-                          : <div className="w-14 h-14 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center flex-shrink-0"><ImageIcon className="w-5 h-5 text-slate-400" /></div>
-                        }
-                        <div className="flex-1 min-w-0">
-                          <p className="text-xs text-slate-500 dark:text-slate-400">스크린샷 첨부됨</p>
-                          <p className="text-[10px] text-slate-400 dark:text-slate-600">500KB 이하 권장</p>
-                        </div>
-                        <button onClick={() => removeEvidence(idx)} className="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950 transition-colors flex-shrink-0"><Trash2 className="w-3.5 h-3.5" /></button>
-                      </div>
-                    )
-                  }
-                  const cfg = EVIDENCE_TYPE_CONFIG[ev.type as VisibleEvidenceType]
-                  if (!cfg) return null
-                  const EIcon = cfg.icon
-                  return (
-                    <div key={idx} className="flex items-center gap-2">
-                      <div className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-xs text-slate-500 dark:text-slate-400 flex-shrink-0"><EIcon className="w-3 h-3" />{cfg.label}</div>
-                      <input type={cfg.inputType} value={ev.value} onChange={e => updateEvidence(idx, e.target.value)} placeholder={cfg.placeholder}
-                        className="flex-1 px-2.5 py-1.5 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-indigo-400" />
-                      <button onClick={() => removeEvidence(idx)} className="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950 transition-colors flex-shrink-0"><Trash2 className="w-3.5 h-3.5" /></button>
-                    </div>
-                  )
-                })}
-              </div>
-            )}
-          </div>
-          <div className="flex gap-2 mt-3">
-            <button onClick={() => { setExpanded(false); setSelectedStatus(null); setMemo(''); setEvidenceList([]); setImageWarning(null) }}
-              className="flex-1 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">취소</button>
-            <button onClick={handleSubmit} disabled={!selectedStatus}
-              className="flex-1 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-semibold transition-colors">기록 저장</button>
-          </div>
-        </div>
-      )}
-    </div>
-  )
-}
-
-// ─── ActionPage ───────────────────────────────────────────────────────────────
-
-export default function ActionPage() {
-  const {
-    scores, diagnosisCompleted, todayActionIds, actionRecords,
-    setTodayActions, addActionRecord, updateScores,
-    scores: currentScores, stage, industry, subIndustry, businessMetrics,
-  } = useStore()
-  const displayScores = diagnosisCompleted ? scores : SAMPLE_SCORES
-  const mounted = useMounted()
-  const [feedbackData, setFeedbackData] = useState<FeedbackData | null>(null)
-
-  useEffect(() => {
-    if (!mounted) return
-    if (todayActionIds.length === 0) {
-      const completedIds = actionRecords.map(r => r.actionId)
-      const lastCompletedActionId = actionRecords.find(r => r.status === 'completed')?.actionId ?? null
-      const latestMetric = businessMetrics.slice().sort((a, b) => b.date.localeCompare(a.date))[0] ?? null
-      const recommended = recommendActions(displayScores, completedIds, 3, stage, industry, lastCompletedActionId, subIndustry, latestMetric)
-      setTodayActions(recommended.map(a => a.id))
-    }
-  }, [actionRecords, businessMetrics, displayScores, industry, mounted, setTodayActions, stage, subIndustry, todayActionIds.length])
-
-  const handleRefresh = () => {
-    const completedIds = actionRecords.map(r => r.actionId)
-    const lastCompletedActionId = actionRecords.find(r => r.status === 'completed')?.actionId ?? null
-    const latestMetric = businessMetrics.slice().sort((a, b) => b.date.localeCompare(a.date))[0] ?? null
-    const recommended = recommendActions(displayScores, completedIds, 3, stage, industry, lastCompletedActionId, subIndustry, latestMetric)
-    setTodayActions(recommended.map(a => a.id))
-  }
-
-  const handleRecord = (actionId: string, status: StatusKey, memo: string, evidence: EvidenceItem[]) => {
-    const action = getActionById(actionId)
-    if (!action) return
-    const evidenceQuality = getEvidenceQuality(action, evidence)
-    const baseScoreGain = status === 'completed' ? action.scoreImpact : Math.floor(action.scoreImpact / 2)
-    const scoreGain = adjustScoreGainByEvidence(baseScoreGain, status, evidenceQuality)
-    const record: ActionRecord = {
-      id: `rec_${Date.now()}`, actionId, date: new Date().toISOString().split('T')[0],
-      status, memo, link: '', scoreGain,
-      evidence: evidence.length > 0 ? evidence : undefined, evidenceQuality,
-    }
-    addActionRecord(record)
-    if (diagnosisCompleted && scoreGain > 0) {
-      const newScores = applyScoreGain(currentScores, action.areaId, scoreGain)
-      updateScores(newScores)
-    }
-    setTodayActions(todayActionIds.filter(id => id !== actionId))
-    const feedbackMessage = status === 'completed' ? action.feedback.completed : status === 'partial' ? action.feedback.partial : action.feedback.skipped
-    const area = AREAS.find(a => a.id === action.areaId)
-    const aiFeedback = generateActionFeedback(record, currentScores, actionRecords)
-    setFeedbackData({ status, feedbackMessage, scoreGain, areaLabel: area?.label ?? '', nextActionId: action.nextActionId, aiFeedback })
-  }
-
-  const today = new Date().toISOString().split('T')[0]
-  const todayRecords = actionRecords.filter(r => r.date === today)
-  if (!mounted) return null
-
-  return (
-    <>
-      <AnimatePresence>{feedbackData && <FeedbackModal data={feedbackData} onClose={() => setFeedbackData(null)} />}</AnimatePresence>
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
-        <div className="max-w-2xl mx-auto px-4 py-8">
-          <div className="flex items-start justify-between mb-8 gap-4">
-            <div>
-              <h1 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white">오늘의 실행</h1>
-              <p className="text-slate-500 dark:text-slate-400 mt-1 text-sm">{new Date().toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', weekday: 'long' })}</p>
-            </div>
-            <button onClick={handleRefresh} className="flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 text-sm font-medium hover:bg-white dark:hover:bg-slate-800 transition-colors">
-              <RefreshCw className="w-4 h-4" />새로 추천
-            </button>
-          </div>
-          {!diagnosisCompleted && (
-            <div className="mb-6 p-4 rounded-xl bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-800 flex items-center gap-3">
-              <div className="text-amber-600 dark:text-amber-400 text-sm flex-1"><strong>샘플 액션입니다.</strong> 진단 완료 후 내 점수에 맞는 맞춤 액션이 추천됩니다.</div>
-              <Link href="/onboarding" className="flex-shrink-0 px-3 py-1.5 rounded-lg bg-amber-600 text-white text-xs font-semibold hover:bg-amber-700 transition-colors">진단하기</Link>
-            </div>
-          )}
-          {todayRecords.length > 0 && (
-            <div className="mb-6 p-4 rounded-xl bg-emerald-50 dark:bg-emerald-950 border border-emerald-200 dark:border-emerald-800">
-              <div className="flex items-center gap-2 mb-2"><CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400" /><span className="font-semibold text-emerald-800 dark:text-emerald-200">오늘 {todayRecords.length}개 완료!</span></div>
-              <div className="flex flex-wrap gap-2">
-                {todayRecords.map(record => {
-                  const action = getActionById(record.actionId); const config = STATUS_CONFIG[record.status]; const Icon = config.icon
-                  return (<div key={record.id} className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${config.bg} ${config.color}`}><Icon className="w-3 h-3" />{action?.title || '알 수 없는 액션'}</div>)
-                })}
-              </div>
-            </div>
-          )}
-          <div className="mb-8">
-            <h2 className="text-base font-bold text-slate-900 dark:text-white mb-4">추천 액션 {todayActionIds.length > 0 ? `(${todayActionIds.length}개)` : ''}</h2>
-            {todayActionIds.length === 0 ? (
-              <div className="p-8 text-center bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800">
-                <CheckCircle2 className="w-12 h-12 text-emerald-500 mx-auto mb-3" />
-                <h3 className="font-bold text-slate-900 dark:text-white mb-2">오늘 액션을 모두 완료했어요!</h3>
-                <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">내일 새로운 액션이 추천됩니다</p>
-                <button onClick={handleRefresh} className="px-5 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-sm font-semibold transition-colors">더 많은 액션 보기</button>
-              </div>
-            ) : (
-              <div className="space-y-4">{todayActionIds.map(id => <ActionCard key={id} actionId={id} onRecord={handleRecord} />)}</div>
-            )}
-          </div>
-          {actionRecords.length > 0 && (
-            <div>
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-base font-bold text-slate-900 dark:text-white">최근 실행 기록</h2>
-                <Link href="/history" className="flex items-center gap-1 text-sm text-red-600 dark:text-red-400 font-medium hover:text-red-700 dark:hover:text-red-300 transition-colors">전체 보기<ArrowRight className="w-4 h-4" /></Link>
-              </div>
-              <div className="space-y-3">
-                {actionRecords.slice(0, 5).map(record => {
-                  const action = getActionById(record.actionId)
-                  const area = action ? AREAS.find(a => a.id === action.areaId) : null
-                  const config = STATUS_CONFIG[record.status]
-                  const Icon = config.icon
-                  return (
-                    <div key={record.id} className={`p-4 rounded-xl border ${config.border} ${config.bg}`}>
-                      <div className="flex items-start gap-3">
-                        <Icon className={`w-5 h-5 flex-shrink-0 mt-0.5 ${config.color}`} />
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 flex-wrap mb-1">
-                            <span className="font-medium text-slate-900 dark:text-white text-sm">{action?.title || '알 수 없는 액션'}</span>
-                            <span className={`text-xs font-medium ${config.color}`}>{config.label}</span>
-                            {record.scoreGain > 0 && <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">+{record.scoreGain}점</span>}
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                      어려웠던 점
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="실행 중 어려웠던 점을 적어주세요"
+                      value={formData.difficulty_note}
+                      onChange={(e) => setFormData({ ...formData, difficulty_note: e.target.value })}
+                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-indigo-400"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                      결과 메모 <span className="text-red-400">*</span>
+                    </label>
+                    <textarea
+                      required
+                      rows={3}
+                      placeholder="실행 결과를 간단히 적어주세요"
+                      value={formData.result_memo}
+                      onChange={(e) => setFormData({ ...formData, result_memo: e.target.value })}
+                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-indigo-400 resize-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                      근거 자료 <span className="text-red-400">*</span>
+                    </label>
+                    <p className="text-xs text-slate-400 mb-2">URL, 수치, 텍스트 입력 또는 스크린샷을 첨부하세요</p>
+                    <input
+                      type="text"
+                      required={uploadedImages.length === 0}
+                      placeholder="예: 네이버 플레이스 URL, 원가율 32%, 리뷰 응답 완료 등"
+                      value={formData.evidence}
+                      onChange={(e) => setFormData({ ...formData, evidence: e.target.value })}
+                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-indigo-400"
+                    />
+                    {/* File upload */}
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      onChange={handleFileUpload}
+                      className="hidden"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="mt-2 w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border-2 border-dashed border-slate-300 dark:border-slate-600 text-slate-500 dark:text-slate-400 text-sm font-medium hover:border-indigo-400 hover:text-indigo-500 dark:hover:border-indigo-500 dark:hover:text-indigo-400 transition-colors"
+                    >
+                      <ImagePlus className="w-4 h-4" />
+                      스크린샷 첨부하기
+                    </button>
+                    {/* Image previews */}
+                    {uploadedImages.length > 0 && (
+                      <div className="mt-3 grid grid-cols-3 gap-2">
+                        {uploadedImages.map((img, idx) => (
+                          <div key={idx} className="relative group rounded-xl overflow-hidden border border-slate-200 dark:border-slate-600">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={img} alt={`첨부 ${idx + 1}`} className="w-full h-20 object-cover" />
+                            <button
+                              type="button"
+                              onClick={() => removeImage(idx)}
+                              className="absolute top-1 right-1 w-5 h-5 rounded-full bg-red-500 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                              <Trash2 className="w-3 h-3" />
+                            </button>
                           </div>
-                          <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
-                            {area && <span>{area.icon} {area.label}</span>}<span>•</span><span>{record.date}</span>
-                          </div>
-                          {record.memo && <p className="text-xs text-slate-600 dark:text-slate-400 mt-1.5 italic">&ldquo;{record.memo}&rdquo;</p>}
-                        </div>
+                        ))}
                       </div>
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
+                    )}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                      다음 시도할 액션 (선택)
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="다음에 도전하고 싶은 것"
+                      value={formData.next_recommended_action}
+                      onChange={(e) => setFormData({ ...formData, next_recommended_action: e.target.value })}
+                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-indigo-400"
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    className="w-full py-3 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-sm transition-colors flex items-center justify-center gap-2"
+                  >
+                    <CheckCircle className="w-4 h-4" />
+                    기록 저장하기
+                  </button>
+                </form>
+              </motion.div>
+            </>
           )}
-        </div>
+        </AnimatePresence>
+
+        {/* Go to history */}
+        <button
+          onClick={() => router.push('/history')}
+          className="flex items-center justify-center gap-2 py-3 rounded-2xl border-2 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-semibold hover:border-indigo-300 hover:text-indigo-600 transition-colors"
+        >
+          실행 히스토리 보기
+          <ArrowRight className="w-4 h-4" />
+        </button>
       </div>
-    </>
+    </div>
   )
 }
