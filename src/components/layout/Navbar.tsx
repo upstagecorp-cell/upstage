@@ -13,6 +13,7 @@ const navItems = [
   { href: '/history', label: '히스토리' },
   { href: '/explore', label: '탐색' },
   { href: '/guide', label: '이용 가이드' },
+  { href: '/pricing', label: '가격' },
 ]
 
 export function Navbar() {
@@ -38,7 +39,7 @@ export function Navbar() {
               href={item.href}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                 pathname === item.href
-                  ? 'bg-red-50 dark:bg-red-950 text-red-600 dark:text-red-400'
+                  ? 'bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400'
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'
               }`}
             >

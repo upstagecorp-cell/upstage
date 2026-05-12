@@ -32,6 +32,7 @@ import {
 } from '@/lib/scoring'
 import { getTodayActions } from '@/lib/actions'
 import { analyzeFinancialSnapshot } from '@/lib/financial'
+import { getRewardState } from '@/lib/rewards'
 import type { OperationType, IndicatorId } from '@/data/types'
 
 export default function DashboardPage() {
@@ -42,6 +43,7 @@ export default function DashboardPage() {
     financialSnapshot,
     diagnosisCompleted,
     executionRecords,
+    weeklyGoal,
     streak,
     calculateStreak,
     resetDiagnosis,
@@ -71,7 +73,9 @@ export default function DashboardPage() {
     effectiveOpType,
     executionRecords.map((r) => r.action_id)
   )
+  const nextAction = todayActions[0]
   const financialAnalysis = analyzeFinancialSnapshot(financialSnapshot)
+  const rewardState = getRewardState(executionRecords, weeklyGoal)
 
   // Radar chart data
   const radarData = activeIndicators.map((ind) => ({
@@ -102,7 +106,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-50 dark:from-slate-950 dark:to-slate-900 px-4 py-8">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 px-4 py-8">
       <div className="max-w-2xl mx-auto flex flex-col gap-6">
 
         {/* Header */}
@@ -117,11 +121,87 @@ export default function DashboardPage() {
               {opTypeLabels[effectiveOpType]} · 오늘도 한 걸음씩
             </p>
           </div>
-          <div className="flex items-center gap-2 bg-orange-50 dark:bg-orange-950 px-3 py-2 rounded-2xl">
+          <div className="flex items-center gap-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-3 py-2 rounded-2xl">
             <Flame className="w-5 h-5 text-orange-500" />
             <span className="font-extrabold text-orange-600 dark:text-orange-400">{streak}</span>
             <span className="text-xs text-orange-500">일 연속</span>
           </div>
+        </motion.div>
+
+        {/* Next Best Action */}
+        {nextAction && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.04 }}
+            className="bg-slate-950 dark:bg-slate-900 rounded-3xl shadow-sm border border-slate-900 dark:border-slate-800 p-6 text-white"
+          >
+            <div className="flex items-center gap-2 mb-3">
+              <Zap className="w-5 h-5 text-emerald-400" />
+              <h2 className="font-bold">지금 먼저 할 일</h2>
+              <span className="ml-auto text-xs text-slate-400">오늘 기준</span>
+            </div>
+            <p className="text-lg font-extrabold leading-relaxed">{nextAction.title}</p>
+            <div className="flex flex-wrap items-center gap-3 mt-3 text-xs text-slate-300">
+              <span className="flex items-center gap-1">
+                <Clock className="w-3 h-3" />
+                {nextAction.expected_time}
+              </span>
+              <span>난이도: {diffLabels[nextAction.difficulty]}</span>
+              <span>효과: {nextAction.impact === 'high' ? '높음' : nextAction.impact === 'medium' ? '중간' : '낮음'}</span>
+            </div>
+            <button
+              onClick={() => router.push('/action')}
+              className="mt-4 w-full py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm transition-colors"
+            >
+              실행 기록하기
+            </button>
+          </motion.div>
+        )}
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.06 }}
+          className="bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-800 p-6"
+        >
+          <div className="flex items-center justify-between gap-4 mb-3">
+            <div>
+              <p className="text-xs font-bold text-emerald-600 dark:text-emerald-400 mb-1">실행 보상 진행도</p>
+              <h2 className="text-base font-extrabold text-slate-950 dark:text-white">실행할수록 더 많은 분석을 받을 수 있습니다</h2>
+            </div>
+            <div className="rounded-2xl bg-emerald-50 dark:bg-emerald-950 px-3 py-2 text-right">
+              <p className="text-lg font-extrabold text-emerald-700 dark:text-emerald-300">{rewardState.completedCount}</p>
+              <p className="text-[11px] text-slate-400">누적 실행</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3 mb-4">
+            <div className="rounded-2xl bg-slate-50 dark:bg-slate-800 p-4">
+              <p className="text-xs text-slate-400 mb-1">받은 보상</p>
+              <p className="text-sm font-extrabold text-slate-900 dark:text-white">{rewardState.unlockedRewards.length}개</p>
+            </div>
+            <div className="rounded-2xl bg-slate-50 dark:bg-slate-800 p-4">
+              <p className="text-xs text-slate-400 mb-1">주간 목표</p>
+              <p className="text-sm font-extrabold text-slate-900 dark:text-white">
+                {rewardState.weeklyGoalCompleted ? '달성됨' : '진행 중'}
+              </p>
+            </div>
+          </div>
+
+          {rewardState.nextReward ? (
+            <div className="rounded-2xl bg-slate-950 dark:bg-slate-800 p-4 text-white">
+              <p className="text-xs font-bold text-emerald-300 mb-1">다음 보상</p>
+              <p className="text-sm font-extrabold leading-relaxed">{rewardState.nextReward.title}</p>
+              <p className="text-xs text-slate-300 mt-2">
+                {rewardState.nextReward.requiredCount - rewardState.completedCount}개 실행을 더 기록하면 받을 수 있습니다.
+              </p>
+            </div>
+          ) : (
+            <div className="rounded-2xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900 p-4">
+              <p className="text-sm font-extrabold text-emerald-700 dark:text-emerald-300">월간 성장 리포트까지 모두 받을 수 있습니다.</p>
+            </div>
+          )}
         </motion.div>
 
         {/* Financial Snapshot */}
@@ -130,7 +210,7 @@ export default function DashboardPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.08 }}
-            className="bg-white dark:bg-slate-800 rounded-3xl shadow-xl p-6"
+            className="bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-800 p-6"
           >
             <div className="flex items-center gap-2 mb-3">
               <WalletCards className="w-5 h-5 text-emerald-500" />
@@ -153,11 +233,11 @@ export default function DashboardPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.05 }}
-          className="bg-white dark:bg-slate-800 rounded-3xl shadow-xl p-6"
+          className="bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-800 p-6"
         >
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-bold text-slate-900 dark:text-white flex items-center gap-2">
-              <BarChart2 className="w-5 h-5 text-indigo-500" />
+              <BarChart2 className="w-5 h-5 text-emerald-500" />
               전체 점수
             </h2>
             <div className={`px-3 py-1 rounded-full text-sm font-bold ${status.bg} ${status.color}`}>
@@ -175,8 +255,8 @@ export default function DashboardPage() {
               />
               <Radar
                 dataKey="score"
-                stroke="#6366f1"
-                fill="#6366f1"
+                stroke="#059669"
+                fill="#059669"
                 fillOpacity={0.2}
                 strokeWidth={2}
               />
@@ -202,7 +282,7 @@ export default function DashboardPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="bg-white dark:bg-slate-800 rounded-3xl shadow-xl p-6"
+          className="bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-800 p-6"
         >
           <h2 className="font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
             <TrendingUp className="w-5 h-5 text-blue-500" />
@@ -286,16 +366,16 @@ export default function DashboardPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="bg-white dark:bg-slate-800 rounded-3xl shadow-xl p-6"
+          className="bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-800 p-6"
         >
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-bold text-slate-900 dark:text-white flex items-center gap-2">
-              <Zap className="w-5 h-5 text-amber-500" />
-              오늘의 추천 액션
+              <Zap className="w-5 h-5 text-emerald-500" />
+              추가 추천 액션
             </h2>
             <button
               onClick={() => router.push('/action')}
-              className="text-xs font-semibold text-indigo-500 flex items-center gap-1"
+              className="text-xs font-semibold text-emerald-600 flex items-center gap-1"
             >
               전체 보기 <ArrowRight className="w-3 h-3" />
             </button>
@@ -312,7 +392,7 @@ export default function DashboardPage() {
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.25 + i * 0.07 }}
-                  className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800"
+                  className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800"
                 >
                   <p className="font-bold text-slate-900 dark:text-white text-sm mb-1">{action.title}</p>
                   <div className="flex items-center gap-3">
@@ -331,7 +411,7 @@ export default function DashboardPage() {
           )}
           <button
             onClick={() => router.push('/action')}
-            className="mt-4 w-full py-3 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-sm transition-colors"
+            className="mt-4 w-full py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm transition-colors"
           >
             실행 기록하기
           </button>
@@ -348,7 +428,7 @@ export default function DashboardPage() {
               resetDiagnosis()
               router.push('/diagnosis')
             }}
-            className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl border-2 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-semibold hover:border-indigo-300 hover:text-indigo-600 dark:hover:border-indigo-600 dark:hover:text-indigo-400 transition-colors"
+            className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-semibold hover:border-emerald-300 hover:text-emerald-600 dark:hover:border-emerald-700 dark:hover:text-emerald-400 transition-colors"
           >
             <RotateCcw className="w-4 h-4" />
             재진단 하기

@@ -56,7 +56,7 @@ const plans: Plan[] = [
     id: 'free',
     name: '무료',
     monthlyPrice: 0,
-    description: '창업 아이디어를 처음 검증하는 단계',
+    description: '내 사업의 현재 상태를 처음 확인하는 단계',
     icon: Zap,
     iconColor: 'text-slate-500',
     iconBg: 'bg-slate-100 dark:bg-slate-800',
@@ -81,7 +81,7 @@ const plans: Plan[] = [
     id: 'starter',
     name: '스타터',
     monthlyPrice: 9900,
-    description: '매일 실행으로 성장 습관을 만드는 단계',
+    description: '반복 진단과 실행 기록으로 개선 흐름을 만드는 단계',
     icon: Star,
     iconColor: 'text-indigo-500',
     iconBg: 'bg-indigo-50 dark:bg-indigo-950',
@@ -108,7 +108,7 @@ const plans: Plan[] = [
     id: 'pro',
     name: '프로',
     monthlyPrice: 29900,
-    description: 'AI 분석과 맞춤 전략으로 빠르게 성장하는 단계',
+    description: '재무·운영 데이터를 바탕으로 더 정밀하게 개선하는 단계',
     icon: Crown,
     iconColor: 'text-indigo-600',
     iconBg: 'bg-indigo-50 dark:bg-indigo-950',
@@ -121,7 +121,7 @@ const plans: Plan[] = [
       { text: '14일 실행-검증 루프', included: true },
       { text: '월간 성장 리포트', included: true },
       { text: '비즈니스 지표 추적 + AI 분석', included: true },
-      { text: '단계 해금 시스템', included: true },
+      { text: '성장 보상 시스템', included: true },
       { text: '2단계 업종 세분류 맞춤 전략', included: true },
     ],
     ctaText: '프로 시작',
@@ -135,7 +135,7 @@ const plans: Plan[] = [
     id: 'business',
     name: '비즈니스',
     monthlyPrice: 99000,
-    description: '팀과 함께 데이터 기반으로 스케일업하는 단계',
+    description: '팀과 함께 여러 지점·사업을 관리하는 단계',
     icon: Building2,
     iconColor: 'text-amber-600',
     iconBg: 'bg-amber-50 dark:bg-amber-950',
@@ -271,20 +271,19 @@ export default function PricingPage() {
       <section className="relative overflow-hidden bg-white dark:bg-slate-950 pt-16 pb-12 px-4">
         <div className="h-1 w-full bg-red-600 absolute top-0 left-0" />
         <div className="max-w-4xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-50 dark:bg-indigo-950 border border-indigo-200 dark:border-indigo-900 text-indigo-700 dark:text-indigo-300 text-sm font-medium mb-6">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-50 dark:bg-emerald-950 border border-emerald-200 dark:border-emerald-900 text-emerald-700 dark:text-emerald-300 text-sm font-medium mb-6">
             <Crown className="w-4 h-4" />
             요금제
           </div>
           <h1 className="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-4">
-            내 창업 단계에 맞는
+            내 사업 단계에 맞는
             <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">
+            <span className="text-emerald-600 dark:text-emerald-400">
               플랜을 선택하세요
             </span>
           </h1>
           <p className="text-slate-600 dark:text-slate-400 text-lg max-w-2xl mx-auto mb-10">
-            무료로 시작하고, 성장에 따라 필요한 기능만 추가하세요.
-            언제든지 업그레이드·다운그레이드 가능합니다.
+            3분 핵심 진단은 무료로 시작하고, 재진단·기록·AI 분석이 필요할 때만 업그레이드하세요.
           </p>
 
           {/* Billing Toggle */}

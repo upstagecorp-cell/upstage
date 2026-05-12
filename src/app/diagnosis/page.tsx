@@ -95,7 +95,7 @@ export default function DiagnosisPage() {
   const isLast = currentIndex === questions.length - 1
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-50 dark:from-slate-950 dark:to-slate-900 flex flex-col items-center justify-start px-4 py-8">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col items-center justify-start px-4 py-8">
       <div className="w-full max-w-2xl">
         {/* Header */}
         <div className="mb-6">
@@ -112,23 +112,23 @@ export default function DiagnosisPage() {
             >
               &#x2715; 나가기
             </button>
-            <span className="text-sm font-semibold text-indigo-600 dark:text-indigo-400">
+            <span className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">
               3분 핵심 진단
             </span>
             <span className="text-xs text-slate-400 dark:text-slate-500">
               {operationType ? difficultyLabel[operationType] : ''} · {currentIndex + 1}/{questions.length}
             </span>
           </div>
-          <div className="mb-3 rounded-2xl bg-white/80 dark:bg-slate-800/70 border border-indigo-100 dark:border-slate-700 px-4 py-3">
+          <div className="mb-3 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-4 py-3">
             <p className="text-sm font-bold text-slate-900 dark:text-white">먼저 핵심 질문만 빠르게 답합니다.</p>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-              결과 확인 후 원하면 세부 지표와 실행 액션으로 정밀하게 이어갈 수 있습니다.
+              정답은 없습니다. 현재 사업 상황에 가장 가까운 답을 고르면 됩니다.
             </p>
           </div>
           {/* Progress bar */}
           <div className="h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
             <motion.div
-              className="h-full bg-indigo-500 rounded-full"
+              className="h-full bg-emerald-500 rounded-full"
               animate={{ width: `${progress}%` }}
               transition={{ duration: 0.35 }}
             />
@@ -152,10 +152,10 @@ export default function DiagnosisPage() {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: direction * -60 }}
             transition={{ duration: 0.3 }}
-            className="bg-white dark:bg-slate-800 rounded-3xl shadow-xl p-6 md:p-8 mb-6"
+            className="bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-800 p-6 md:p-8 mb-6"
           >
             {/* Category badge */}
-            <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300 mb-4">
+            <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300 mb-4">
               {getCategoryLabel(currentQuestion.category)}
             </span>
 
@@ -172,11 +172,6 @@ export default function DiagnosisPage() {
             <div className="flex flex-col gap-3">
               {currentQuestion.answer_options.map((option, i) => {
                 const isSelected = selectedScore === option.score
-                const riskColors: Record<string, string> = {
-                  low: 'border-emerald-200 dark:border-emerald-700',
-                  medium: 'border-amber-200 dark:border-amber-700',
-                  high: 'border-red-200 dark:border-red-700',
-                }
                 return (
                   <motion.button
                     key={i}
@@ -184,14 +179,14 @@ export default function DiagnosisPage() {
                     onClick={() => handleSelectAnswer(option.score)}
                     className={`flex items-start gap-4 p-4 rounded-2xl border-2 transition-all text-left ${
                       isSelected
-                        ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-950 dark:border-indigo-400'
-                        : `${riskColors[option.risk_level]} bg-slate-50 dark:bg-slate-700/50 hover:border-indigo-300 dark:hover:border-indigo-500`
+                        ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950 dark:border-emerald-400'
+                        : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 hover:border-emerald-300 dark:hover:border-emerald-500'
                     }`}
                   >
                     <div
                       className={`mt-0.5 flex-shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${
                         isSelected
-                          ? 'border-indigo-500 bg-indigo-500'
+                          ? 'border-emerald-500 bg-emerald-500'
                           : 'border-slate-300 dark:border-slate-500'
                       }`}
                     >
@@ -211,17 +206,11 @@ export default function DiagnosisPage() {
                         </motion.p>
                       )}
                     </div>
-                    <span
-                      className={`flex-shrink-0 text-xs font-bold px-2 py-0.5 rounded-full ${
-                        option.risk_level === 'low'
-                          ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300'
-                          : option.risk_level === 'medium'
-                          ? 'bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-300'
-                          : 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300'
-                      }`}
-                    >
-                      {option.score}점
-                    </span>
+                    {isSelected && (
+                      <span className="flex-shrink-0 text-xs font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">
+                        선택됨
+                      </span>
+                    )}
                   </motion.button>
                 )
               })}
@@ -232,7 +221,7 @@ export default function DiagnosisPage() {
               <motion.div
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="mt-4 p-3 rounded-xl bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600"
+                className="mt-4 p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700"
               >
                 <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
                   <span className="font-semibold text-slate-700 dark:text-slate-300">벤치마크: </span>
@@ -262,7 +251,7 @@ export default function DiagnosisPage() {
             whileTap={{ scale: 0.97 }}
             onClick={handleNext}
             disabled={selectedScore === undefined}
-            className="flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-300 dark:disabled:bg-slate-700 text-white font-bold transition-colors"
+            className="flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-300 dark:disabled:bg-slate-700 text-white font-bold transition-colors"
           >
             {isLast ? '결과 보기' : '다음'}
             <ChevronRight className="w-4 h-4" />

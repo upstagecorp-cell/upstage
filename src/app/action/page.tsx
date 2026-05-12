@@ -18,6 +18,7 @@ import {
 import { useStore } from '@/lib/store'
 import { getTodayActions } from '@/lib/actions'
 import { generateActionFeedback } from '@/lib/ai-feedback'
+import { getRewardMessage, getRewardState } from '@/lib/rewards'
 import type { OperationType, ExecutionRecord } from '@/data/types'
 
 const diffLabels: Record<string, string> = { easy: '쉬움', normal: '보통', hard: '어려움' }
@@ -31,6 +32,7 @@ export default function ActionPage() {
     operationType,
     diagnosisCompleted,
     executionRecords,
+    weeklyGoal,
     addExecutionRecord,
     calculateStreak,
   } = useStore()
@@ -38,6 +40,7 @@ export default function ActionPage() {
   const effectiveOpType: OperationType = operationType ?? 'hall'
   const completedIds = executionRecords.map((r) => r.action_id)
   const todayActions = getTodayActions(scores, effectiveOpType, completedIds)
+  const rewardState = getRewardState(executionRecords, weeklyGoal)
 
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [formActionId, setFormActionId] = useState<string | null>(null)
@@ -109,7 +112,8 @@ export default function ActionPage() {
     setRecordCounter(c => c + 1)
     calculateStreak()
     const feedback = generateActionFeedback(record, scores)
-    setFeedbackMsg(feedback)
+    const rewardFeedback = getRewardMessage([record, ...executionRecords])
+    setFeedbackMsg(`${feedback} ${rewardFeedback}`)
     setSubmittedId(formActionId)
     setFormActionId(null)
   }
@@ -141,6 +145,37 @@ export default function ActionPage() {
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
             추천된 액션을 실행하고 기록을 남겨보세요
           </p>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-slate-950 dark:bg-slate-900 rounded-3xl border border-slate-900 dark:border-slate-800 p-5 text-white"
+        >
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="text-xs font-bold text-emerald-300 mb-1">실행 보상</p>
+              <h2 className="text-base font-extrabold">기록을 남길수록 더 정밀한 분석을 받을 수 있습니다</h2>
+            </div>
+            <div className="rounded-2xl bg-white/10 px-3 py-2 text-right">
+              <p className="text-lg font-extrabold text-emerald-300">{rewardState.completedCount}</p>
+              <p className="text-[11px] text-slate-400">누적 실행</p>
+            </div>
+          </div>
+
+          {rewardState.nextReward ? (
+            <div className="mt-4 rounded-2xl bg-white/10 p-4">
+              <p className="text-xs font-bold text-emerald-300 mb-1">다음 보상</p>
+              <p className="text-sm font-extrabold">{rewardState.nextReward.title}</p>
+              <p className="text-xs text-slate-300 mt-2">
+                {rewardState.nextReward.requiredCount - rewardState.completedCount}개 실행을 더 기록하면 받을 수 있습니다.
+              </p>
+            </div>
+          ) : (
+            <div className="mt-4 rounded-2xl bg-emerald-500 p-4 text-emerald-950">
+              <p className="text-sm font-extrabold">월간 성장 리포트까지 모두 받을 수 있습니다.</p>
+            </div>
+          )}
         </motion.div>
 
         {/* Success Feedback Banner */}
