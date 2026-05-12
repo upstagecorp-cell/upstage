@@ -3,23 +3,31 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowRight, ArrowLeft, CheckCircle } from 'lucide-react'
+import { ArrowRight, ArrowLeft, CheckCircle, Upload, X } from 'lucide-react'
 import { useStore } from '@/lib/store'
 import { INDUSTRIES, STAGES, getOperationTypesForIndustry } from '@/data/constants'
 import type { IndustryId, StageId, OperationType } from '@/data/types'
 
-const TOTAL_STEPS = 3
+const BASE_TOTAL_STEPS = 3
+
+function requiresFinancialSnapshot(stage: StageId | null) {
+  return stage === 'operating' || stage === 'plateau' || stage === 'expansion'
+}
 
 export default function OnboardingPage() {
   const router = useRouter()
-  const { setIndustry, setStage, setOperationType } = useStore()
+  const { setIndustry, setStage, setOperationType, setFinancialSnapshot } = useStore()
 
   const [step, setStep] = useState(1)
   const [selectedIndustry, setSelectedIndustry] = useState<IndustryId | null>(null)
   const [selectedOpType, setSelectedOpType] = useState<OperationType | null>(null)
   const [selectedStage, setSelectedStage] = useState<StageId | null>(null)
+  const [monthlyRevenueText, setMonthlyRevenueText] = useState('')
+  const [monthlyNetProfitText, setMonthlyNetProfitText] = useState('')
+  const [evidenceFileNames, setEvidenceFileNames] = useState<string[]>([])
 
-  const progress = (step / TOTAL_STEPS) * 100
+  const totalSteps = requiresFinancialSnapshot(selectedStage) || step === 4 ? 4 : BASE_TOTAL_STEPS
+  const progress = (step / totalSteps) * 100
 
   function handleNext() {
     if (step === 1) {
@@ -27,12 +35,26 @@ export default function OnboardingPage() {
       setIndustry(selectedIndustry)
       setStep(2)
     } else if (step === 2) {
-      if ((selectedIndustry === 'restaurant' || selectedIndustry === 'accommodation') && !selectedOpType) return
+      if ((selectedIndustry === 'restaurant' || selectedIndustry === 'cafe' || selectedIndustry === 'accommodation') && !selectedOpType) return
       if (selectedOpType) setOperationType(selectedOpType)
       setStep(3)
     } else if (step === 3) {
       if (!selectedStage) return
       setStage(selectedStage)
+      if (requiresFinancialSnapshot(selectedStage)) {
+        setStep(4)
+        return
+      }
+      setFinancialSnapshot(null)
+      router.push('/diagnosis')
+    } else if (step === 4) {
+      if (!monthlyRevenueText.trim() || !monthlyNetProfitText.trim()) return
+      setFinancialSnapshot({
+        monthlyRevenueText: monthlyRevenueText.trim(),
+        monthlyNetProfitText: monthlyNetProfitText.trim(),
+        evidenceFileNames,
+        capturedAt: new Date().toISOString(),
+      })
       router.push('/diagnosis')
     }
   }
@@ -41,7 +63,20 @@ export default function OnboardingPage() {
     if (step > 1) setStep(step - 1)
   }
 
-  const stepLabels = ['업종 선택', '운영 유형', '창업 단계']
+  function handleEvidenceUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = e.target.files
+    if (!files) return
+    setEvidenceFileNames(prev => Array.from(new Set([...prev, ...Array.from(files).map(file => file.name)])))
+    e.target.value = ''
+  }
+
+  function removeEvidenceFile(name: string) {
+    setEvidenceFileNames(prev => prev.filter(fileName => fileName !== name))
+  }
+
+  const stepLabels = totalSteps === 4
+    ? ['업종 선택', '운영 유형', '창업 단계', '재무 입력']
+    : ['업종 선택', '운영 유형', '창업 단계']
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-50 dark:from-slate-950 dark:to-slate-900 flex flex-col items-center justify-center px-4 py-12">
@@ -145,7 +180,7 @@ export default function OnboardingPage() {
                   </button>
                 ))}
               </div>
-              {selectedIndustry !== 'restaurant' && selectedIndustry !== 'accommodation' && (
+              {selectedIndustry !== 'restaurant' && selectedIndustry !== 'cafe' && selectedIndustry !== 'accommodation' && (
                 <p className="mt-4 text-xs text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950 rounded-xl p-3">
                   현재 선택 업종 진단은 준비 중입니다. 음식점 진단으로 진행합니다.
                 </p>
@@ -189,6 +224,96 @@ export default function OnboardingPage() {
               </div>
             </motion.div>
           )}
+
+          {/* Step 4: 재무 입력 */}
+          {step === 4 && (
+            <motion.div
+              key="step4"
+              initial={{ opacity: 0, x: 40 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -40 }}
+              transition={{ duration: 0.3 }}
+              className="bg-white dark:bg-slate-800 rounded-3xl shadow-xl p-8"
+            >
+              <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white mb-1">최근 3개월 평균 재무 상태를 입력해주세요</h2>
+              <p className="text-slate-500 dark:text-slate-400 text-sm mb-6">
+                운영 중인 사업은 현재 매출과 순이익을 기준으로 더 현실적인 진단을 제공합니다.
+              </p>
+
+              <div className="flex flex-col gap-4">
+                <div>
+                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
+                    최근 3개월 월평균 매출 <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    inputMode="text"
+                    placeholder="예: 2,500만원 또는 25000000"
+                    value={monthlyRevenueText}
+                    onChange={(e) => setMonthlyRevenueText(e.target.value)}
+                    className="w-full px-4 py-3 rounded-2xl border-2 border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-700 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-indigo-400"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
+                    최근 3개월 월평균 순이익 <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    inputMode="text"
+                    placeholder="예: 320만원 또는 3200000"
+                    value={monthlyNetProfitText}
+                    onChange={(e) => setMonthlyNetProfitText(e.target.value)}
+                    className="w-full px-4 py-3 rounded-2xl border-2 border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-700 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-indigo-400"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
+                    재무 증빙 자료 <span className="text-slate-400 font-medium">(선택)</span>
+                  </label>
+                  <p className="text-xs text-slate-400 mb-3">
+                    매출표, 손익 자료, POS 캡처, 통장 내역, 스크린샷 등을 첨부할 수 있습니다.
+                  </p>
+                  <label className="flex items-center justify-center gap-2 w-full py-3 rounded-2xl border-2 border-dashed border-slate-300 dark:border-slate-600 text-slate-500 dark:text-slate-400 text-sm font-semibold hover:border-indigo-400 hover:text-indigo-500 dark:hover:border-indigo-500 dark:hover:text-indigo-400 transition-colors cursor-pointer">
+                    <Upload className="w-4 h-4" />
+                    파일 또는 스크린샷 업로드
+                    <input
+                      type="file"
+                      multiple
+                      accept="image/*,.pdf,.xlsx,.xls,.csv,.txt"
+                      onChange={handleEvidenceUpload}
+                      className="hidden"
+                    />
+                  </label>
+
+                  {evidenceFileNames.length > 0 && (
+                    <div className="mt-3 flex flex-col gap-2">
+                      {evidenceFileNames.map((fileName) => (
+                        <div
+                          key={fileName}
+                          className="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-700 text-xs text-slate-600 dark:text-slate-300"
+                        >
+                          <span className="flex-1 truncate">{fileName}</span>
+                          <button
+                            type="button"
+                            onClick={() => removeEvidenceFile(fileName)}
+                            className="p-1 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600"
+                            aria-label={`${fileName} 제거`}
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </motion.div>
+          )}
         </AnimatePresence>
 
         {/* Navigation */}
@@ -208,12 +333,13 @@ export default function OnboardingPage() {
             onClick={handleNext}
             disabled={
               (step === 1 && !selectedIndustry) ||
-              (step === 2 && (selectedIndustry === 'restaurant' || selectedIndustry === 'accommodation') && !selectedOpType) ||
-              (step === 3 && !selectedStage)
+              (step === 2 && (selectedIndustry === 'restaurant' || selectedIndustry === 'cafe' || selectedIndustry === 'accommodation') && !selectedOpType) ||
+              (step === 3 && !selectedStage) ||
+              (step === 4 && (!monthlyRevenueText.trim() || !monthlyNetProfitText.trim()))
             }
             className="flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-300 dark:disabled:bg-slate-700 text-white font-bold transition-colors"
           >
-            {step === TOTAL_STEPS ? '진단 시작하기' : '다음'}
+            {step === totalSteps ? '진단 시작하기' : '다음'}
             <ArrowRight className="w-4 h-4" />
           </motion.button>
         </div>

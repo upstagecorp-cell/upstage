@@ -1,6 +1,17 @@
 // ===== 업종 및 운영 유형 =====
 export type IndustryId = 'restaurant' | 'cafe' | 'accommodation' | 'service' | 'online' | 'other'
-export type OperationType = 'hall' | 'delivery' | 'takeout' | 'boutique' | 'social' | 'stay'
+export type OperationType =
+  | 'hall'
+  | 'delivery'
+  | 'takeout'
+  | 'boutique'
+  | 'social'
+  | 'stay'
+  | 'cafe_takeout'
+  | 'cafe_stay'
+  | 'cafe_dessert'
+  | 'cafe_craft'
+  | 'cafe_local'
 export type StageId = 'idea' | 'preparing' | 'pre-open' | 'operating' | 'plateau' | 'expansion'
 
 // ===== 공통 KPI 영역 (공통전략 Section 5) =====
@@ -45,7 +56,23 @@ export type AccommodationIndicatorId =
   | 'housekeeping_efficiency'
   | 'cancellation_rate'
 
-export type IndicatorId = RestaurantIndicatorId | AccommodationIndicatorId
+export type CafeIndicatorId =
+  | 'cafe_positioning'
+  | 'signature_menu'
+  | 'menu_cost_rate_cafe'
+  | 'avg_basket_size'
+  | 'peak_wait_time'
+  | 'digital_ordering'
+  | 'wallet_loyalty'
+  | 'local_seo'
+  | 'review_response'
+  | 'sns_shortform_ugc'
+  | 'local_partnership'
+  | 'retention_winback'
+  | 'space_productivity'
+  | 'sourcing_story'
+
+export type IndicatorId = RestaurantIndicatorId | AccommodationIndicatorId | CafeIndicatorId
 
 // ===== 위험도 =====
 export type RiskLevel = 'low' | 'medium' | 'high'
@@ -164,6 +191,14 @@ export interface Stage {
   label: string
   icon: string
   description: string
+}
+
+// ===== 재무 스냅샷 =====
+export interface FinancialSnapshot {
+  monthlyRevenueText: string
+  monthlyNetProfitText: string
+  evidenceFileNames: string[]
+  capturedAt: string
 }
 
 // ===== 주간 목표 =====

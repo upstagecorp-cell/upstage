@@ -4,12 +4,12 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { BookOpen, ChevronDown, ChevronUp, ExternalLink, Lightbulb, CheckCircle, Star } from 'lucide-react'
 import { useStore } from '@/lib/store'
-import { INDICATORS } from '@/data/constants'
+import { getIndicatorsForOperationType } from '@/data/constants'
 import { getActionsByIndicator } from '@/data/actions'
 import { BENCHMARKS } from '@/data/benchmarks'
 import { SCORE_MESSAGES } from '@/data/score-messages'
 import { getStatusLevel } from '@/lib/scoring'
-import type { RestaurantIndicatorId } from '@/data/types'
+import type { IndicatorId, OperationType } from '@/data/types'
 
 const LEARNING_RESOURCES: {
   category: string
@@ -97,12 +97,14 @@ const LEARNING_RESOURCES: {
 ]
 
 export default function ExplorePage() {
-  const { scores, executionRecords } = useStore()
+  const { scores, executionRecords, operationType } = useStore()
+  const effectiveOpType: OperationType = operationType ?? 'hall'
+  const activeIndicators = getIndicatorsForOperationType(effectiveOpType)
 
   const completedIds = new Set(executionRecords.map((r) => r.action_id))
 
   const [activeTab, setActiveTab] = useState<'strategies' | 'resources' | 'benchmarks'>('strategies')
-  const [expandedIndicator, setExpandedIndicator] = useState<RestaurantIndicatorId | null>(null)
+  const [expandedIndicator, setExpandedIndicator] = useState<IndicatorId | null>(null)
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null)
 
   const tabs = [
@@ -165,8 +167,8 @@ export default function ExplorePage() {
               <p className="text-xs text-slate-400 text-center">
                 지표를 탭하면 관련 액션 카드를 볼 수 있습니다
               </p>
-              {INDICATORS.map((ind) => {
-                const score = scores[ind.id as RestaurantIndicatorId] ?? 0
+              {activeIndicators.map((ind) => {
+                const score = scores[ind.id as IndicatorId] ?? 0
                 const sl = getStatusLevel(score)
                 const actions = getActionsByIndicator(ind.id)
                 const isExpanded = expandedIndicator === ind.id
@@ -178,7 +180,7 @@ export default function ExplorePage() {
                     className="bg-white dark:bg-slate-800 rounded-2xl shadow overflow-hidden"
                   >
                     <button
-                      onClick={() => setExpandedIndicator(isExpanded ? null : ind.id as RestaurantIndicatorId)}
+                      onClick={() => setExpandedIndicator(isExpanded ? null : ind.id as IndicatorId)}
                       className="w-full flex items-center gap-3 p-4 text-left"
                     >
                       <span className="text-xl flex-shrink-0">{ind.icon}</span>
@@ -344,11 +346,11 @@ export default function ExplorePage() {
               exit={{ opacity: 0, y: -10 }}
               className="flex flex-col gap-4"
             >
-              {INDICATORS.map((ind) => {
-                const score = scores[ind.id as RestaurantIndicatorId] ?? 0
+              {activeIndicators.map((ind) => {
+                const score = scores[ind.id as IndicatorId] ?? 0
                 const sl = getStatusLevel(score)
                 const benchmark = BENCHMARKS.find((b) => b.indicator === ind.id)
-                const messages = SCORE_MESSAGES[ind.id as RestaurantIndicatorId]
+                const messages = SCORE_MESSAGES[ind.id as IndicatorId]
                 const message = messages?.find((m) => score >= m.threshold)?.message ?? ''
 
                 const statusKey = score >= 80 ? 'good' : score >= 40 ? 'normal' : 'danger'

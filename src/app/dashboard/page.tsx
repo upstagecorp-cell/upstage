@@ -22,7 +22,7 @@ import {
   Tooltip,
 } from 'recharts'
 import { useStore } from '@/lib/store'
-import { INDICATORS } from '@/data/constants'
+import { INDICATORS, getIndicatorsForOperationType } from '@/data/constants'
 import {
   getTotalScore,
   getStatusLevel,
@@ -30,7 +30,7 @@ import {
   getSortedIndicatorsByScore,
 } from '@/lib/scoring'
 import { getTodayActions } from '@/lib/actions'
-import type { OperationType, RestaurantIndicatorId } from '@/data/types'
+import type { OperationType, IndicatorId } from '@/data/types'
 
 export default function DashboardPage() {
   const router = useRouter()
@@ -62,6 +62,7 @@ export default function DashboardPage() {
   const status = getStatusLevel(totalScore)
   const topRisks = getTopRiskIndicators(scores, effectiveOpType)
   const sortedIndicators = getSortedIndicatorsByScore(scores, effectiveOpType)
+  const activeIndicators = getIndicatorsForOperationType(effectiveOpType)
   const todayActions = getTodayActions(
     scores,
     effectiveOpType,
@@ -69,10 +70,10 @@ export default function DashboardPage() {
   )
 
   // Radar chart data
-  const radarData = INDICATORS.map((ind) => ({
+  const radarData = activeIndicators.map((ind) => ({
     subject: ind.label.length > 5 ? ind.label.slice(0, 5) + '…' : ind.label,
     fullLabel: ind.label,
-    score: scores[ind.id as RestaurantIndicatorId] ?? 0,
+    score: scores[ind.id as IndicatorId] ?? 0,
     max: 100,
   }))
 
@@ -80,6 +81,14 @@ export default function DashboardPage() {
     hall: '홀 중심',
     delivery: '배달 중심',
     takeout: '테이크아웃 중심',
+    boutique: '부티크/감성형',
+    social: '소셜/로컬형',
+    stay: '장기체류형',
+    cafe_takeout: '테이크아웃/배달형',
+    cafe_stay: '좌석 체류형',
+    cafe_dessert: '디저트/미식형',
+    cafe_craft: '개인 브랜딩/크래프트형',
+    cafe_local: '로컬 앵커형',
   }
   const diffLabels: Record<string, string> = { easy: '쉬움', normal: '보통', hard: '어려움' }
   const impactColors: Record<string, string> = {

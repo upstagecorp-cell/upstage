@@ -26,7 +26,12 @@ export default function DiagnosisPage() {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [direction, setDirection] = useState<1 | -1>(1)
 
-  const questions = industry === 'accommodation' ? QUESTIONS_BY_INDUSTRY.accommodation : RESTAURANT_QUESTIONS
+  const questions =
+    industry === 'cafe'
+      ? QUESTIONS_BY_INDUSTRY.cafe
+      : industry === 'accommodation'
+      ? QUESTIONS_BY_INDUSTRY.accommodation
+      : RESTAURANT_QUESTIONS
 
   const currentQuestion = questions[currentIndex]
   const progress = ((currentIndex + 1) / questions.length) * 100
@@ -77,6 +82,11 @@ export default function DiagnosisPage() {
     boutique: '부티크/감성형',
     social: '소셜/로컬형',
     stay: '장기체류형',
+    cafe_takeout: '테이크아웃/배달형',
+    cafe_stay: '좌석 체류형',
+    cafe_dessert: '디저트/미식형',
+    cafe_craft: '개인 브랜딩/크래프트형',
+    cafe_local: '로컬 앵커형',
   }
 
   if (!currentQuestion) return null
@@ -285,6 +295,20 @@ function getCategoryLabel(category: string): string {
     ugc_sns: 'UGC/SNS 확산',
     housekeeping_efficiency: '하우스키핑 효율',
     cancellation_rate: '취소율',
+    cafe_positioning: '카페 포지셔닝',
+    signature_menu: '시그니처 메뉴',
+    menu_cost_rate_cafe: '음료/디저트 원가율',
+    avg_basket_size: '객단가/APC',
+    peak_wait_time: '피크 대기 시간',
+    digital_ordering: '디지털 주문',
+    wallet_loyalty: '디지털 로열티',
+    local_seo: '로컬 SEO',
+    review_response: '리뷰 응답',
+    sns_shortform_ugc: '숏폼/UGC',
+    local_partnership: '로컬 협업',
+    retention_winback: '재방문/윈백',
+    space_productivity: '공간 생산성',
+    sourcing_story: '원두/브랜드 스토리',
   }
   return labels[category] ?? category
 }
@@ -305,6 +329,20 @@ function getTermHelp(category: string): string | null {
     ugc_sns: 'UGC는 고객이 직접 올리는 사진, 영상, 후기 같은 콘텐츠입니다. 인스타그램 게시물이나 블로그 후기가 대표적입니다.',
     housekeeping_efficiency: '하우스키핑 효율은 청소와 객실 정비에 드는 비용, 시간, 품질을 함께 관리하는 정도입니다.',
     cancellation_rate: '취소율은 전체 예약 중 취소된 예약의 비율입니다. 취소 이유를 알면 안내 문구와 환불 정책을 개선할 수 있습니다.',
+    cafe_positioning: '포지셔닝은 누구를 위해, 어떤 상황에서, 어떤 이유로 방문하게 만들지 정하는 기준입니다.',
+    signature_menu: '시그니처 메뉴는 고객이 이 카페를 기억하고 다시 찾게 만드는 대표 메뉴입니다.',
+    menu_cost_rate_cafe: '원가율은 판매가 중 재료비가 차지하는 비율입니다. 카페는 재료비뿐 아니라 인건비와 임대료도 함께 봐야 합니다.',
+    avg_basket_size: 'APC 또는 객단가는 고객 1명이 한 번 주문할 때 평균적으로 결제하는 금액입니다.',
+    peak_wait_time: '피크 대기 시간은 주문이 몰리는 시간에 주문 접수부터 음료 제공까지 걸리는 평균 시간입니다.',
+    digital_ordering: '디지털 주문은 키오스크, 모바일 선주문, QR 주문처럼 직원 응대 없이 주문을 받는 방식입니다.',
+    wallet_loyalty: '디지털 로열티는 종이 쿠폰 대신 휴대폰 월렛, 문자, 카카오 등으로 적립과 리워드를 관리하는 방식입니다.',
+    local_seo: '로컬 SEO는 네이버/구글 지도에서 내 주변 카페, 지금 영업 중 카페 같은 검색에 잘 보이게 관리하는 일입니다.',
+    review_response: '리뷰 응답률은 새 리뷰에 정해진 시간 안에 답글을 단 비율입니다. 평점만큼 응답 속도도 신뢰에 영향을 줍니다.',
+    sns_shortform_ugc: 'UGC는 고객이 직접 올리는 사진, 영상, 후기입니다. 숏폼은 릴스나 틱톡처럼 짧은 세로 영상 콘텐츠입니다.',
+    local_partnership: '로컬 협업은 인근 회사, 헬스장, 미용실, 상점 등과 서로 고객을 보내주는 혜택을 만드는 활동입니다.',
+    retention_winback: '윈백은 한동안 오지 않은 고객에게 혜택이나 메시지를 보내 다시 방문하게 만드는 활동입니다.',
+    space_productivity: '공간 생산성은 좌석이 오래 차지되는 시간 대비 실제 매출이 충분한지 보는 지표입니다.',
+    sourcing_story: '원두/브랜드 스토리는 산지, 가공 방식, 추출 철학, 운영자의 전문성을 고객이 이해하도록 전달하는 내용입니다.',
   }
   return descriptions[category] ?? null
 }

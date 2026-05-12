@@ -330,6 +330,11 @@ function getOperationTypeLabel(operationType: OperationType): string {
     boutique: '부티크/감성형',
     social: '소셜/로컬형',
     stay: '장기체류형',
+    cafe_takeout: '테이크아웃/배달형',
+    cafe_stay: '좌석 체류형',
+    cafe_dessert: '디저트/미식형',
+    cafe_craft: '개인 브랜딩/크래프트형',
+    cafe_local: '로컬 앵커형',
   }
   return labels[operationType]
 }

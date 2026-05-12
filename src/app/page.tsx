@@ -19,8 +19,8 @@ export default function LandingPage() {
   const features = [
     {
       icon: <BarChart2 className="w-6 h-6 text-indigo-500" />,
-      title: '11가지 핵심 지표 진단',
-      desc: '음식점 매출에 직결되는 지표를 체계적으로 분석합니다.',
+      title: '내 사업 핵심 지표 진단',
+      desc: '업종과 운영 방식에 맞춰 매출, 이익, 고객, 운영 상태를 함께 점검합니다.',
     },
     {
       icon: <Zap className="w-6 h-6 text-amber-500" />,
@@ -43,17 +43,17 @@ export default function LandingPage() {
         className="text-center max-w-xl w-full"
       >
         <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300 mb-6 tracking-wide uppercase">
-          음식점 매출 진단 SaaS
+          내 사업 성장 진단
         </span>
 
         <h1 className="text-4xl md:text-5xl font-extrabold text-slate-900 dark:text-white mb-4 leading-tight">
-          매출이 안 오르는 <br />
+          내 사업이 막힌 <br />
           <span className="text-indigo-600 dark:text-indigo-400">진짜 이유</span>를 찾아드립니다
         </h1>
 
         <p className="text-slate-500 dark:text-slate-400 text-lg mb-10 leading-relaxed">
-          5분 진단으로 우리 가게의 약점을 발견하고,<br />
-          오늘 당장 실행할 수 있는 액션을 받아보세요.
+          업종과 현재 매출 상황에 맞춰 약점을 찾고,<br />
+          오늘 바로 실행할 수 있는 개선 방법을 제안합니다.
         </p>
 
         <div className="flex flex-col items-center gap-3">

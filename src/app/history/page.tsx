@@ -14,14 +14,16 @@ import {
 } from 'recharts'
 import { TrendingUp, Calendar, Clock, BarChart2 } from 'lucide-react'
 import { useStore } from '@/lib/store'
-import { INDICATORS } from '@/data/constants'
+import { getIndicatorsForOperationType } from '@/data/constants'
 import { getActionById } from '@/data/actions'
 import { getStatusLevel } from '@/lib/scoring'
-import type { RestaurantIndicatorId } from '@/data/types'
+import type { IndicatorId, OperationType } from '@/data/types'
 
 export default function HistoryPage() {
   const router = useRouter()
-  const { scoreHistory, executionRecords, diagnosisCompleted } = useStore()
+  const { scoreHistory, executionRecords, diagnosisCompleted, operationType } = useStore()
+  const effectiveOpType: OperationType = operationType ?? 'hall'
+  const activeIndicators = getIndicatorsForOperationType(effectiveOpType)
 
   if (!diagnosisCompleted) {
     return (
@@ -43,9 +45,9 @@ export default function HistoryPage() {
     fullDate: snap.date,
     전체점수: snap.totalScore,
     ...Object.fromEntries(
-      INDICATORS.map((ind) => [
+      activeIndicators.map((ind) => [
         ind.label.length > 4 ? ind.label.slice(0, 4) : ind.label,
-        snap.scores[ind.id as RestaurantIndicatorId] ?? 0,
+        snap.scores[ind.id as IndicatorId] ?? 0,
       ])
     ),
   }))
@@ -159,7 +161,7 @@ export default function HistoryPage() {
                   wrapperStyle={{ fontSize: '10px', color: '#94a3b8' }}
                   iconSize={8}
                 />
-                {INDICATORS.map((ind, i) => {
+                {activeIndicators.map((ind, i) => {
                   const key = ind.label.length > 4 ? ind.label.slice(0, 4) : ind.label
                   return (
                     <Line
@@ -187,8 +189,8 @@ export default function HistoryPage() {
           >
             <h2 className="font-bold text-slate-900 dark:text-white mb-4">최근 지표별 점수</h2>
             <div className="flex flex-col gap-2">
-              {INDICATORS.map((ind) => {
-                const score = latestScores[ind.id as RestaurantIndicatorId] ?? 0
+              {activeIndicators.map((ind) => {
+                const score = latestScores[ind.id as IndicatorId] ?? 0
                 const sl = getStatusLevel(score)
                 return (
                   <div key={ind.id} className="flex items-center gap-3">

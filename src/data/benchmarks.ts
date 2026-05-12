@@ -82,6 +82,20 @@ export const BENCHMARKS: BenchmarkStatus[] = [
   { indicator: 'ugc_sns', good: '포토존과 언박싱 경험이 자발적 UGC 확산을 만듦', normal: '공유될 요소는 있으나 고객 행동 유도 장치가 약함', danger: 'SNS 확산 구조가 없어 감성 경쟁력이 외부로 퍼지지 않음' },
   { indicator: 'housekeeping_efficiency', good: '하우스키핑 비용과 품질을 함께 관리해 마진과 리뷰를 보호함', normal: '품질 관리는 하지만 비용 효율 비교가 부족함', danger: '청소 비용과 클레임을 추적하지 않아 수익성과 평판 리스크가 큼' },
   { indicator: 'cancellation_rate', good: '취소율과 원인을 분석해 정책과 안내 문구를 개선함', normal: '취소 현황은 보지만 원인별 개선 루틴은 부족함', danger: '취소 데이터를 보지 않아 예약 안정성과 매출 예측력이 낮음' },
+  { indicator: 'cafe_positioning', good: '핵심 고객군·방문 상황·니즈가 운영에 반영됨', normal: '타겟 감각은 있으나 데이터 기반 문서화가 부족함', danger: '누구를 위한 카페인지 불명확해 차별화가 약함' },
+  { indicator: 'signature_menu', good: '시그니처 메뉴가 주문 비중과 자발 언급으로 검증됨', normal: '대표 메뉴는 있으나 고객 반응 수치가 부족함', danger: '고객이 기억할 대표 메뉴가 약함' },
+  { indicator: 'menu_cost_rate_cafe', good: '상위 메뉴의 원가율과 판매 비중을 함께 관리함', normal: '일부 원가는 알지만 마진 관리가 부족함', danger: '원가율을 몰라 수익성 판단이 어려움' },
+  { indicator: 'avg_basket_size', good: '객단가와 디저트 결합률을 기준으로 추가 판매를 개선함', normal: '객단가는 알지만 결합률 관리가 부족함', danger: '객단가를 몰라 세트/페어링 전략을 세우기 어려움' },
+  { indicator: 'peak_wait_time', good: '피크 대기 시간을 5분 이내로 측정 관리함', normal: '대기 문제는 알지만 측정 루틴이 부족함', danger: '대기 시간이 관리되지 않아 고객 이탈 위험이 큼' },
+  { indicator: 'digital_ordering', good: '디지털 주문 비중과 오류를 관리함', normal: '주문 도구는 있으나 성과 측정이 부족함', danger: '디지털 주문 체계가 약해 피크 처리량이 낮음' },
+  { indicator: 'wallet_loyalty', good: '디지털 로열티로 가입과 재방문 데이터를 관리함', normal: '혜택은 있으나 데이터 추적이 약함', danger: '재방문 시스템 없이 신규 고객에 의존함' },
+  { indicator: 'local_seo', good: '지도 검색 키워드와 정보를 정기 관리함', normal: '기본 정보는 있으나 순위와 사진 관리가 부족함', danger: '로컬 검색 노출이 약해 신규 방문 기회를 잃음' },
+  { indicator: 'review_response', good: '리뷰 평점과 24시간 응답률을 관리함', normal: '리뷰 확인은 하지만 응답 속도 루틴이 약함', danger: '리뷰 방치로 신뢰와 지도 노출이 약해짐' },
+  { indicator: 'sns_shortform_ugc', good: 'UGC와 숏폼 성과를 기록해 디지털 증거를 쌓음', normal: '콘텐츠는 있으나 성과 측정이 부족함', danger: 'SNS 증거가 약해 방문 전 확신을 주기 어려움' },
+  { indicator: 'local_partnership', good: '인근 사업장 협업을 실행하고 성과를 측정함', normal: '협업 필요성은 있으나 실행 기록이 부족함', danger: '지역 상권 연결이 약해 단골 확보 경로가 좁음' },
+  { indicator: 'retention_winback', good: '14일 미방문 기준 복귀 캠페인을 운영함', normal: '혜택은 있으나 이탈 기준과 복귀율 측정이 약함', danger: '이탈 고객을 추적하지 않아 재방문 기반이 약함' },
+  { indicator: 'space_productivity', good: '좌석 체류와 객단가를 함께 관리함', normal: '체류 패턴은 알지만 수치 관리가 부족함', danger: '공간이 매출에 기여하는지 알 수 없음' },
+  { indicator: 'sourcing_story', good: '원두와 브랜드 스토리를 지속적으로 소통하고 반응을 기록함', normal: '스토리는 있으나 고객 접점 반영이 부족함', danger: '전문성 스토리가 없어 차별화가 약함' },
 ]
 
 export function getBenchmark(indicator: string): BenchmarkStatus | undefined {

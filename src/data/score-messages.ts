@@ -280,6 +280,76 @@ export const SCORE_MESSAGES: Record<IndicatorId, { threshold: number; message: s
     { threshold: 50, message: '취소 현황은 보지만 원인 분류가 부족합니다. 취소 사유를 분류하세요.' },
     { threshold: 0, message: '취소 데이터를 보지 않아 예약 안정성이 낮습니다. 최근 취소 사유부터 정리하세요.' },
   ],
+  cafe_positioning: [
+    { threshold: 80, message: '카페 포지셔닝이 명확합니다. 핵심 고객 기준으로 메뉴와 홍보 문구를 유지하세요.' },
+    { threshold: 50, message: '타겟 감각은 있지만 문서화가 부족합니다. Who-Occasion-Need를 정리하세요.' },
+    { threshold: 0, message: '누구를 위한 카페인지 불명확합니다. 핵심 고객과 방문 이유부터 정하세요.' },
+  ],
+  signature_menu: [
+    { threshold: 80, message: '시그니처 메뉴가 잘 검증되고 있습니다. 주문 비중과 자발 언급을 계속 추적하세요.' },
+    { threshold: 50, message: '대표 메뉴는 있지만 고객 반응 수치가 부족합니다. 시그니처 검증표를 만드세요.' },
+    { threshold: 0, message: '고객이 기억할 대표 메뉴가 약합니다. 압도적 시그니처 후보부터 개발하세요.' },
+  ],
+  menu_cost_rate_cafe: [
+    { threshold: 80, message: '원가율과 마진율 관리가 좋습니다. 저마진 인기 메뉴를 꾸준히 조정하세요.' },
+    { threshold: 50, message: '일부 원가는 알지만 판매 비중과 마진 관리가 부족합니다. 상위 5개 메뉴부터 계산하세요.' },
+    { threshold: 0, message: '원가율을 모르면 팔수록 손해가 날 수 있습니다. 상위 메뉴 원가 계산이 시급합니다.' },
+  ],
+  avg_basket_size: [
+    { threshold: 80, message: '객단가와 결합률 관리가 좋습니다. 페어링 추천을 계속 테스트하세요.' },
+    { threshold: 50, message: '객단가는 알지만 디저트 결합률이 부족합니다. 페어링 판매를 설계하세요.' },
+    { threshold: 0, message: '객단가 기준이 없습니다. 최근 30일 객단가와 디저트 결합률부터 계산하세요.' },
+  ],
+  peak_wait_time: [
+    { threshold: 80, message: '피크 대기 시간이 잘 관리됩니다. 5분 이내 기준을 유지하세요.' },
+    { threshold: 50, message: '대기 문제는 알지만 측정이 부족합니다. 피크타임 주문 시간을 재보세요.' },
+    { threshold: 0, message: '대기 시간이 관리되지 않습니다. 출근길/점심 고객 이탈을 막기 위해 측정부터 시작하세요.' },
+  ],
+  digital_ordering: [
+    { threshold: 80, message: '디지털 주문 체계가 잘 작동합니다. 채널별 오류와 속도를 계속 관리하세요.' },
+    { threshold: 50, message: '주문 도구는 있지만 성과 측정이 부족합니다. 채널별 주문 비중을 계산하세요.' },
+    { threshold: 0, message: '디지털 주문 체계가 약합니다. 프리오더나 키오스크 운영 점검이 필요합니다.' },
+  ],
+  wallet_loyalty: [
+    { threshold: 80, message: '디지털 로열티가 잘 작동합니다. 가입자 재방문율을 계속 추적하세요.' },
+    { threshold: 50, message: '혜택은 있지만 데이터 추적이 부족합니다. 가입자 수와 재방문율을 기록하세요.' },
+    { threshold: 0, message: '재방문 시스템이 없습니다. 앱 설치 없는 디지털 멤버십부터 만드세요.' },
+  ],
+  local_seo: [
+    { threshold: 80, message: '로컬 SEO가 잘 관리되고 있습니다. 지도 사진과 키워드를 계속 갱신하세요.' },
+    { threshold: 50, message: '기본 정보는 있지만 순위 점검이 부족합니다. 핵심 키워드 검색 순위를 기록하세요.' },
+    { threshold: 0, message: '지도 검색 노출이 약합니다. 영업시간, 메뉴, 사진부터 최신화하세요.' },
+  ],
+  review_response: [
+    { threshold: 80, message: '리뷰 응답 체계가 좋습니다. 24시간 내 응답률을 유지하세요.' },
+    { threshold: 50, message: '리뷰는 보지만 응답률 관리가 부족합니다. 리뷰 응답 루틴을 만드세요.' },
+    { threshold: 0, message: '리뷰 관리가 약합니다. 평점과 신규 리뷰 수, 응답률을 즉시 기록하세요.' },
+  ],
+  sns_shortform_ugc: [
+    { threshold: 80, message: '숏폼과 UGC가 잘 쌓이고 있습니다. 성과 좋은 주제를 반복하세요.' },
+    { threshold: 50, message: '콘텐츠는 있지만 성과 기록이 부족합니다. 최근 30일 게시물 수를 기록하세요.' },
+    { threshold: 0, message: '방문 전 확인할 SNS 증거가 약합니다. 숏폼과 UGC 기록 루틴을 시작하세요.' },
+  ],
+  local_partnership: [
+    { threshold: 80, message: '로컬 협업이 잘 작동합니다. 쿠폰 사용과 유입 건수를 계속 기록하세요.' },
+    { threshold: 50, message: '협업 아이디어는 있지만 실행이 부족합니다. 인근 사업장 1곳과 테스트하세요.' },
+    { threshold: 0, message: '로컬 연결이 약합니다. Business of the Day 협업부터 시작하세요.' },
+  ],
+  retention_winback: [
+    { threshold: 80, message: '재방문/윈백 시스템이 잘 작동합니다. 14일 미방문 복귀율을 계속 관리하세요.' },
+    { threshold: 50, message: '쿠폰은 있지만 자동화와 복귀율 기록이 부족합니다. 14일 기준 캠페인을 만드세요.' },
+    { threshold: 0, message: '이탈 고객을 추적하지 않습니다. 14일 미방문 고객 목록부터 만드세요.' },
+  ],
+  space_productivity: [
+    { threshold: 80, message: '공간 생산성이 잘 관리됩니다. 좌석별 체류 시간과 객단가를 계속 보세요.' },
+    { threshold: 50, message: '체류 고객은 알지만 수치가 부족합니다. 좌석별 체류 시간당 매출을 기록하세요.' },
+    { threshold: 0, message: '공간이 매출에 기여하는지 알 수 없습니다. 좌석 체류 데이터부터 수집하세요.' },
+  ],
+  sourcing_story: [
+    { threshold: 80, message: '원두/브랜드 스토리가 잘 전달됩니다. 고객 반응을 계속 모으세요.' },
+    { threshold: 50, message: '스토리는 있지만 고객 접점 반영이 부족합니다. 스토리 카드를 만드세요.' },
+    { threshold: 0, message: '전문성 스토리가 약합니다. 대표 원두와 브랜드 이야기를 4문장으로 정리하세요.' },
+  ],
 }
 
 /**

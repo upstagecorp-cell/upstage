@@ -14,10 +14,10 @@ import {
   X,
 } from 'lucide-react'
 import { useStore } from '@/lib/store'
-import { INDICATORS } from '@/data/constants'
+import { INDICATORS, getIndicatorsForOperationType } from '@/data/constants'
 import { getTodayActions } from '@/lib/actions'
 import { getStatusLevel } from '@/lib/scoring'
-import type { OperationType, RestaurantIndicatorId, WeeklyGoal } from '@/data/types'
+import type { OperationType, IndicatorId, WeeklyGoal } from '@/data/types'
 
 export default function GoalsPage() {
   const router = useRouter()
@@ -31,11 +31,12 @@ export default function GoalsPage() {
   } = useStore()
 
   const effectiveOpType: OperationType = operationType ?? 'hall'
+  const activeIndicators = getIndicatorsForOperationType(effectiveOpType)
 
   const [showForm, setShowForm] = useState(false)
   const [formData, setFormData] = useState({
     title: '',
-    targetIndicator: '' as RestaurantIndicatorId | '',
+    targetIndicator: '' as IndicatorId | '',
     endDate: getDefaultEndDate(),
   })
 
@@ -66,7 +67,7 @@ export default function GoalsPage() {
     const goal: WeeklyGoal = {
       id: goalId,
       title: formData.title,
-      targetIndicator: formData.targetIndicator as RestaurantIndicatorId,
+      targetIndicator: formData.targetIndicator as IndicatorId,
       startDate: new Date().toISOString().split('T')[0],
       endDate: formData.endDate,
       targetActions: actionIds,
@@ -287,8 +288,8 @@ export default function GoalsPage() {
             지표별 현황 (목표 설정 참고)
           </h2>
           <div className="flex flex-col gap-2">
-            {INDICATORS.map((ind) => {
-              const score = scores[ind.id as RestaurantIndicatorId] ?? 0
+            {activeIndicators.map((ind) => {
+              const score = scores[ind.id as IndicatorId] ?? 0
               const sl = getStatusLevel(score)
               return (
                 <div
@@ -297,7 +298,7 @@ export default function GoalsPage() {
                   onClick={() => {
                     setFormData({
                       title: `${ind.label} 개선 목표`,
-                      targetIndicator: ind.id as RestaurantIndicatorId,
+                      targetIndicator: ind.id as IndicatorId,
                       endDate: getDefaultEndDate(),
                     })
                     setShowForm(true)
@@ -359,13 +360,13 @@ export default function GoalsPage() {
                     <select
                       required
                       value={formData.targetIndicator}
-                      onChange={(e) => setFormData({ ...formData, targetIndicator: e.target.value as RestaurantIndicatorId })}
+                      onChange={(e) => setFormData({ ...formData, targetIndicator: e.target.value as IndicatorId })}
                       className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-indigo-400"
                     >
                       <option value="">지표 선택...</option>
-                      {INDICATORS.map((ind) => (
+                      {activeIndicators.map((ind) => (
                         <option key={ind.id} value={ind.id}>
-                          {ind.icon} {ind.label} ({scores[ind.id as RestaurantIndicatorId] ?? 0}점)
+                          {ind.icon} {ind.label} ({scores[ind.id as IndicatorId] ?? 0}점)
                         </option>
                       ))}
                     </select>

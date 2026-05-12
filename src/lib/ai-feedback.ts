@@ -28,7 +28,19 @@ export function generateDiagnosisFeedback(
   feedback.push(`가장 시급한 영역: ${worst3.map(i => `${i.label}(${i.score}점)`).join(', ')}`)
 
   // 운영 유형별 맞춤 조언
-  const typeLabel = { hall: '홀 중심', delivery: '배달 중심', takeout: '테이크아웃 중심', boutique: '부티크/감성형', social: '소셜/로컬형', stay: '장기체류형' }[operationType]
+  const typeLabel = {
+    hall: '홀 중심',
+    delivery: '배달 중심',
+    takeout: '테이크아웃 중심',
+    boutique: '부티크/감성형',
+    social: '소셜/로컬형',
+    stay: '장기체류형',
+    cafe_takeout: '테이크아웃/배달형',
+    cafe_stay: '좌석 체류형',
+    cafe_dessert: '디저트/미식형',
+    cafe_craft: '개인 브랜딩/크래프트형',
+    cafe_local: '로컬 앵커형',
+  }[operationType]
   feedback.push(`${typeLabel} 운영 특성에 맞춰 가장 중요도가 높은 지표부터 개선하세요.`)
 
   // 위험 지표 개선 가이드

@@ -11,6 +11,7 @@ import {
   ScoreSnapshot,
   WeeklyGoal,
   BusinessMetricEntry,
+  FinancialSnapshot,
 } from '@/data/types'
 import { getActionById } from '@/data/actions'
 
@@ -19,6 +20,7 @@ interface AppStore {
   industry: IndustryId | null
   stage: StageId | null
   operationType: OperationType | null
+  financialSnapshot: FinancialSnapshot | null
 
   // 진단
   answers: Record<string, number>
@@ -46,6 +48,7 @@ interface AppStore {
   setIndustry: (industry: IndustryId) => void
   setStage: (stage: StageId) => void
   setOperationType: (type: OperationType) => void
+  setFinancialSnapshot: (snapshot: FinancialSnapshot | null) => void
   setAnswer: (questionId: string, score: number) => void
   setScores: (scores: Record<IndicatorId, number>) => void
   completeDiagnosis: (scores: Record<IndicatorId, number>) => void
@@ -86,6 +89,20 @@ const defaultScores: Record<IndicatorId, number> = {
   ugc_sns: 0,
   housekeeping_efficiency: 0,
   cancellation_rate: 0,
+  cafe_positioning: 0,
+  signature_menu: 0,
+  menu_cost_rate_cafe: 0,
+  avg_basket_size: 0,
+  peak_wait_time: 0,
+  digital_ordering: 0,
+  wallet_loyalty: 0,
+  local_seo: 0,
+  review_response: 0,
+  sns_shortform_ugc: 0,
+  local_partnership: 0,
+  retention_winback: 0,
+  space_productivity: 0,
+  sourcing_story: 0,
 }
 
 function getTotalScoreFromScores(scores: Record<IndicatorId, number>) {
@@ -107,6 +124,7 @@ export const useStore = create<AppStore>()(
       industry: null,
       stage: null,
       operationType: null,
+      financialSnapshot: null,
       answers: {},
       scores: { ...defaultScores },
       diagnosisCompleted: false,
@@ -121,6 +139,7 @@ export const useStore = create<AppStore>()(
       setIndustry: (industry) => set({ industry }),
       setStage: (stage) => set({ stage }),
       setOperationType: (type) => set({ operationType: type }),
+      setFinancialSnapshot: (snapshot) => set({ financialSnapshot: snapshot }),
       setAnswer: (questionId, score) =>
         set(state => ({ answers: { ...state.answers, [questionId]: score } })),
       setScores: (scores) => set({ scores }),
@@ -166,12 +185,13 @@ export const useStore = create<AppStore>()(
         }))
       },
       resetDiagnosis: () =>
-        set({ industry: null, stage: null, operationType: null, answers: {}, scores: { ...defaultScores }, diagnosisCompleted: false }),
+        set({ industry: null, stage: null, operationType: null, financialSnapshot: null, answers: {}, scores: { ...defaultScores }, diagnosisCompleted: false }),
       reset: () =>
         set({
           industry: null,
           stage: null,
           operationType: null,
+          financialSnapshot: null,
           answers: {},
           scores: { ...defaultScores },
           diagnosisCompleted: false,
