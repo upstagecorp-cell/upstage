@@ -6,7 +6,7 @@ import {
   IndustryId,
   StageId,
   OperationType,
-  RestaurantIndicatorId,
+  IndicatorId,
   ExecutionRecord,
   ScoreSnapshot,
   WeeklyGoal,
@@ -22,7 +22,7 @@ interface AppStore {
 
   // 진단
   answers: Record<string, number>
-  scores: Record<RestaurantIndicatorId, number>
+  scores: Record<IndicatorId, number>
   diagnosisCompleted: boolean
 
   // 실행
@@ -47,11 +47,11 @@ interface AppStore {
   setStage: (stage: StageId) => void
   setOperationType: (type: OperationType) => void
   setAnswer: (questionId: string, score: number) => void
-  setScores: (scores: Record<RestaurantIndicatorId, number>) => void
-  completeDiagnosis: (scores: Record<RestaurantIndicatorId, number>) => void
+  setScores: (scores: Record<IndicatorId, number>) => void
+  completeDiagnosis: (scores: Record<IndicatorId, number>) => void
   setTodayActions: (actionIds: string[]) => void
   addExecutionRecord: (record: ExecutionRecord) => void
-  updateScores: (newScores: Record<RestaurantIndicatorId, number>) => void
+  updateScores: (newScores: Record<IndicatorId, number>) => void
   resetDiagnosis: () => void
   reset: () => void
   setWeeklyGoal: (goal: WeeklyGoal) => void
@@ -59,7 +59,7 @@ interface AppStore {
   calculateStreak: () => void
 }
 
-const defaultScores: Record<RestaurantIndicatorId, number> = {
+const defaultScores: Record<IndicatorId, number> = {
   main_customer: 0,
   commercial_traffic: 0,
   sales_time_diff: 0,
@@ -71,14 +71,29 @@ const defaultScores: Record<RestaurantIndicatorId, number> = {
   review_rating: 0,
   naver_place_status: 0,
   revisit_rate: 0,
+  lodging_positioning: 0,
+  occupancy_rate: 0,
+  adr_revpar: 0,
+  direct_booking_share: 0,
+  ota_dependency: 0,
+  weekday_weekend_gap: 0,
+  visual_content_ctr: 0,
+  conversion_rate: 0,
+  reply_speed: 0,
+  review_reputation: 0,
+  naver_trust_layer: 0,
+  amenity_transparency: 0,
+  ugc_sns: 0,
+  housekeeping_efficiency: 0,
+  cancellation_rate: 0,
 }
 
-function getTotalScoreFromScores(scores: Record<RestaurantIndicatorId, number>) {
+function getTotalScoreFromScores(scores: Record<IndicatorId, number>) {
   const values = Object.values(scores)
   return values.length > 0 ? Math.round(values.reduce((a, b) => a + b, 0) / values.length) : 0
 }
 
-function buildScoreSnapshot(scores: Record<RestaurantIndicatorId, number>): ScoreSnapshot {
+function buildScoreSnapshot(scores: Record<IndicatorId, number>): ScoreSnapshot {
   return {
     date: new Date().toISOString().split('T')[0],
     scores,

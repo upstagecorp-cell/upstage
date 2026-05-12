@@ -1,11 +1,11 @@
-import { RestaurantIndicatorId, OperationType, DiagnosisQuestion, ActionCard } from '@/data/types'
+import { IndicatorId, OperationType, DiagnosisQuestion, ActionCard } from '@/data/types'
 import { ACTION_CARDS } from '@/data/actions'
 import { INDICATOR_WEIGHTS } from '@/data/constants'
 import { SCORE_ACTION_RULES } from '@/data/types'
 
 // 점수 기반 추천 액션 결정 (PDF 공통전략 Section 11)
 export function getRecommendedActions(
-  scores: Record<RestaurantIndicatorId, number>,
+  scores: Record<IndicatorId, number>,
   operationType: OperationType,
   completedActionIds: string[] = []
 ): ActionCard[] {
@@ -15,7 +15,7 @@ export function getRecommendedActions(
   // 가중치 높은 순으로 지표를 정렬
   const sortedIndicators = Object.entries(weights)
     .sort(([, a], [, b]) => b - a)
-    .map(([id]) => id as RestaurantIndicatorId)
+    .map(([id]) => id as IndicatorId)
 
   for (const indicator of sortedIndicators) {
     const score = scores[indicator] || 0
@@ -42,7 +42,7 @@ export function getRecommendedActions(
 
 // 오늘 할 일 추천 (1~3개)
 export function getTodayActions(
-  scores: Record<RestaurantIndicatorId, number>,
+  scores: Record<IndicatorId, number>,
   operationType: OperationType,
   completedActionIds: string[] = []
 ): ActionCard[] {
@@ -51,7 +51,7 @@ export function getTodayActions(
 
 // 이번 주 할 일 추천
 export function getWeekActions(
-  scores: Record<RestaurantIndicatorId, number>,
+  scores: Record<IndicatorId, number>,
   operationType: OperationType,
   completedActionIds: string[] = []
 ): ActionCard[] {

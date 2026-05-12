@@ -61,7 +61,7 @@ export default function DashboardPage() {
   const totalScore = getTotalScore(scores, effectiveOpType)
   const status = getStatusLevel(totalScore)
   const topRisks = getTopRiskIndicators(scores, effectiveOpType)
-  const sortedIndicators = getSortedIndicatorsByScore(scores)
+  const sortedIndicators = getSortedIndicatorsByScore(scores, effectiveOpType)
   const todayActions = getTodayActions(
     scores,
     effectiveOpType,

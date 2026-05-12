@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ArrowRight, ArrowLeft, CheckCircle } from 'lucide-react'
 import { useStore } from '@/lib/store'
-import { INDUSTRIES, STAGES, OPERATION_TYPES } from '@/data/constants'
+import { INDUSTRIES, STAGES, getOperationTypesForIndustry } from '@/data/constants'
 import type { IndustryId, StageId, OperationType } from '@/data/types'
 
 const TOTAL_STEPS = 3
@@ -27,7 +27,7 @@ export default function OnboardingPage() {
       setIndustry(selectedIndustry)
       setStep(2)
     } else if (step === 2) {
-      if (selectedIndustry === 'restaurant' && !selectedOpType) return
+      if ((selectedIndustry === 'restaurant' || selectedIndustry === 'accommodation') && !selectedOpType) return
       if (selectedOpType) setOperationType(selectedOpType)
       setStep(3)
     } else if (step === 3) {
@@ -119,13 +119,9 @@ export default function OnboardingPage() {
               className="bg-white dark:bg-slate-800 rounded-3xl shadow-xl p-8"
             >
               <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white mb-1">주요 운영 방식은 무엇인가요?</h2>
-              <p className="text-slate-500 dark:text-slate-400 text-sm mb-6">
-                {selectedIndustry === 'restaurant'
-                  ? '운영 방식에 따라 핵심 지표 가중치가 달라집니다'
-                  : '현재는 음식점 진단만 지원합니다. 운영 유형을 선택하세요.'}
-              </p>
+              <p className="text-slate-500 dark:text-slate-400 text-sm mb-6">운영 방식에 따라 핵심 지표 가중치가 달라집니다</p>
               <div className="flex flex-col gap-3">
-                {OPERATION_TYPES.map((op) => (
+                {getOperationTypesForIndustry(selectedIndustry).map((op) => (
                   <button
                     key={op.id}
                     onClick={() => setSelectedOpType(op.id)}
@@ -149,9 +145,9 @@ export default function OnboardingPage() {
                   </button>
                 ))}
               </div>
-              {selectedIndustry !== 'restaurant' && (
+              {selectedIndustry !== 'restaurant' && selectedIndustry !== 'accommodation' && (
                 <p className="mt-4 text-xs text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950 rounded-xl p-3">
-                  현재 음식점 외 업종 진단은 준비 중입니다. 음식점 진단으로 진행합니다.
+                  현재 선택 업종 진단은 준비 중입니다. 음식점 진단으로 진행합니다.
                 </p>
               )}
             </motion.div>
@@ -212,7 +208,7 @@ export default function OnboardingPage() {
             onClick={handleNext}
             disabled={
               (step === 1 && !selectedIndustry) ||
-              (step === 2 && selectedIndustry === 'restaurant' && !selectedOpType) ||
+              (step === 2 && (selectedIndustry === 'restaurant' || selectedIndustry === 'accommodation') && !selectedOpType) ||
               (step === 3 && !selectedStage)
             }
             className="flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-300 dark:disabled:bg-slate-700 text-white font-bold transition-colors"

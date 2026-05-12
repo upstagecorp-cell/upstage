@@ -1,4 +1,4 @@
-import { RestaurantIndicatorId } from './types'
+import { IndicatorId } from './types'
 
 /**
  * 지표별 점수 메시지
@@ -6,7 +6,7 @@ import { RestaurantIndicatorId } from './types'
  * 배열 순서는 내림차순 (높은 임계값 먼저)
  * 점수는 1~5점 → 백분율(20~100)로 변환하여 사용
  */
-export const SCORE_MESSAGES: Record<RestaurantIndicatorId, { threshold: number; message: string }[]> = {
+export const SCORE_MESSAGES: Record<IndicatorId, { threshold: number; message: string }[]> = {
 
   main_customer: [
     {
@@ -205,6 +205,81 @@ export const SCORE_MESSAGES: Record<RestaurantIndicatorId, { threshold: number; 
         '재방문율을 파악하지 못하고 있습니다. 신규 고객 유치 비용이 재방문 유지 비용보다 5배 이상 듭니다. 단골 분류와 재방문 쿠폰부터 즉시 시작하세요.',
     },
   ],
+  lodging_positioning: [
+    { threshold: 80, message: '숙소 포지셔닝이 명확합니다. 컨셉과 타겟에 맞는 사진과 문구를 계속 일관되게 관리하세요.' },
+    { threshold: 50, message: '컨셉은 있지만 예약 이유로 연결되는 메시지가 약합니다. 숙소 컨셉 매트릭스를 정리해보세요.' },
+    { threshold: 0, message: '포지셔닝이 약해 가격 경쟁에 노출될 수 있습니다. 타겟 고객과 X-Factor부터 정의하세요.' },
+  ],
+  occupancy_rate: [
+    { threshold: 80, message: '객실 점유율을 잘 관리하고 있습니다. 62% 이하 구간 대응 규칙을 유지하세요.' },
+    { threshold: 50, message: '예약률은 보지만 대응 기준이 부족합니다. 점유율과 최소숙박일 조정표를 만들어보세요.' },
+    { threshold: 0, message: '점유율을 모르면 공실 대응이 늦어집니다. 최근 30일 점유율부터 계산하세요.' },
+  ],
+  adr_revpar: [
+    { threshold: 80, message: 'ADR/RevPAR 관리가 좋습니다. 객단가와 점유율 균형을 계속 테스트하세요.' },
+    { threshold: 50, message: '객단가 감각은 있지만 수익 효율 분석이 부족합니다. RevPAR 계산표를 만드세요.' },
+    { threshold: 0, message: '감으로 가격을 정하면 저가 경쟁이나 공실 위험이 커집니다. ADR/RevPAR부터 계산하세요.' },
+  ],
+  direct_booking_share: [
+    { threshold: 80, message: '직접 예약 채널이 잘 관리되고 있습니다. OTA 수수료 절감액을 꾸준히 기록하세요.' },
+    { threshold: 50, message: '직접 문의는 있지만 비중 관리가 부족합니다. 직접 예약 링크와 혜택을 정비하세요.' },
+    { threshold: 0, message: 'OTA 의존도가 높습니다. 직접 예약 채널을 하나라도 구축해야 합니다.' },
+  ],
+  ota_dependency: [
+    { threshold: 80, message: '채널 리스크를 잘 분산하고 있습니다. 채널별 매출 비중을 계속 확인하세요.' },
+    { threshold: 50, message: '여러 채널은 있으나 실제 의존도 관리가 부족합니다. OTA 비중을 계산해보세요.' },
+    { threshold: 0, message: '특정 플랫폼 의존도가 높습니다. 대체 채널을 즉시 정비하세요.' },
+  ],
+  weekday_weekend_gap: [
+    { threshold: 80, message: '요일별 수요에 맞춰 상품과 요금을 잘 조정하고 있습니다.' },
+    { threshold: 50, message: '평일 공실 개선 실험이 부족합니다. 평일 패키지를 테스트해보세요.' },
+    { threshold: 0, message: '요일별 편차를 모르면 평일 공실과 주말 수익 손실이 생깁니다. 예약 데이터를 나눠보세요.' },
+  ],
+  visual_content_ctr: [
+    { threshold: 80, message: '시각 콘텐츠가 강합니다. 대표 사진과 숏폼을 정기적으로 테스트하세요.' },
+    { threshold: 50, message: '사진은 있지만 클릭률 관점의 개선이 부족합니다. 대표 사진 교체 테스트를 해보세요.' },
+    { threshold: 0, message: '사진 신뢰도가 약합니다. 숙소의 X-Factor가 보이는 대표 사진부터 교체하세요.' },
+  ],
+  conversion_rate: [
+    { threshold: 80, message: '예약 전환 흐름을 잘 관리하고 있습니다. 상세 페이지 실험을 이어가세요.' },
+    { threshold: 50, message: '예약 수는 보지만 전환 병목이 불명확합니다. 문의 대비 예약 전환율을 계산하세요.' },
+    { threshold: 0, message: '예약 저조 원인을 감으로만 판단하고 있습니다. 상세 페이지 병목 점검이 필요합니다.' },
+  ],
+  reply_speed: [
+    { threshold: 80, message: '응답 속도와 품질이 안정적입니다. 템플릿을 최신 상태로 유지하세요.' },
+    { threshold: 50, message: '응답은 하지만 표준화가 부족합니다. 예약 문의 템플릿을 만드세요.' },
+    { threshold: 0, message: '응답 지연은 예약 이탈로 이어집니다. 자동응답과 FAQ부터 준비하세요.' },
+  ],
+  review_reputation: [
+    { threshold: 80, message: '리뷰 신뢰 자산이 잘 쌓이고 있습니다. 체크아웃 리뷰 요청 루틴을 유지하세요.' },
+    { threshold: 50, message: '리뷰 관리는 하지만 수집/응답 루틴이 부족합니다. 리뷰 요청 자동화를 만드세요.' },
+    { threshold: 0, message: '리뷰 관리가 약해 신규 고객 신뢰가 낮을 수 있습니다. 최근 리뷰 응답부터 시작하세요.' },
+  ],
+  naver_trust_layer: [
+    { threshold: 80, message: '네이버 신뢰 레이어가 잘 구축되어 있습니다. 로컬 스토리를 꾸준히 발행하세요.' },
+    { threshold: 50, message: '네이버 기본 정보는 있으나 콘텐츠가 부족합니다. 블로그형 로컬 스토리를 작성하세요.' },
+    { threshold: 0, message: '네이버 검증 채널이 약합니다. 플레이스 정보와 후기 콘텐츠부터 정비하세요.' },
+  ],
+  amenity_transparency: [
+    { threshold: 80, message: '어메니티 정보가 투명합니다. 변경 사항을 정기적으로 반영하세요.' },
+    { threshold: 50, message: '주요 시설만 안내되어 있습니다. 41개 어메니티 리스트를 공개하세요.' },
+    { threshold: 0, message: '시설 정보 부족은 문의와 취소로 이어집니다. 세부 비품 리스트부터 만드세요.' },
+  ],
+  ugc_sns: [
+    { threshold: 80, message: 'UGC 확산 구조가 좋습니다. 포토존과 협업 콘텐츠를 계속 축적하세요.' },
+    { threshold: 50, message: '공유될 요소는 있지만 유도 장치가 약합니다. UGC 포토존을 설계하세요.' },
+    { threshold: 0, message: 'SNS 확산 구조가 없습니다. 입실 첫 5분의 공유 장면부터 설계하세요.' },
+  ],
+  housekeeping_efficiency: [
+    { threshold: 80, message: '하우스키핑 비용과 품질이 잘 관리됩니다. 절감액을 가격 전략에 반영하세요.' },
+    { threshold: 50, message: '청소 품질은 보지만 비용 효율 분석이 부족합니다. 건당 비용표를 만드세요.' },
+    { threshold: 0, message: '하우스키핑 비용과 클레임을 모르면 마진과 평판이 흔들립니다. 기록부터 시작하세요.' },
+  ],
+  cancellation_rate: [
+    { threshold: 80, message: '취소율과 원인을 잘 관리하고 있습니다. 안내 문구를 계속 개선하세요.' },
+    { threshold: 50, message: '취소 현황은 보지만 원인 분류가 부족합니다. 취소 사유를 분류하세요.' },
+    { threshold: 0, message: '취소 데이터를 보지 않아 예약 안정성이 낮습니다. 최근 취소 사유부터 정리하세요.' },
+  ],
 }
 
 /**
@@ -217,7 +292,7 @@ export function scoreToPercent(score: number): number {
 /**
  * 지표 ID와 점수를 받아 해당하는 메시지를 반환
  */
-export function getScoreMessage(indicator: RestaurantIndicatorId, score: number): string {
+export function getScoreMessage(indicator: IndicatorId, score: number): string {
   const percent = scoreToPercent(score)
   const messages = SCORE_MESSAGES[indicator]
   const matched = messages.find(m => percent >= m.threshold)

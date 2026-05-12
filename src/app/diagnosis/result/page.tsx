@@ -24,7 +24,7 @@ import {
 } from '@/lib/scoring'
 import { getTodayActions, getWeekActions } from '@/lib/actions'
 import { generateDiagnosisFeedback } from '@/lib/ai-feedback'
-import type { OperationType, RestaurantIndicatorId } from '@/data/types'
+import type { OperationType, IndicatorId } from '@/data/types'
 
 export default function DiagnosisResultPage() {
   const router = useRouter()
@@ -170,12 +170,12 @@ export default function DiagnosisResultPage() {
           <div className="flex items-center gap-2 mb-4">
             <Target className="w-5 h-5 text-indigo-500" />
             <h2 className="font-bold text-slate-900 dark:text-white">
-              {effectiveOpType === 'hall' ? '홀' : effectiveOpType === 'delivery' ? '배달' : '테이크아웃'} 운영 핵심 지표
+              {getOperationTypeLabel(effectiveOpType)} 운영 핵심 지표
             </h2>
           </div>
           <div className="flex flex-col gap-2">
             {priorityIndicators.map((ind, i) => {
-              const score = scores[ind.id as RestaurantIndicatorId] ?? 0
+              const score = scores[ind.id as IndicatorId] ?? 0
               const sl = getStatusLevel(score)
               return (
                 <div key={ind.id} className="flex items-center gap-3">
@@ -320,4 +320,16 @@ export default function DiagnosisResultPage() {
       </div>
     </div>
   )
+}
+
+function getOperationTypeLabel(operationType: OperationType): string {
+  const labels: Record<OperationType, string> = {
+    hall: '홀',
+    delivery: '배달',
+    takeout: '테이크아웃',
+    boutique: '부티크/감성형',
+    social: '소셜/로컬형',
+    stay: '장기체류형',
+  }
+  return labels[operationType]
 }

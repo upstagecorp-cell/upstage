@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ChevronRight, ChevronLeft } from 'lucide-react'
 import { useStore } from '@/lib/store'
-import { RESTAURANT_QUESTIONS } from '@/data/questions'
+import { QUESTIONS_BY_INDUSTRY, RESTAURANT_QUESTIONS } from '@/data/questions'
 import { calculateIndicatorScores } from '@/lib/scoring'
 import { getTodayActions } from '@/lib/actions'
 import type { OperationType } from '@/data/types'
@@ -26,8 +26,7 @@ export default function DiagnosisPage() {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [direction, setDirection] = useState<1 | -1>(1)
 
-  // Filter questions (for now, restaurant only)
-  const questions = RESTAURANT_QUESTIONS
+  const questions = industry === 'accommodation' ? QUESTIONS_BY_INDUSTRY.accommodation : RESTAURANT_QUESTIONS
 
   const currentQuestion = questions[currentIndex]
   const progress = ((currentIndex + 1) / questions.length) * 100
@@ -75,6 +74,9 @@ export default function DiagnosisPage() {
     hall: '홀 중심',
     delivery: '배달 중심',
     takeout: '테이크아웃 중심',
+    boutique: '부티크/감성형',
+    social: '소셜/로컬형',
+    stay: '장기체류형',
   }
 
   if (!currentQuestion) return null
@@ -144,6 +146,11 @@ export default function DiagnosisPage() {
             <h2 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white mb-6 leading-snug">
               {currentQuestion.question}
             </h2>
+            {getTermHelp(currentQuestion.category) && (
+              <p className="text-xs md:text-sm text-slate-500 dark:text-slate-400 leading-relaxed -mt-3 mb-6">
+                {getTermHelp(currentQuestion.category)}
+              </p>
+            )}
 
             {/* Answer options */}
             <div className="flex flex-col gap-3">
@@ -263,6 +270,41 @@ function getCategoryLabel(category: string): string {
     review_rating: '리뷰/평점',
     naver_place_status: '네이버 플레이스',
     revisit_rate: '재방문율',
+    lodging_positioning: '숙소 포지셔닝',
+    occupancy_rate: '객실 점유율',
+    adr_revpar: 'ADR/RevPAR',
+    direct_booking_share: '직접 예약 비중',
+    ota_dependency: 'OTA 의존도',
+    weekday_weekend_gap: '평일/주말 편차',
+    visual_content_ctr: '사진 클릭률',
+    conversion_rate: '예약 전환율',
+    reply_speed: '응답 속도',
+    review_reputation: '리뷰/평판',
+    naver_trust_layer: '네이버 신뢰 레이어',
+    amenity_transparency: '어메니티 투명성',
+    ugc_sns: 'UGC/SNS 확산',
+    housekeeping_efficiency: '하우스키핑 효율',
+    cancellation_rate: '취소율',
   }
   return labels[category] ?? category
+}
+
+function getTermHelp(category: string): string | null {
+  const descriptions: Record<string, string> = {
+    occupancy_rate: '객실 점유율은 전체 판매 가능한 객실 중 실제 예약된 객실의 비율입니다. 예를 들어 10개 객실 중 6개가 팔리면 60%입니다.',
+    adr_revpar: 'ADR은 하루에 팔린 객실의 평균 객실 단가입니다. RevPAR는 전체 객실 1개당 평균 매출로, 객실 단가와 점유율을 함께 보는 수익 지표입니다.',
+    direct_booking_share: '직접 예약은 OTA를 거치지 않고 자사 예약 링크, 네이버, 인스타그램, 전화, 문자 등으로 바로 받은 예약을 뜻합니다.',
+    ota_dependency: 'OTA는 야놀자, 여기어때, 에어비앤비, 부킹닷컴처럼 숙소를 대신 노출하고 예약을 받아주는 온라인 예약 플랫폼입니다.',
+    weekday_weekend_gap: '평일/주말 예약 편차는 평일과 주말의 예약률이나 매출 차이를 뜻합니다. 편차가 크면 요금이나 패키지를 다르게 운영할 필요가 있습니다.',
+    visual_content_ctr: 'CTR은 클릭률입니다. 숙소 사진이나 대표 이미지가 노출됐을 때 고객이 얼마나 자주 눌러보는지를 의미합니다.',
+    conversion_rate: '예약 전환율은 숙소 페이지를 본 사람 중 실제 문의나 결제까지 이어진 사람의 비율입니다.',
+    reply_speed: '응답 속도는 고객 문의가 들어온 뒤 첫 답변을 보내기까지 걸리는 시간입니다. 빠른 답변은 예약 이탈을 줄이는 데 중요합니다.',
+    review_reputation: '리뷰/평판은 최근 리뷰 수, 평점, 답글 여부, 부정 리뷰 대응까지 포함한 고객 신뢰 지표입니다.',
+    naver_trust_layer: '네이버 신뢰 레이어는 고객이 예약 전 검색했을 때 확인하는 플레이스 정보, 블로그 후기, 카페 언급 등 검증 자료를 뜻합니다.',
+    amenity_transparency: '어메니티는 샴푸, 수건, 주방도구, 주차, 와이파이처럼 숙박 중 사용할 수 있는 비품과 편의시설입니다.',
+    ugc_sns: 'UGC는 고객이 직접 올리는 사진, 영상, 후기 같은 콘텐츠입니다. 인스타그램 게시물이나 블로그 후기가 대표적입니다.',
+    housekeeping_efficiency: '하우스키핑 효율은 청소와 객실 정비에 드는 비용, 시간, 품질을 함께 관리하는 정도입니다.',
+    cancellation_rate: '취소율은 전체 예약 중 취소된 예약의 비율입니다. 취소 이유를 알면 안내 문구와 환불 정책을 개선할 수 있습니다.',
+  }
+  return descriptions[category] ?? null
 }

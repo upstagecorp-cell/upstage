@@ -1,6 +1,6 @@
 // ===== 업종 및 운영 유형 =====
 export type IndustryId = 'restaurant' | 'cafe' | 'accommodation' | 'service' | 'online' | 'other'
-export type OperationType = 'hall' | 'delivery' | 'takeout'
+export type OperationType = 'hall' | 'delivery' | 'takeout' | 'boutique' | 'social' | 'stay'
 export type StageId = 'idea' | 'preparing' | 'pre-open' | 'operating' | 'plateau' | 'expansion'
 
 // ===== 공통 KPI 영역 (공통전략 Section 5) =====
@@ -27,6 +27,25 @@ export type RestaurantIndicatorId =
   | 'review_rating'
   | 'naver_place_status'
   | 'revisit_rate'
+
+export type AccommodationIndicatorId =
+  | 'lodging_positioning'
+  | 'occupancy_rate'
+  | 'adr_revpar'
+  | 'direct_booking_share'
+  | 'ota_dependency'
+  | 'weekday_weekend_gap'
+  | 'visual_content_ctr'
+  | 'conversion_rate'
+  | 'reply_speed'
+  | 'review_reputation'
+  | 'naver_trust_layer'
+  | 'amenity_transparency'
+  | 'ugc_sns'
+  | 'housekeeping_efficiency'
+  | 'cancellation_rate'
+
+export type IndicatorId = RestaurantIndicatorId | AccommodationIndicatorId
 
 // ===== 위험도 =====
 export type RiskLevel = 'low' | 'medium' | 'high'
@@ -56,7 +75,7 @@ export interface QuestionAnswerOption {
 // ===== 질문 구조 (공통전략 Section 8) =====
 export interface DiagnosisQuestion {
   question_id: string
-  category: RestaurantIndicatorId
+  category: IndicatorId
   business_type: IndustryId
   operation_type?: OperationType[]
   question: string
@@ -66,7 +85,7 @@ export interface DiagnosisQuestion {
     normal: string
     danger: string
   }
-  weight: Record<OperationType, number>
+  weight: Partial<Record<OperationType, number>>
 }
 
 // ===== 액션 카드 (공통전략 Section 12) =====
@@ -82,12 +101,12 @@ export interface ActionCard {
   recurrence_cycle: string
   execution_steps: string[]
   success_condition: string
-  related_indicator: RestaurantIndicatorId
+  related_indicator: IndicatorId
 }
 
 // ===== 벤치마크 상태 문장 (공통전략 Section 13) =====
 export interface BenchmarkStatus {
-  indicator: RestaurantIndicatorId
+  indicator: IndicatorId
   good: string
   normal: string
   danger: string
@@ -117,9 +136,9 @@ export interface ExecutionRecord {
 // ===== 진단 결과 (음식점 진단 DB Step 8) =====
 export interface DiagnosisResult {
   total_score: number
-  indicator_scores: Record<RestaurantIndicatorId, number>
-  top_risk_indicators: { indicator: RestaurantIndicatorId; score: number; risk: RiskLevel }[]
-  priority_by_operation: RestaurantIndicatorId[]
+  indicator_scores: Record<IndicatorId, number>
+  top_risk_indicators: { indicator: IndicatorId; score: number; risk: RiskLevel }[]
+  priority_by_operation: IndicatorId[]
   today_actions: string[]
   week_actions: string[]
   learning_content: string[]
@@ -128,7 +147,7 @@ export interface DiagnosisResult {
 // ===== 점수 스냅샷 =====
 export interface ScoreSnapshot {
   date: string
-  scores: Record<RestaurantIndicatorId, number>
+  scores: Record<IndicatorId, number>
   totalScore: number
 }
 
@@ -151,7 +170,7 @@ export interface Stage {
 export interface WeeklyGoal {
   id: string
   title: string
-  targetIndicator: RestaurantIndicatorId
+  targetIndicator: IndicatorId
   startDate: string
   endDate: string
   targetActions: string[]
@@ -173,7 +192,7 @@ export interface BusinessMetricEntry {
 
 // ===== 지표 정보 =====
 export interface IndicatorInfo {
-  id: RestaurantIndicatorId
+  id: IndicatorId
   label: string
   description: string
   icon: string

@@ -1,5 +1,5 @@
-import { RestaurantIndicatorId, OperationType, ExecutionRecord, ScoreSnapshot } from '@/data/types'
-import { INDICATORS } from '@/data/constants'
+import { IndicatorId, OperationType, ExecutionRecord, ScoreSnapshot } from '@/data/types'
+import { INDICATORS, getIndicatorsForOperationType } from '@/data/constants'
 import { getActionById } from '@/data/actions'
 
 export interface WeeklyInsight {
@@ -8,19 +8,19 @@ export interface WeeklyInsight {
   risk: string | null
 }
 
-function sortIndicatorsByScore(scores: Record<RestaurantIndicatorId, number>) {
-  return INDICATORS.map(ind => ({
-    id: ind.id as RestaurantIndicatorId,
-    score: scores[ind.id as RestaurantIndicatorId] ?? 0,
+function sortIndicatorsByScore(scores: Record<IndicatorId, number>, operationType: OperationType = 'hall') {
+  return getIndicatorsForOperationType(operationType).map(ind => ({
+    id: ind.id,
+    score: scores[ind.id] ?? 0,
     label: ind.label,
   })).sort((a, b) => a.score - b.score)
 }
 
 export function generateDiagnosisFeedback(
-  scores: Record<RestaurantIndicatorId, number>,
+  scores: Record<IndicatorId, number>,
   operationType: OperationType,
 ): string[] {
-  const sorted = sortIndicatorsByScore(scores)
+  const sorted = sortIndicatorsByScore(scores, operationType)
   const feedback: string[] = []
 
   // 가장 위험한 3개 지표
@@ -28,7 +28,7 @@ export function generateDiagnosisFeedback(
   feedback.push(`가장 시급한 영역: ${worst3.map(i => `${i.label}(${i.score}점)`).join(', ')}`)
 
   // 운영 유형별 맞춤 조언
-  const typeLabel = { hall: '홀 중심', delivery: '배달 중심', takeout: '테이크아웃 중심' }[operationType]
+  const typeLabel = { hall: '홀 중심', delivery: '배달 중심', takeout: '테이크아웃 중심', boutique: '부티크/감성형', social: '소셜/로컬형', stay: '장기체류형' }[operationType]
   feedback.push(`${typeLabel} 운영 특성에 맞춰 가장 중요도가 높은 지표부터 개선하세요.`)
 
   // 위험 지표 개선 가이드
@@ -51,11 +51,11 @@ export function generateDiagnosisFeedback(
 
 export function generateActionFeedback(
   record: ExecutionRecord,
-  scores: Record<RestaurantIndicatorId, number>,
+  scores: Record<IndicatorId, number>,
 ): string {
   // PDF 요구: 실행 결과 해석 → 다음 액션 → 재진단 유도
   const action = getActionById(record.action_id)
-  const indicator = action?.related_indicator as RestaurantIndicatorId | undefined
+  const indicator = action?.related_indicator as IndicatorId | undefined
   const indicatorInfo = indicator ? INDICATORS.find(i => i.id === indicator) : null
   const currentScore = indicator ? (scores[indicator] ?? 0) : 0
 
