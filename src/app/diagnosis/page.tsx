@@ -113,11 +113,17 @@ export default function DiagnosisPage() {
               &#x2715; 나가기
             </button>
             <span className="text-sm font-semibold text-indigo-600 dark:text-indigo-400">
-              {currentIndex + 1} / {questions.length}
+              3분 핵심 진단
             </span>
             <span className="text-xs text-slate-400 dark:text-slate-500">
-              {operationType ? difficultyLabel[operationType] : ''} 진단
+              {operationType ? difficultyLabel[operationType] : ''} · {currentIndex + 1}/{questions.length}
             </span>
+          </div>
+          <div className="mb-3 rounded-2xl bg-white/80 dark:bg-slate-800/70 border border-indigo-100 dark:border-slate-700 px-4 py-3">
+            <p className="text-sm font-bold text-slate-900 dark:text-white">먼저 핵심 질문만 빠르게 답합니다.</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+              결과 확인 후 원하면 세부 지표와 실행 액션으로 정밀하게 이어갈 수 있습니다.
+            </p>
           </div>
           {/* Progress bar */}
           <div className="h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
@@ -129,10 +135,10 @@ export default function DiagnosisPage() {
           </div>
           <div className="flex items-center justify-between mt-2">
             <span className="text-xs text-slate-400">
-              {answeredCount}개 완료
+              핵심 질문 {answeredCount}개 완료
             </span>
             <span className="text-xs text-slate-400">
-              남은 질문: {questions.length - currentIndex - 1}개
+              남은 핵심 질문: {questions.length - currentIndex - 1}개
             </span>
           </div>
         </div>
@@ -258,7 +264,7 @@ export default function DiagnosisPage() {
             disabled={selectedScore === undefined}
             className="flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-300 dark:disabled:bg-slate-700 text-white font-bold transition-colors"
           >
-            {isLast ? '진단 완료' : '다음 질문'}
+            {isLast ? '결과 보기' : '다음'}
             <ChevronRight className="w-4 h-4" />
           </motion.button>
         </div>

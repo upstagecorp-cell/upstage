@@ -12,6 +12,7 @@ import {
   TrendingUp,
   Zap,
   Clock,
+  WalletCards,
 } from 'lucide-react'
 import {
   RadarChart,
@@ -30,6 +31,7 @@ import {
   getSortedIndicatorsByScore,
 } from '@/lib/scoring'
 import { getTodayActions } from '@/lib/actions'
+import { analyzeFinancialSnapshot } from '@/lib/financial'
 import type { OperationType, IndicatorId } from '@/data/types'
 
 export default function DashboardPage() {
@@ -37,6 +39,7 @@ export default function DashboardPage() {
   const {
     scores,
     operationType,
+    financialSnapshot,
     diagnosisCompleted,
     executionRecords,
     streak,
@@ -68,6 +71,7 @@ export default function DashboardPage() {
     effectiveOpType,
     executionRecords.map((r) => r.action_id)
   )
+  const financialAnalysis = analyzeFinancialSnapshot(financialSnapshot)
 
   // Radar chart data
   const radarData = activeIndicators.map((ind) => ({
@@ -119,6 +123,30 @@ export default function DashboardPage() {
             <span className="text-xs text-orange-500">일 연속</span>
           </div>
         </motion.div>
+
+        {/* Financial Snapshot */}
+        {financialAnalysis && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.08 }}
+            className="bg-white dark:bg-slate-800 rounded-3xl shadow-xl p-6"
+          >
+            <div className="flex items-center gap-2 mb-3">
+              <WalletCards className="w-5 h-5 text-emerald-500" />
+              <h2 className="font-bold text-slate-900 dark:text-white">재무 상태</h2>
+              <span className={`ml-auto px-3 py-1 rounded-full text-sm font-bold ${financialAnalysis.status.bg} ${financialAnalysis.status.color}`}>
+                {financialAnalysis.status.label}
+              </span>
+            </div>
+            <p className="text-sm font-semibold text-slate-800 dark:text-slate-100 leading-relaxed">
+              {financialAnalysis.headline}
+            </p>
+            <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mt-2">
+              {financialAnalysis.recommendation}
+            </p>
+          </motion.div>
+        )}
 
         {/* Score Overview */}
         <motion.div

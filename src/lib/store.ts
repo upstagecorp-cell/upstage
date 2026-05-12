@@ -14,6 +14,7 @@ import {
   FinancialSnapshot,
 } from '@/data/types'
 import { getActionById } from '@/data/actions'
+import { getIndicatorsForOperationType } from '@/data/constants'
 
 interface AppStore {
   // 온보딩
@@ -105,16 +106,19 @@ const defaultScores: Record<IndicatorId, number> = {
   sourcing_story: 0,
 }
 
-function getTotalScoreFromScores(scores: Record<IndicatorId, number>) {
-  const values = Object.values(scores)
+function getTotalScoreFromScores(scores: Record<IndicatorId, number>, operationType: OperationType | null) {
+  const indicators = operationType ? getIndicatorsForOperationType(operationType) : []
+  const values = indicators.length > 0
+    ? indicators.map(indicator => scores[indicator.id] ?? 0)
+    : Object.values(scores)
   return values.length > 0 ? Math.round(values.reduce((a, b) => a + b, 0) / values.length) : 0
 }
 
-function buildScoreSnapshot(scores: Record<IndicatorId, number>): ScoreSnapshot {
+function buildScoreSnapshot(scores: Record<IndicatorId, number>, operationType: OperationType | null): ScoreSnapshot {
   return {
     date: new Date().toISOString().split('T')[0],
     scores,
-    totalScore: getTotalScoreFromScores(scores),
+    totalScore: getTotalScoreFromScores(scores, operationType),
   }
 }
 
@@ -144,7 +148,7 @@ export const useStore = create<AppStore>()(
         set(state => ({ answers: { ...state.answers, [questionId]: score } })),
       setScores: (scores) => set({ scores }),
       completeDiagnosis: (scores) => {
-        const snapshot = buildScoreSnapshot(scores)
+        const snapshot = buildScoreSnapshot(scores, get().operationType)
         set(state => ({
           scores,
           diagnosisCompleted: true,
@@ -167,7 +171,7 @@ export const useStore = create<AppStore>()(
             const snapshot: ScoreSnapshot = {
               date: new Date().toISOString().split('T')[0],
               scores: newScores,
-              totalScore: Math.round(Object.values(newScores).reduce((a, b) => a + b, 0) / Object.keys(newScores).length),
+              totalScore: getTotalScoreFromScores(newScores, state.operationType),
             }
             return {
               executionRecords: newRecords,
@@ -178,7 +182,7 @@ export const useStore = create<AppStore>()(
           return { executionRecords: newRecords }
         }),
       updateScores: (newScores) => {
-        const snapshot = buildScoreSnapshot(newScores)
+        const snapshot = buildScoreSnapshot(newScores, get().operationType)
         set(state => ({
           scores: newScores,
           scoreHistory: [...state.scoreHistory, snapshot],

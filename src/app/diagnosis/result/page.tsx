@@ -12,6 +12,7 @@ import {
   Clock,
   Zap,
   Target,
+  WalletCards,
 } from 'lucide-react'
 import { useStore } from '@/lib/store'
 import { INDICATORS } from '@/data/constants'
@@ -24,13 +25,16 @@ import {
 } from '@/lib/scoring'
 import { getTodayActions, getWeekActions } from '@/lib/actions'
 import { generateDiagnosisFeedback } from '@/lib/ai-feedback'
-import type { OperationType, IndicatorId } from '@/data/types'
+import { analyzeFinancialSnapshot } from '@/lib/financial'
+import type { OperationType, IndicatorId, ActionCard } from '@/data/types'
+import type { FinancialAnalysis } from '@/lib/financial'
 
 export default function DiagnosisResultPage() {
   const router = useRouter()
   const {
     scores,
     operationType,
+    financialSnapshot,
     diagnosisCompleted,
     executionRecords,
     resetDiagnosis,
@@ -50,9 +54,14 @@ export default function DiagnosisResultPage() {
   const status = getStatusLevel(totalScore)
   const topRisks = getTopRiskIndicators(scores, effectiveOpType)
   const priorityIndicators = getIndicatorsByPriority(effectiveOpType).slice(0, 5)
-  const todayActions = getTodayActions(scores, effectiveOpType, [])
-  const weekActions = getWeekActions(scores, effectiveOpType, [])
   const feedbacks = generateDiagnosisFeedback(scores, effectiveOpType)
+  const financialAnalysis = analyzeFinancialSnapshot(financialSnapshot)
+  const todayActions = prioritizeActionsByFinancial(getTodayActions(scores, effectiveOpType, []), financialAnalysis)
+  const weekActions = prioritizeActionsByFinancial(getWeekActions(scores, effectiveOpType, []), financialAnalysis)
+  const primaryRisk = topRisks[0]
+  const primaryIndicator = primaryRisk ? INDICATORS.find((ind) => ind.id === primaryRisk.indicator) : null
+  const primaryAction = todayActions[0] ?? weekActions[0]
+  const resultSummary = buildResultSummary(financialAnalysis, primaryIndicator?.label, primaryAction?.title)
 
   const completedActionIds = executionRecords.map((r) => r.action_id)
 
@@ -74,42 +83,89 @@ export default function DiagnosisResultPage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-50 dark:from-slate-950 dark:to-slate-900 px-4 py-8">
       <div className="max-w-2xl mx-auto flex flex-col gap-6">
 
-        {/* Total Score */}
+        {/* Priority Summary */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white dark:bg-slate-800 rounded-3xl shadow-xl p-8 text-center"
+          className="bg-white dark:bg-slate-800 rounded-3xl shadow-xl p-6 md:p-8"
         >
-          <h1 className="text-lg font-bold text-slate-500 dark:text-slate-400 mb-2">진단 완료</h1>
-          <div className="relative inline-flex items-center justify-center w-32 h-32 mx-auto mb-4">
-            <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full -rotate-90">
-              <circle cx="50" cy="50" r="44" fill="none" stroke="currentColor" strokeWidth="8" className="text-slate-100 dark:text-slate-700" />
-              <circle
-                cx="50" cy="50" r="44" fill="none"
-                stroke="currentColor" strokeWidth="8"
-                strokeDasharray={`${2 * Math.PI * 44 * totalScore / 100} ${2 * Math.PI * 44 * (1 - totalScore / 100)}`}
-                className={status.color}
-                strokeLinecap="round"
-              />
-            </svg>
-            <div className="flex flex-col items-center">
-              <span className={`text-3xl font-extrabold ${status.color}`}>{totalScore}</span>
-              <span className="text-xs text-slate-400">/ 100</span>
+          <div className="flex items-start justify-between gap-4 mb-5">
+            <div>
+              <p className="text-xs font-bold text-indigo-600 dark:text-indigo-300 mb-2">진단 완료 · 맞춤 우선순위</p>
+              <h1 className="text-2xl md:text-3xl font-extrabold text-slate-950 dark:text-white leading-tight">
+                지금 가장 먼저 고쳐야 할 1가지
+              </h1>
+            </div>
+            <div className={`flex-shrink-0 rounded-2xl px-4 py-3 text-center ${status.bg}`}>
+              <p className={`text-2xl font-extrabold ${status.color}`}>{totalScore}</p>
+              <p className="text-[11px] font-bold text-slate-400">전체 점수</p>
             </div>
           </div>
-          <div className={`inline-block px-4 py-1 rounded-full text-sm font-bold mb-3 ${status.bg} ${status.color}`}>
-            {status.label}
+
+          <div className="rounded-2xl bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900 p-4 mb-4">
+            <div className="flex items-start gap-3">
+              <Target className="w-5 h-5 text-indigo-600 dark:text-indigo-300 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="text-xs font-bold text-indigo-500 dark:text-indigo-300 mb-1">우선 개선 1순위</p>
+                <p className="font-extrabold text-slate-950 dark:text-white leading-relaxed">
+                  {resultSummary.primary}
+                </p>
+              </div>
+            </div>
           </div>
-          <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed max-w-xs mx-auto">
-            {totalScore >= 80
-              ? '전반적으로 잘 관리되고 있습니다. 약점 지표를 집중 개선하세요.'
-              : totalScore >= 60
-              ? '기본은 갖추어져 있습니다. 위험 지표 개선으로 큰 성장이 가능합니다.'
-              : totalScore >= 40
-              ? '개선이 필요한 영역이 많습니다. 오늘 액션부터 하나씩 시작하세요.'
-              : '즉각적인 개선이 필요합니다. 아래 액션을 오늘 바로 실행하세요.'}
-          </p>
+
+          <div className="grid gap-3">
+            <div className="rounded-2xl bg-slate-50 dark:bg-slate-700/50 p-4">
+              <p className="text-xs font-bold text-slate-400 mb-1">왜 매출/이익이 막혔나</p>
+              <p className="text-sm font-semibold text-slate-800 dark:text-slate-100 leading-relaxed">
+                {resultSummary.reason}
+              </p>
+            </div>
+            <div className="rounded-2xl bg-emerald-50 dark:bg-emerald-950/30 p-4">
+              <p className="text-xs font-bold text-emerald-600 dark:text-emerald-300 mb-1">이번 주 예상 개선 방향</p>
+              <p className="text-sm font-semibold text-slate-800 dark:text-slate-100 leading-relaxed">
+                {resultSummary.weekPlan}
+              </p>
+            </div>
+          </div>
         </motion.div>
+
+        {/* Financial Snapshot */}
+        {financialAnalysis && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.08 }}
+            className="bg-white dark:bg-slate-800 rounded-3xl shadow-xl p-6"
+          >
+            <div className="flex items-center gap-2 mb-4">
+              <WalletCards className="w-5 h-5 text-emerald-500" />
+              <h2 className="font-bold text-slate-900 dark:text-white">재무 스냅샷</h2>
+              <span className={`ml-auto text-xs px-2 py-1 rounded-full font-bold ${financialAnalysis.status.bg} ${financialAnalysis.status.color}`}>
+                {financialAnalysis.status.label}
+              </span>
+            </div>
+            <p className="text-sm font-semibold text-slate-800 dark:text-slate-100 leading-relaxed">
+              {financialAnalysis.headline}
+            </p>
+            <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mt-2">
+              {financialAnalysis.recommendation}
+            </p>
+            <div className="grid grid-cols-2 gap-3 mt-4">
+              <div className="rounded-2xl bg-slate-50 dark:bg-slate-700/50 p-3">
+                <p className="text-xs text-slate-400 mb-1">월평균 매출</p>
+                <p className="text-sm font-bold text-slate-900 dark:text-white">{financialSnapshot?.monthlyRevenueText}</p>
+              </div>
+              <div className="rounded-2xl bg-slate-50 dark:bg-slate-700/50 p-3">
+                <p className="text-xs text-slate-400 mb-1">월평균 순이익</p>
+                <p className="text-sm font-bold text-slate-900 dark:text-white">{financialSnapshot?.monthlyNetProfitText}</p>
+              </div>
+            </div>
+            <p className="text-xs text-slate-400 mt-3">
+              증빙 자료: {financialAnalysis.hasEvidence ? `${financialSnapshot?.evidenceFileNames.length ?? 0}개 첨부됨` : '자가 입력 기준'}
+            </p>
+          </motion.div>
+        )}
 
         {/* Top Risk Indicators */}
         <motion.div
@@ -337,4 +393,81 @@ function getOperationTypeLabel(operationType: OperationType): string {
     cafe_local: '로컬 앵커형',
   }
   return labels[operationType]
+}
+
+const PROFIT_PRIORITY_INDICATORS = new Set<IndicatorId>([
+  'menu_cost_rate',
+  'avg_spending_per_customer',
+  'table_turnover',
+  'menu_cost_rate_cafe',
+  'avg_basket_size',
+  'space_productivity',
+  'adr_revpar',
+  'occupancy_rate',
+  'direct_booking_share',
+  'housekeeping_efficiency',
+])
+
+function prioritizeActionsByFinancial(
+  actions: ActionCard[],
+  financialAnalysis: FinancialAnalysis | null
+): ActionCard[] {
+  if (!financialAnalysis || !['loss', 'danger', 'warning'].includes(financialAnalysis.status.level)) {
+    return actions
+  }
+
+  return [...actions].sort((a, b) => {
+    const aPriority = PROFIT_PRIORITY_INDICATORS.has(a.related_indicator) ? 1 : 0
+    const bPriority = PROFIT_PRIORITY_INDICATORS.has(b.related_indicator) ? 1 : 0
+    return bPriority - aPriority
+  })
+}
+
+function buildResultSummary(
+  financialAnalysis: FinancialAnalysis | null,
+  primaryIndicatorLabel?: string,
+  primaryActionTitle?: string
+) {
+  const fallbackIndicator = primaryIndicatorLabel ?? '가장 낮은 핵심 지표'
+  const fallbackAction = primaryActionTitle ?? `${fallbackIndicator} 개선 액션`
+  const margin = financialAnalysis?.netProfitMargin
+  const formattedMargin = typeof margin === 'number' ? `${margin.toFixed(1)}%` : null
+
+  if (financialAnalysis?.status.level === 'loss') {
+    return {
+      primary: `신규 광고보다 ${fallbackAction}을 먼저 실행하세요.`,
+      reason: `최근 3개월 기준 순이익률이 ${formattedMargin ?? '적자'}로 적자 상태입니다. 지금은 유입을 늘리기보다 비용 누수와 객단가 구조를 먼저 잡아야 합니다.`,
+      weekPlan: `${fallbackIndicator}를 중심으로 원가율, 객단가, 반복 비용을 점검하고 바로 줄일 수 있는 지출부터 정리하세요.`,
+    }
+  }
+
+  if (financialAnalysis?.status.level === 'danger') {
+    return {
+      primary: `광고 확대보다 ${fallbackAction}을 먼저 실행하세요.`,
+      reason: `최근 3개월 평균 순이익률이 ${formattedMargin}로 낮습니다. 매출을 더 만들어도 원가율이나 객단가가 그대로면 남는 돈이 크게 늘지 않습니다.`,
+      weekPlan: `${fallbackIndicator}를 우선 개선하고, 고마진 상품 구성이나 가격/패키지 조정을 함께 점검하세요.`,
+    }
+  }
+
+  if (financialAnalysis?.status.level === 'warning') {
+    return {
+      primary: `${fallbackAction}부터 실행하세요.`,
+      reason: `순이익률이 ${formattedMargin}로 개선 여지가 있습니다. 신규 유입과 이익률 개선을 함께 봐야 실제 남는 돈이 늘어납니다.`,
+      weekPlan: `${fallbackIndicator} 개선 액션을 실행하면서 객단가, 재방문, 비용 구조 중 하나를 같이 올려보세요.`,
+    }
+  }
+
+  if (financialAnalysis && ['good', 'excellent'].includes(financialAnalysis.status.level)) {
+    return {
+      primary: `${fallbackAction}부터 실행하세요.`,
+      reason: `현재 이익 구조는 비교적 버틸 수 있는 편입니다. 그래서 가장 낮은 운영 지표를 먼저 개선하면 성장 폭이 더 커질 수 있습니다.`,
+      weekPlan: `${fallbackIndicator}를 끌어올리고, 효과가 보이면 유입 확대나 상품 확장으로 이어가세요.`,
+    }
+  }
+
+  return {
+    primary: `${fallbackAction}부터 실행하세요.`,
+    reason: `현재 진단에서 ${fallbackIndicator}가 가장 먼저 손봐야 할 가능성이 높습니다. 재무 입력값이 추가되면 매출/이익 기준으로 더 정확히 우선순위를 잡을 수 있습니다.`,
+    weekPlan: `이번 주는 ${fallbackAction}을 실행하고, 결과를 기록해 다음 진단의 기준값으로 남기세요.`,
+  }
 }
