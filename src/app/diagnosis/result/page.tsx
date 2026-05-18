@@ -80,14 +80,14 @@ export default function DiagnosisResultPage() {
   const impactLabels: Record<string, string> = { low: '낮음', medium: '중간', high: '높음' }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 px-4 py-8">
+    <div className="min-h-screen bg-[#f7f7f5] dark:bg-[#191919] px-4 py-8">
       <div className="max-w-2xl mx-auto flex flex-col gap-6">
 
         {/* Priority Summary */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-800 p-6 md:p-8"
+          className="bg-white dark:bg-[#202020] rounded-2xl border border-[#e9e9e7] dark:border-[#313131] p-6 md:p-8"
         >
           <div className="flex items-start justify-between gap-4 mb-5">
             <div>
@@ -136,7 +136,7 @@ export default function DiagnosisResultPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.08 }}
-            className="bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-800 p-6"
+            className="bg-white dark:bg-[#202020] rounded-2xl border border-[#e9e9e7] dark:border-[#313131] p-6"
           >
             <div className="flex items-center gap-2 mb-4">
               <WalletCards className="w-5 h-5 text-emerald-500" />
@@ -172,7 +172,7 @@ export default function DiagnosisResultPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-800 p-6"
+          className="bg-white dark:bg-[#202020] rounded-2xl border border-[#e9e9e7] dark:border-[#313131] p-6"
         >
           <div className="flex items-center gap-2 mb-4">
             <AlertTriangle className="w-5 h-5 text-red-500" />
@@ -221,7 +221,7 @@ export default function DiagnosisResultPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-800 p-6"
+          className="bg-white dark:bg-[#202020] rounded-2xl border border-[#e9e9e7] dark:border-[#313131] p-6"
         >
           <div className="flex items-center gap-2 mb-4">
             <Target className="w-5 h-5 text-emerald-500" />
@@ -253,7 +253,7 @@ export default function DiagnosisResultPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.25 }}
-          className="bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-800 p-6"
+          className="bg-white dark:bg-[#202020] rounded-2xl border border-[#e9e9e7] dark:border-[#313131] p-6"
         >
           <div className="flex items-center gap-2 mb-4">
             <Zap className="w-5 h-5 text-emerald-500" />
@@ -323,7 +323,7 @@ export default function DiagnosisResultPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-800 p-6"
+          className="bg-white dark:bg-[#202020] rounded-2xl border border-[#e9e9e7] dark:border-[#313131] p-6"
         >
           <div className="flex items-center gap-2 mb-4">
             <TrendingUp className="w-5 h-5 text-blue-500" />

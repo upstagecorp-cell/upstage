@@ -117,7 +117,7 @@ export default function ExplorePage() {
   const impactLabels: Record<string, string> = { low: '낮음', medium: '중간', high: '높음' }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-50 dark:from-slate-950 dark:to-slate-900 px-4 py-8">
+    <div className="min-h-screen bg-[#f7f7f5] dark:bg-[#191919] px-4 py-8">
       <div className="max-w-2xl mx-auto flex flex-col gap-6">
 
         {/* Header */}
@@ -136,7 +136,7 @@ export default function ExplorePage() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.05 }}
-          className="flex bg-white dark:bg-slate-800 rounded-2xl p-1 shadow"
+          className="flex bg-white dark:bg-[#202020] rounded-xl p-1 border border-[#e9e9e7] dark:border-[#313131]"
         >
           {tabs.map((tab) => (
             <button
@@ -177,7 +177,7 @@ export default function ExplorePage() {
                   <motion.div
                     key={ind.id}
                     layout
-                    className="bg-white dark:bg-slate-800 rounded-2xl shadow overflow-hidden"
+                    className="bg-white dark:bg-[#202020] rounded-2xl border border-[#e9e9e7] dark:border-[#313131] overflow-hidden"
                   >
                     <button
                       onClick={() => setExpandedIndicator(isExpanded ? null : ind.id as IndicatorId)}
@@ -286,7 +286,7 @@ export default function ExplorePage() {
               {LEARNING_RESOURCES.map((cat) => {
                 const isExp = expandedCategory === cat.category
                 return (
-                  <div key={cat.category} className="bg-white dark:bg-slate-800 rounded-2xl shadow overflow-hidden">
+                  <div key={cat.category} className="bg-white dark:bg-[#202020] rounded-2xl border border-[#e9e9e7] dark:border-[#313131] overflow-hidden">
                     <button
                       onClick={() => setExpandedCategory(isExp ? null : cat.category)}
                       className="w-full flex items-center gap-3 p-4 text-left"
@@ -356,7 +356,7 @@ export default function ExplorePage() {
                 const statusKey = score >= 80 ? 'good' : score >= 40 ? 'normal' : 'danger'
 
                 return (
-                  <div key={ind.id} className="bg-white dark:bg-slate-800 rounded-2xl shadow p-5">
+                  <div key={ind.id} className="bg-white dark:bg-[#202020] rounded-2xl border border-[#e9e9e7] dark:border-[#313131] p-5">
                     <div className="flex items-center gap-3 mb-3">
                       <span className="text-xl">{ind.icon}</span>
                       <div className="flex-1">

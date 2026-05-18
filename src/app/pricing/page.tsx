@@ -266,9 +266,9 @@ export default function PricingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white dark:bg-slate-950">
+    <div className="min-h-screen bg-[#f7f7f5] dark:bg-[#191919]">
       {/* Hero */}
-      <section className="relative overflow-hidden bg-white dark:bg-slate-950 pt-16 pb-12 px-4">
+      <section className="relative overflow-hidden bg-[#f7f7f5] dark:bg-[#191919] pt-16 pb-12 px-4">
         <div className="h-1 w-full bg-red-600 absolute top-0 left-0" />
         <div className="max-w-4xl mx-auto text-center">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-50 dark:bg-emerald-950 border border-emerald-200 dark:border-emerald-900 text-emerald-700 dark:text-emerald-300 text-sm font-medium mb-6">

@@ -79,7 +79,7 @@ export default function OnboardingPage() {
     : ['업종 선택', '운영 유형', '창업 단계']
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-50 dark:from-slate-950 dark:to-slate-900 flex flex-col items-center justify-center px-4 py-12">
+    <div className="min-h-screen bg-[#f7f7f5] dark:bg-[#191919] flex flex-col items-center justify-center px-4 py-12">
       <div className="w-full max-w-lg">
         {/* Progress */}
         <div className="mb-8">
@@ -119,7 +119,7 @@ export default function OnboardingPage() {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -40 }}
               transition={{ duration: 0.3 }}
-              className="bg-white dark:bg-slate-800 rounded-3xl shadow-xl p-8"
+              className="bg-white dark:bg-[#202020] rounded-2xl border border-[#e9e9e7] dark:border-[#313131] p-8"
             >
               <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white mb-1">어떤 업종을 운영하시나요?</h2>
               <p className="text-slate-500 dark:text-slate-400 text-sm mb-6">업종에 맞는 맞춤 진단을 제공합니다</p>
@@ -151,7 +151,7 @@ export default function OnboardingPage() {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -40 }}
               transition={{ duration: 0.3 }}
-              className="bg-white dark:bg-slate-800 rounded-3xl shadow-xl p-8"
+              className="bg-white dark:bg-[#202020] rounded-2xl border border-[#e9e9e7] dark:border-[#313131] p-8"
             >
               <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white mb-1">주요 운영 방식은 무엇인가요?</h2>
               <p className="text-slate-500 dark:text-slate-400 text-sm mb-6">운영 방식에 따라 핵심 지표 가중치가 달라집니다</p>
@@ -196,7 +196,7 @@ export default function OnboardingPage() {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -40 }}
               transition={{ duration: 0.3 }}
-              className="bg-white dark:bg-slate-800 rounded-3xl shadow-xl p-8"
+              className="bg-white dark:bg-[#202020] rounded-2xl border border-[#e9e9e7] dark:border-[#313131] p-8"
             >
               <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white mb-1">현재 사업 단계는 어떻게 되나요?</h2>
               <p className="text-slate-500 dark:text-slate-400 text-sm mb-6">단계별로 집중해야 할 지표가 다릅니다</p>
@@ -233,7 +233,7 @@ export default function OnboardingPage() {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -40 }}
               transition={{ duration: 0.3 }}
-              className="bg-white dark:bg-slate-800 rounded-3xl shadow-xl p-8"
+              className="bg-white dark:bg-[#202020] rounded-2xl border border-[#e9e9e7] dark:border-[#313131] p-8"
             >
               <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white mb-1">최근 3개월 평균 재무 상태를 입력해주세요</h2>
               <p className="text-slate-500 dark:text-slate-400 text-sm mb-6">

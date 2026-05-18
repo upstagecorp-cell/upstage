@@ -95,7 +95,7 @@ export default function DiagnosisPage() {
   const isLast = currentIndex === questions.length - 1
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col items-center justify-start px-4 py-8">
+    <div className="min-h-screen bg-[#f7f7f5] dark:bg-[#191919] flex flex-col items-center justify-start px-4 py-8">
       <div className="w-full max-w-2xl">
         {/* Header */}
         <div className="mb-6">
@@ -152,7 +152,7 @@ export default function DiagnosisPage() {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: direction * -60 }}
             transition={{ duration: 0.3 }}
-            className="bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-800 p-6 md:p-8 mb-6"
+            className="bg-white dark:bg-[#202020] rounded-2xl border border-[#e9e9e7] dark:border-[#313131] p-6 md:p-8 mb-6"
           >
             {/* Category badge */}
             <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300 mb-4">

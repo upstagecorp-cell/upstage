@@ -133,7 +133,7 @@ export default function ActionPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-amber-50 dark:from-slate-950 dark:to-slate-900 px-4 py-8">
+    <div className="min-h-screen bg-[#f7f7f5] dark:bg-[#191919] px-4 py-8">
       <div className="max-w-2xl mx-auto flex flex-col gap-6">
 
         {/* Header */}
@@ -198,7 +198,7 @@ export default function ActionPage() {
 
         {/* Action Cards */}
         {todayActions.length === 0 ? (
-          <div className="bg-white dark:bg-slate-800 rounded-3xl shadow p-8 text-center">
+          <div className="bg-white dark:bg-[#202020] rounded-2xl border border-[#e9e9e7] dark:border-[#313131] p-8 text-center">
             <p className="text-slate-500 dark:text-slate-400 mb-4">오늘 추천된 액션이 없습니다.</p>
             <button
               onClick={() => router.push('/dashboard')}
@@ -220,7 +220,7 @@ export default function ActionPage() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.08 }}
-                  className={`bg-white dark:bg-slate-800 rounded-3xl shadow-xl overflow-hidden border-2 transition-colors ${
+                  className={`bg-white dark:bg-[#202020] rounded-2xl overflow-hidden border transition-colors ${
                     isCompleted || isSubmittedNow
                       ? 'border-emerald-200 dark:border-emerald-800'
                       : 'border-transparent'
@@ -334,7 +334,7 @@ export default function ActionPage() {
                 initial={{ opacity: 0, y: 60 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 60 }}
-                className="fixed inset-x-4 bottom-4 md:inset-x-auto md:left-1/2 md:-translate-x-1/2 md:w-full md:max-w-lg z-50 bg-white dark:bg-slate-800 rounded-3xl shadow-2xl p-6 max-h-[80vh] overflow-y-auto"
+                className="fixed inset-x-4 bottom-4 md:inset-x-auto md:left-1/2 md:-translate-x-1/2 md:w-full md:max-w-lg z-50 bg-white dark:bg-[#202020] rounded-2xl border border-[#e9e9e7] dark:border-[#313131] p-6 max-h-[80vh] overflow-y-auto"
               >
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="font-extrabold text-slate-900 dark:text-white">실행 기록</h3>

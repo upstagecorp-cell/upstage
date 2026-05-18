@@ -16,7 +16,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko" suppressHydrationWarning>
-      <body className="min-h-screen bg-white dark:bg-slate-950 text-slate-900 dark:text-white antialiased">
+      <body className="min-h-screen bg-[#f7f7f5] dark:bg-[#191919] text-[#37352f] dark:text-[#f1f1ef] antialiased">
         <ThemeProvider>
           <Navbar />
           <main className="pb-20 md:pb-0">

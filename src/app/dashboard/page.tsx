@@ -106,7 +106,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 px-4 py-8">
+    <div className="min-h-screen bg-[#f7f7f5] dark:bg-[#191919] px-4 py-8">
       <div className="max-w-2xl mx-auto flex flex-col gap-6">
 
         {/* Header */}
@@ -134,7 +134,7 @@ export default function DashboardPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.04 }}
-            className="bg-slate-950 dark:bg-slate-900 rounded-3xl shadow-sm border border-slate-900 dark:border-slate-800 p-6 text-white"
+            className="bg-white dark:bg-[#202020] rounded-2xl border border-[#e9e9e7] dark:border-[#313131] p-6 text-slate-900 dark:text-white"
           >
             <div className="flex items-center gap-2 mb-3">
               <Zap className="w-5 h-5 text-emerald-400" />
@@ -163,7 +163,7 @@ export default function DashboardPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.06 }}
-          className="bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-800 p-6"
+          className="bg-white dark:bg-[#202020] rounded-2xl border border-[#e9e9e7] dark:border-[#313131] p-6"
         >
           <div className="flex items-center justify-between gap-4 mb-3">
             <div>
@@ -210,7 +210,7 @@ export default function DashboardPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.08 }}
-            className="bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-800 p-6"
+            className="bg-white dark:bg-[#202020] rounded-2xl border border-[#e9e9e7] dark:border-[#313131] p-6"
           >
             <div className="flex items-center gap-2 mb-3">
               <WalletCards className="w-5 h-5 text-emerald-500" />
@@ -233,7 +233,7 @@ export default function DashboardPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.05 }}
-          className="bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-800 p-6"
+          className="bg-white dark:bg-[#202020] rounded-2xl border border-[#e9e9e7] dark:border-[#313131] p-6"
         >
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-bold text-slate-900 dark:text-white flex items-center gap-2">
@@ -282,7 +282,7 @@ export default function DashboardPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-800 p-6"
+          className="bg-white dark:bg-[#202020] rounded-2xl border border-[#e9e9e7] dark:border-[#313131] p-6"
         >
           <h2 className="font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
             <TrendingUp className="w-5 h-5 text-blue-500" />
@@ -366,7 +366,7 @@ export default function DashboardPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-800 p-6"
+          className="bg-white dark:bg-[#202020] rounded-2xl border border-[#e9e9e7] dark:border-[#313131] p-6"
         >
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-bold text-slate-900 dark:text-white flex items-center gap-2">

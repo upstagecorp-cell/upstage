@@ -100,7 +100,7 @@ export default function GoalsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-50 dark:from-slate-950 dark:to-slate-900 px-4 py-8">
+    <div className="min-h-screen bg-[#f7f7f5] dark:bg-[#191919] px-4 py-8">
       <div className="max-w-2xl mx-auto flex flex-col gap-6">
 
         {/* Header */}
@@ -121,14 +121,14 @@ export default function GoalsPage() {
           transition={{ delay: 0.05 }}
           className="grid grid-cols-2 gap-3"
         >
-          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow p-4 flex flex-col gap-1">
+          <div className="bg-white dark:bg-[#202020] rounded-xl border border-[#e9e9e7] dark:border-[#313131] p-4 flex flex-col gap-1">
             <span className="text-xs text-slate-400">이번 주 완료</span>
             <span className="text-2xl font-extrabold text-indigo-600 dark:text-indigo-400">
               {completedThisWeek.length}
             </span>
             <span className="text-xs text-slate-500">개 액션</span>
           </div>
-          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow p-4 flex flex-col gap-1">
+          <div className="bg-white dark:bg-[#202020] rounded-xl border border-[#e9e9e7] dark:border-[#313131] p-4 flex flex-col gap-1">
             <span className="text-xs text-slate-400">전체 실행 기록</span>
             <span className="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400">
               {executionRecords.length}
@@ -143,7 +143,7 @@ export default function GoalsPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="bg-white dark:bg-slate-800 rounded-3xl shadow-xl p-6"
+            className="bg-white dark:bg-[#202020] rounded-2xl border border-[#e9e9e7] dark:border-[#313131] p-6"
           >
             <div className="flex items-start justify-between mb-4">
               <div>
@@ -257,7 +257,7 @@ export default function GoalsPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="bg-white dark:bg-slate-800 rounded-3xl shadow-xl p-8 text-center"
+            className="bg-white dark:bg-[#202020] rounded-2xl border border-[#e9e9e7] dark:border-[#313131] p-8 text-center"
           >
             <div className="w-16 h-16 rounded-2xl bg-indigo-50 dark:bg-indigo-950 flex items-center justify-center mx-auto mb-4">
               <Target className="w-8 h-8 text-indigo-500" />
@@ -281,7 +281,7 @@ export default function GoalsPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.15 }}
-          className="bg-white dark:bg-slate-800 rounded-3xl shadow-xl p-6"
+          className="bg-white dark:bg-[#202020] rounded-2xl border border-[#e9e9e7] dark:border-[#313131] p-6"
         >
           <h2 className="font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
             <TrendingUp className="w-5 h-5 text-blue-500" />
@@ -331,7 +331,7 @@ export default function GoalsPage() {
                 initial={{ opacity: 0, y: 60 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 60 }}
-                className="fixed inset-x-4 bottom-4 md:inset-x-auto md:left-1/2 md:-translate-x-1/2 md:w-full md:max-w-lg z-50 bg-white dark:bg-slate-800 rounded-3xl shadow-2xl p-6"
+                className="fixed inset-x-4 bottom-4 md:inset-x-auto md:left-1/2 md:-translate-x-1/2 md:w-full md:max-w-lg z-50 bg-white dark:bg-[#202020] rounded-2xl border border-[#e9e9e7] dark:border-[#313131] p-6"
               >
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="font-extrabold text-slate-900 dark:text-white">주간 목표 설정</h3>

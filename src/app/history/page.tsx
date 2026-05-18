@@ -77,7 +77,7 @@ export default function HistoryPage() {
   ]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-50 dark:from-slate-950 dark:to-slate-900 px-4 py-8">
+    <div className="min-h-screen bg-[#f7f7f5] dark:bg-[#191919] px-4 py-8">
       <div className="max-w-2xl mx-auto flex flex-col gap-6">
 
         {/* Header */}
@@ -96,7 +96,7 @@ export default function HistoryPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.05 }}
-          className="bg-white dark:bg-slate-800 rounded-3xl shadow-xl p-6"
+          className="bg-white dark:bg-[#202020] rounded-2xl border border-[#e9e9e7] dark:border-[#313131] p-6"
         >
           <h2 className="font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
             <BarChart2 className="w-5 h-5 text-indigo-500" />
@@ -140,7 +140,7 @@ export default function HistoryPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="bg-white dark:bg-slate-800 rounded-3xl shadow-xl p-6"
+            className="bg-white dark:bg-[#202020] rounded-2xl border border-[#e9e9e7] dark:border-[#313131] p-6"
           >
             <h2 className="font-bold text-slate-900 dark:text-white mb-4">지표별 점수 추이</h2>
             <ResponsiveContainer width="100%" height={280}>
@@ -185,7 +185,7 @@ export default function HistoryPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.15 }}
-            className="bg-white dark:bg-slate-800 rounded-3xl shadow-xl p-6"
+            className="bg-white dark:bg-[#202020] rounded-2xl border border-[#e9e9e7] dark:border-[#313131] p-6"
           >
             <h2 className="font-bold text-slate-900 dark:text-white mb-4">최근 지표별 점수</h2>
             <div className="flex flex-col gap-2">
@@ -215,7 +215,7 @@ export default function HistoryPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="bg-white dark:bg-slate-800 rounded-3xl shadow-xl p-6"
+          className="bg-white dark:bg-[#202020] rounded-2xl border border-[#e9e9e7] dark:border-[#313131] p-6"
         >
           <h2 className="font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
             <Calendar className="w-5 h-5 text-emerald-500" />

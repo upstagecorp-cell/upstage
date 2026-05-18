@@ -115,7 +115,7 @@ export default function MetricsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-50 dark:from-slate-950 dark:to-slate-900 px-4 py-8">
+    <div className="min-h-screen bg-[#f7f7f5] dark:bg-[#191919] px-4 py-8">
       <div className="max-w-2xl mx-auto flex flex-col gap-6">
 
         {/* Header */}
@@ -145,7 +145,7 @@ export default function MetricsPage() {
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-white dark:bg-slate-800 rounded-3xl shadow-xl p-6"
+            className="bg-white dark:bg-[#202020] rounded-2xl border border-[#e9e9e7] dark:border-[#313131] p-6"
           >
             <h2 className="font-bold text-slate-900 dark:text-white mb-4">데이터 입력</h2>
             <form onSubmit={handleSubmit} className="flex flex-col gap-3">
@@ -211,7 +211,7 @@ export default function MetricsPage() {
                 if (val === undefined) return null
                 const trend = getTrend(field.key)
                 return (
-                  <div key={String(field.key)} className="bg-white dark:bg-slate-800 rounded-2xl shadow p-4">
+                  <div key={String(field.key)} className="bg-white dark:bg-[#202020] rounded-xl border border-[#e9e9e7] dark:border-[#313131] p-4">
                     <p className="text-xs text-slate-400 mb-1">{field.label}</p>
                     <p className="text-xl font-extrabold text-slate-900 dark:text-white">
                       {field.prefix ?? ''}
@@ -250,7 +250,7 @@ export default function MetricsPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="bg-white dark:bg-slate-800 rounded-3xl shadow-xl p-6"
+          className="bg-white dark:bg-[#202020] rounded-2xl border border-[#e9e9e7] dark:border-[#313131] p-6"
         >
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-bold text-slate-900 dark:text-white">추이 차트</h2>
@@ -327,7 +327,7 @@ export default function MetricsPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.15 }}
-            className="bg-white dark:bg-slate-800 rounded-3xl shadow-xl p-6 overflow-x-auto"
+            className="bg-white dark:bg-[#202020] rounded-2xl border border-[#e9e9e7] dark:border-[#313131] p-6 overflow-x-auto"
           >
             <h2 className="font-bold text-slate-900 dark:text-white mb-4">입력된 데이터</h2>
             <table className="w-full text-sm min-w-[400px]">

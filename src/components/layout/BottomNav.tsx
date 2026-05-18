@@ -20,7 +20,7 @@ export function BottomNav() {
   if (!showNav) return null
 
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950">
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-[#e9e9e7] dark:border-[#313131] bg-[#f7f7f5]/95 dark:bg-[#191919]/95 backdrop-blur">
       <div className="flex">
         {navItems.map(item => {
           const Icon = item.icon
@@ -31,8 +31,8 @@ export function BottomNav() {
               href={item.href}
               className={`flex-1 flex flex-col items-center gap-0.5 py-2.5 text-[10px] font-medium transition-colors ${
                 isActive
-                  ? 'text-red-600 dark:text-red-400'
-                  : 'text-slate-500 dark:text-slate-400'
+                  ? 'text-violet-700 dark:text-violet-300'
+                  : 'text-[#6b6a67] dark:text-[#b9b8b4]'
               }`}
             >
               <Icon className="w-5 h-5" />

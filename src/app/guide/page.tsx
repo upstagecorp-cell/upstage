@@ -374,7 +374,7 @@ export default function GuidePage() {
   ]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-50 dark:from-slate-950 dark:to-slate-900 px-4 py-12">
+    <div className="min-h-screen bg-[#f7f7f5] dark:bg-[#191919] px-4 py-12">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <motion.div
@@ -398,7 +398,7 @@ export default function GuidePage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="bg-white dark:bg-slate-800 rounded-2xl p-6 md:p-8 shadow-sm border border-slate-100 dark:border-slate-700 mb-12"
+          className="bg-white dark:bg-[#202020] rounded-2xl p-6 md:p-8 border border-[#e9e9e7] dark:border-[#313131] mb-12"
         >
           <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-4">
             서비스 핵심 구조
@@ -423,7 +423,7 @@ export default function GuidePage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="bg-white dark:bg-slate-800 rounded-2xl p-6 md:p-8 shadow-sm border border-slate-100 dark:border-slate-700 mb-16"
+          className="bg-white dark:bg-[#202020] rounded-2xl p-6 md:p-8 border border-[#e9e9e7] dark:border-[#313131] mb-16"
         >
           <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-4">
             진단하는 11가지 핵심 지표
