@@ -1052,8 +1052,6 @@ export const ACCOMMODATION_QUESTIONS: DiagnosisQuestion[] = [
   },
 ]
 
-const cafeWeights = { cafe_takeout: 6, cafe_stay: 6, cafe_dessert: 6, cafe_craft: 6, cafe_local: 6 }
-
 export const CAFE_QUESTIONS: DiagnosisQuestion[] = [
   {
     question_id: 'cafe_pos_1',
