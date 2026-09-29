@@ -7,13 +7,16 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest",
+    "test:run": "vitest run",
     "audit:high": "npm audit --audit-level=high",
-    "check": "npm run lint && npm run build && npm run audit:high"
+    "check": "npm run lint && npm run typecheck && npm run test:run && npm run build && npm run audit:high"
   },
   "dependencies": {
     "framer-motion": "^12.38.0",
     "lucide-react": "^1.14.0",
-    "next": "16.2.9",
+    "next": "16.3.6",
     "next-themes": "^0.4.6",
     "react": "19.2.4",
     "react-dom": "19.2.4",
@@ -22,12 +25,13 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
+    "@types/node": "^24",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "16.2.9",
+    "eslint-config-next": "16.3.6",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^5.0.2"
   }
 }

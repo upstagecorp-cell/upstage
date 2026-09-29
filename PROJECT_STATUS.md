@@ -1,6 +1,6 @@
-# UpStage SaaS Project Status
+# NEXSORA SaaS Project Status
 
-Last checked: 2026-05-06
+Last checked: 2026-09-29
 Environment checked: Windows PowerShell, Node.js v24.14.0, npm v11.9.0
 
 ## 1. Current Summary
@@ -13,7 +13,8 @@ Current status:
 - `next` is available through local `node_modules`.
 - `npm.cmd run dev` is configured to use webpack dev mode for Windows stability.
 - `npm.cmd run build` passes.
-- `npm.cmd run lint` passes with warnings only.
+- `npm.cmd run lint`, `npm.cmd run typecheck`, and `npm.cmd run test:run` pass.
+- `npm.cmd audit` reports 0 vulnerabilities.
 - The main product workflow is implemented locally with Zustand persistence.
 - There is no active Supabase SDK or environment-variable integration in the current source tree.
 
@@ -34,7 +35,7 @@ http://localhost:3000
 
 Core stack:
 
-- Next.js `16.2.4`
+- Next.js `16.3.6`
 - React `19.2.4`
 - React DOM `19.2.4`
 - TypeScript `5.9.3`
@@ -52,7 +53,10 @@ Important scripts:
   "dev": "next dev --webpack",
   "build": "next build",
   "start": "next start",
-  "lint": "eslint"
+  "lint": "eslint",
+  "typecheck": "tsc --noEmit",
+  "test:run": "vitest run",
+  "check": "npm run lint && npm run typecheck && npm run test:run && npm run build && npm run audit:high"
 }
 ```
 
@@ -138,7 +142,7 @@ npm.cmd ls next react react-dom typescript --depth=0
 
 Verified:
 
-- `next@16.2.4`
+- `next@16.3.6`
 - `react@19.2.4`
 - `react-dom@19.2.4`
 - `typescript@5.9.3`
@@ -157,19 +161,24 @@ Result:
 
 ### Lint
 
-Status: passed with warnings
+Status: passed
 
 ```powershell
 npm.cmd run lint
 ```
 
-Current warnings:
+No lint errors or warnings.
 
-- `src/app/action/page.tsx`: one `<img>` warning.
-- `src/app/history/page.tsx`: two `<img>` warnings.
-- `src/lib/ai-feedback.ts`: five unused variable warnings.
+### Type check and unit tests
 
-No lint errors.
+Status: passed
+
+```powershell
+npm.cmd run typecheck
+npm.cmd run test:run
+```
+
+Vitest currently runs 14 tests covering time zones, streaks, scoring, action recurrence, financial parsing, and persisted-state validation.
 
 ### Production build
 
@@ -193,12 +202,12 @@ Generated static routes:
 - `/metrics`
 - `/onboarding`
 - `/pricing`
+- `/robots.txt`
+- `/sitemap.xml`
 
 Build note:
 
-- Recharts printed a chart-size warning during static generation:
-  - `The width(-1) and height(-1) of chart should be greater than 0`
-- The build still completed successfully.
+- Next.js `16.3.6` generated all 17 static pages without warnings.
 
 ### Localhost check
 
@@ -489,7 +498,7 @@ Implication:
 - If Supabase is required, the next implementation phase should add:
   - Supabase dependency
   - Supabase client module
-  - `.env.example`
+  - Wire the existing `.env.example` values into the runtime integration
   - Auth/session handling
   - Database schema
   - Server actions or route handlers for persistence
@@ -509,77 +518,53 @@ Impact:
 - No source-level Korean text restoration is currently required.
 - If Korean appears broken in a terminal, set the terminal to UTF-8 or inspect with a UTF-8-aware reader.
 
-### 2. Lint warnings remain
-
-Current warnings:
-
-- `<img>` usage in action/history pages should be migrated to `next/image` or intentionally suppressed.
-- Unused variables in `src/lib/ai-feedback.ts` should be removed or wired into the feedback logic.
-
-Impact:
-
-- Not blocking build.
-- Should be cleaned before production polish.
-
-### 3. Recharts static generation warning
-
-Build warning:
-
-```text
-The width(-1) and height(-1) of chart should be greater than 0
-```
-
-Impact:
-
-- Build succeeds.
-- Some chart containers may need explicit min width/height or SSR-safe rendering improvements.
-
-Recommended next step:
-
-- Audit `ResponsiveContainer` usage in `history` and `metrics`.
-- Ensure chart parents have stable dimensions.
-
-### 4. No backend persistence
+### 2. Time zone and language scope
 
 Current behavior:
 
-- User progress is stored in local browser storage only.
+- UTC timestamps are retained for chronological audit data.
+- Calendar dates and streaks use the browser's IANA time zone.
+- The current UI language remains Korean.
 
 Impact:
 
-- Data disappears if local storage is cleared.
-- Data does not follow the user across devices.
-- No team/admin analytics possible yet.
+- Worldwide time-zone behavior has a tested foundation.
+- Locale routing, translation dictionaries, localized metadata, and a language switcher are still required.
 
-Recommended next step:
-
-- Implement Supabase auth and tables for profiles, diagnoses, actions, metrics, and goals.
-
-### 5. Pricing page is UI-only
+### 3. Browser-only persistence
 
 Current behavior:
 
-- Pricing page shows plans and CTAs.
+- Versioned Zustand state is validated and migrated in `localStorage`.
+- Data is not synchronized or backed up remotely.
+
+Impact:
+
+- Clearing browser data removes user records.
+- Client state is not an authorization boundary.
+
+Recommended next step:
+
+- Add Auth, server persistence, and user-scoped RLS before accepting production customer data.
+
+### 4. Pricing page is UI-only
+
+Current behavior:
+
+- Pricing page shows planned prices and features.
+- Paid plan controls are disabled and marked as not yet available.
 - No payment flow is connected.
 
 Recommended next step:
 
 - Add Stripe Checkout or another payment flow when monetization is ready.
 
-### 6. Repository metadata may need confirmation
+### 5. Real file evidence storage is not implemented
 
-In this working directory, the active tool environment did not expose a `.git` directory during checks.
-
-Recommended next step:
-
-- In your real VSCode terminal, verify:
-
-```powershell
-git status
-git remote -v
-```
-
-Then commit only source/config/docs changes, not generated folders.
+- File selectors enforce local size, count, and type limits.
+- Selected financial evidence stores file names only.
+- Action screenshots are local previews and are not persisted.
+- Production uploads require private object storage, server-side validation, and signed URLs.
 
 ## 10. What Should Be Committed
 
@@ -606,7 +591,7 @@ On another Windows PC:
 
 ```powershell
 git clone <repository-url>
-cd upstage-main
+cd nexsora-main
 node -v
 npm.cmd -v
 npm.cmd ci
@@ -627,13 +612,12 @@ Requirements:
 
 ## 12. Recommended Next Work Order
 
-1. Add `.env.example` if Supabase or external services will be used.
-2. Decide whether the MVP remains local-only or moves to Supabase persistence.
-3. Fix lint warnings.
-4. Fix Recharts container warning.
-5. Add basic tests for scoring, action recommendation, and store transitions.
-6. Replace placeholder/sample states with real empty states.
-7. Connect pricing page to a real payment flow only after auth and persistence are ready.
+1. Implement Supabase Auth, database migrations, and user-scoped RLS.
+2. Add locale-prefixed routing and translation dictionaries.
+3. Add private evidence storage with signed URLs.
+4. Add end-to-end tests for authentication and core product flows.
+5. Replace placeholder/sample states with real empty states.
+6. Connect pricing to a real payment flow only after auth and persistence are ready.
 
 ## 13. Current Overall Readiness
 
@@ -653,5 +637,6 @@ Primary blockers for production:
 
 - No backend persistence/auth.
 - No real payment integration.
-- Remaining lint/chart warnings.
-- No automated tests.
+- No production file storage.
+- No multilingual routing or translated legal content.
+- No end-to-end test suite, monitoring, or operational backup process.

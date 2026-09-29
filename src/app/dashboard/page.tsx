@@ -34,6 +34,7 @@ import { getTodayActions } from '@/lib/actions'
 import { analyzeFinancialSnapshot } from '@/lib/financial'
 import { getRewardState } from '@/lib/rewards'
 import type { OperationType, IndicatorId } from '@/data/types'
+import { useLocalDateKey } from '@/lib/use-local-date-key'
 
 export default function DashboardPage() {
   const router = useRouter()
@@ -50,6 +51,7 @@ export default function DashboardPage() {
   } = useStore()
 
   const effectiveOpType: OperationType = operationType ?? 'hall'
+  const today = useLocalDateKey()
 
   useEffect(() => {
     calculateStreak()
@@ -71,7 +73,8 @@ export default function DashboardPage() {
   const todayActions = getTodayActions(
     scores,
     effectiveOpType,
-    executionRecords.map((r) => r.action_id)
+    executionRecords,
+    today
   )
   const nextAction = todayActions[0]
   const financialAnalysis = analyzeFinancialSnapshot(financialSnapshot)
@@ -426,7 +429,7 @@ export default function DashboardPage() {
           <button
             onClick={() => {
               resetDiagnosis()
-              router.push('/diagnosis')
+              router.push('/onboarding')
             }}
             className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-semibold hover:border-emerald-300 hover:text-emerald-600 dark:hover:border-emerald-700 dark:hover:text-emerald-400 transition-colors"
           >

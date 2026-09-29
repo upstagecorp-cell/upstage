@@ -26,9 +26,9 @@ export function Navbar() {
       <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2">
           {mounted && theme === 'dark' ? (
-            <Image src="/logo-red-bg.png" alt="UpStage" width={120} height={36} className="h-9 w-auto object-contain" />
+            <Image src="/logo-red-bg.png" alt="NEXSORA" width={120} height={36} className="h-9 w-auto object-contain" />
           ) : (
-            <Image src="/logo.jpg" alt="UpStage" width={120} height={36} className="h-9 w-auto object-contain" />
+            <Image src="/logo.jpg" alt="NEXSORA" width={120} height={36} className="h-9 w-auto object-contain" />
           )}
         </Link>
 

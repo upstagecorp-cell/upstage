@@ -153,6 +153,9 @@ export interface ExecutionRecord {
   id: string
   action_id: string
   execution_date: string
+  recorded_at?: string
+  time_zone?: string
+  locale?: string
   time_spent: string
   difficulty_note: string
   result_memo: string
@@ -174,6 +177,9 @@ export interface DiagnosisResult {
 // ===== 점수 스냅샷 =====
 export interface ScoreSnapshot {
   date: string
+  recordedAt?: string
+  timeZone?: string
+  locale?: string
   scores: Record<IndicatorId, number>
   totalScore: number
 }
@@ -199,6 +205,8 @@ export interface FinancialSnapshot {
   monthlyNetProfitText: string
   evidenceFileNames: string[]
   capturedAt: string
+  timeZone?: string
+  locale?: string
 }
 
 // ===== 주간 목표 =====
@@ -208,6 +216,9 @@ export interface WeeklyGoal {
   targetIndicator: IndicatorId
   startDate: string
   endDate: string
+  createdAt?: string
+  timeZone?: string
+  locale?: string
   targetActions: string[]
   completedActions: string[]
 }
@@ -215,6 +226,9 @@ export interface WeeklyGoal {
 // ===== 비즈니스 메트릭 =====
 export interface BusinessMetricEntry {
   date: string
+  recordedAt?: string
+  timeZone?: string
+  locale?: string
   revenue?: number
   customers?: number
   visitors?: number

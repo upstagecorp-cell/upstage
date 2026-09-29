@@ -35,6 +35,7 @@ interface Plan {
   ctaHref: string
   ctaClass: string
   cardClass: string
+  available: boolean
 }
 
 interface CompareRow {
@@ -76,6 +77,7 @@ const plans: Plan[] = [
       'w-full py-3 rounded-xl font-semibold text-sm bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all',
     cardClass:
       'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700',
+    available: true,
   },
   {
     id: 'starter',
@@ -85,7 +87,7 @@ const plans: Plan[] = [
     icon: Star,
     iconColor: 'text-indigo-500',
     iconBg: 'bg-indigo-50 dark:bg-indigo-950',
-    badge: '가장 인기',
+    badge: '출시 예정',
     badgeColor: 'bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-300',
     features: [
       { text: '무제한 재진단', included: true },
@@ -97,12 +99,13 @@ const plans: Plan[] = [
       { text: '기본 AI 피드백 (진단 결과 해석)', included: true },
       { text: '이미지/스크린샷 증거 업로드', included: false },
     ],
-    ctaText: '스타터 시작',
+    ctaText: '출시 준비 중',
     ctaHref: '/onboarding',
     ctaClass:
       'w-full py-3 rounded-xl font-semibold text-sm bg-indigo-600 hover:bg-indigo-700 text-white transition-all shadow-md shadow-indigo-500/20',
     cardClass:
       'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700',
+    available: false,
   },
   {
     id: 'pro',
@@ -112,7 +115,7 @@ const plans: Plan[] = [
     icon: Crown,
     iconColor: 'text-indigo-600',
     iconBg: 'bg-indigo-50 dark:bg-indigo-950',
-    badge: '추천',
+    badge: '출시 예정',
     badgeColor: 'bg-gradient-to-r from-indigo-100 to-purple-100 dark:from-indigo-900 dark:to-purple-900 text-indigo-700 dark:text-indigo-300',
     features: [
       { text: '스타터 전체 포함', included: true },
@@ -124,12 +127,13 @@ const plans: Plan[] = [
       { text: '성장 보상 시스템', included: true },
       { text: '2단계 업종 세분류 맞춤 전략', included: true },
     ],
-    ctaText: '프로 시작',
+    ctaText: '출시 준비 중',
     ctaHref: '/onboarding',
     ctaClass:
       'w-full py-3 rounded-xl font-semibold text-sm bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white transition-all shadow-md shadow-indigo-500/30',
     cardClass:
       'bg-white dark:bg-slate-900 border-2 border-indigo-500 dark:border-indigo-400 ring-4 ring-indigo-500/10 dark:ring-indigo-400/10',
+    available: false,
   },
   {
     id: 'business',
@@ -149,12 +153,13 @@ const plans: Plan[] = [
       { text: '매출 예측 AI 모델', included: true },
       { text: 'API 연동 (POS, 예약시스템 등)', included: true },
     ],
-    ctaText: '비즈니스 문의',
+    ctaText: '출시 준비 중',
     ctaHref: '/onboarding',
     ctaClass:
       'w-full py-3 rounded-xl font-semibold text-sm bg-amber-500 hover:bg-amber-600 text-white transition-all shadow-md shadow-amber-500/25',
     cardClass:
       'bg-white dark:bg-slate-900 border border-amber-200 dark:border-amber-800',
+    available: false,
   },
 ]
 
@@ -182,27 +187,27 @@ const faqs: FaqItem[] = [
   {
     question: '결제는 어떻게 이루어지나요?',
     answer:
-      '신용카드 또는 체크카드로 결제하실 수 있습니다. 연간 결제를 선택하시면 20% 할인된 금액이 즉시 청구됩니다. 월간 결제는 매달 동일 날짜에 자동 갱신됩니다.',
+      '현재는 무료 MVP만 제공하며 실제 결제는 진행되지 않습니다. 유료 플랜과 결제 방식은 정식 출시 전에 다시 안내합니다.',
   },
   {
     question: '환불 정책은 어떻게 되나요?',
     answer:
-      '결제 후 7일 이내에는 전액 환불이 가능합니다. 7일이 지난 경우 잔여 기간에 대한 부분 환불이 가능합니다. 환불 요청은 이메일 또는 1:1 문의를 통해 접수해 주세요.',
+      '현재 결제 기능이 없어 환불도 발생하지 않습니다. 유료 서비스 출시 전 최종 환불 정책과 약관을 공개합니다.',
   },
   {
     question: '요금제를 언제든지 변경할 수 있나요?',
     answer:
-      '네, 언제든지 업그레이드 또는 다운그레이드 가능합니다. 업그레이드 시 즉시 상위 기능을 이용하실 수 있으며, 차액은 일할 계산됩니다. 다운그레이드는 다음 갱신일부터 적용됩니다.',
+      '현재 요금제 변경 기능은 준비 중입니다. 화면의 유료 플랜은 예정 기능과 예상 가격을 보여주는 미리보기입니다.',
   },
   {
     question: '무료 플랜과 유료 플랜의 데이터는 유지되나요?',
     answer:
-      '네, 플랜 변경 후에도 기존에 입력한 모든 데이터는 그대로 유지됩니다. 유료 플랜으로 업그레이드하면 이전 7일 이후의 데이터도 즉시 열람 가능합니다.',
+      '현재 데이터는 이 브라우저에만 저장됩니다. 계정 기반 데이터 이전 정책은 서버 저장 기능을 도입할 때 확정합니다.',
   },
   {
     question: '비즈니스 플랜 팀원 초대는 어떻게 작동하나요?',
     answer:
-      '비즈니스 플랜 구독자는 대시보드 설정 메뉴에서 최대 5명의 팀원을 이메일로 초대할 수 있습니다. 초대받은 팀원은 동일한 데이터를 열람·편집하며 협업할 수 있습니다.',
+      '팀원 초대는 아직 구현되지 않은 예정 기능입니다. 인증과 조직별 권한 관리가 준비된 후 제공할 계획입니다.',
   },
 ]
 
@@ -283,7 +288,7 @@ export default function PricingPage() {
             </span>
           </h1>
           <p className="text-slate-600 dark:text-slate-400 text-lg max-w-2xl mx-auto mb-10">
-            3분 핵심 진단은 무료로 시작하고, 재진단·기록·AI 분석이 필요할 때만 업그레이드하세요.
+            현재는 무료 MVP를 이용할 수 있으며, 유료 플랜은 예정 기능과 예상 가격을 보여주는 미리보기입니다.
           </p>
 
           {/* Billing Toggle */}
@@ -296,7 +301,7 @@ export default function PricingPage() {
                   : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
               }`}
             >
-              월간 결제
+              월간 예상
             </button>
             <button
               onClick={() => setIsAnnual(true)}
@@ -306,7 +311,7 @@ export default function PricingPage() {
                   : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
               }`}
             >
-              연간 결제
+              연간 예상
               <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900 text-emerald-700 dark:text-emerald-300 font-semibold">
                 20% 할인
               </span>
@@ -314,7 +319,7 @@ export default function PricingPage() {
           </div>
           {isAnnual && (
             <p className="text-sm text-emerald-600 dark:text-emerald-400 mt-3 font-medium">
-              연간 결제 시 2개월 무료 혜택!
+              정식 출시 시 연간 요금 혜택을 확정할 예정입니다.
             </p>
           )}
         </div>
@@ -371,12 +376,22 @@ export default function PricingPage() {
                 </div>
 
                 {/* CTA */}
-                <Link href={plan.ctaHref} className={plan.ctaClass}>
-                  <span className="flex items-center justify-center gap-2">
+                {plan.available ? (
+                  <Link href={plan.ctaHref} className={plan.ctaClass}>
+                    <span className="flex items-center justify-center gap-2">
+                      {plan.ctaText}
+                      <ArrowRight className="w-4 h-4" />
+                    </span>
+                  </Link>
+                ) : (
+                  <button
+                    type="button"
+                    disabled
+                    className={`${plan.ctaClass} cursor-not-allowed opacity-60`}
+                  >
                     {plan.ctaText}
-                    <ArrowRight className="w-4 h-4" />
-                  </span>
-                </Link>
+                  </button>
+                )}
 
                 {/* Divider */}
                 <div className="my-5 border-t border-slate-100 dark:border-slate-800" />
@@ -473,7 +488,7 @@ export default function PricingPage() {
         <div className="max-w-2xl mx-auto">
           <div className="text-center mb-10">
             <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">자주 묻는 질문</h2>
-            <p className="text-slate-500 dark:text-slate-400 text-sm">결제, 환불, 업그레이드 관련 궁금증을 해결해 드립니다</p>
+            <p className="text-slate-500 dark:text-slate-400 text-sm">현재 제공 범위와 향후 유료 플랜 계획을 안내합니다</p>
           </div>
           <div className="flex flex-col gap-3">
             {faqs.map((faq, i) => (
@@ -488,7 +503,7 @@ export default function PricingPage() {
         <div className="max-w-2xl mx-auto text-center">
           <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">지금 바로 시작하세요</h2>
           <p className="text-indigo-100 mb-8">
-            신용카드 없이 무료로 시작. 언제든지 업그레이드 가능합니다.
+            현재 무료 MVP로 진단과 실행 흐름을 먼저 확인할 수 있습니다.
           </p>
           <Link
             href="/onboarding"

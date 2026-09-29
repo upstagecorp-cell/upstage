@@ -14,30 +14,28 @@ export interface FinancialAnalysis {
   }
   headline: string
   recommendation: string
-  hasEvidence: boolean
+  hasEvidenceFileNames: boolean
 }
 
-function parseKoreanMoneyText(value: string): number | null {
-  const normalized = value.replace(/,/g, '').replace(/\s/g, '')
+export function parseKoreanMoneyText(value: string): number | null {
+  const normalized = value.trim().replace(/,/g, '').replace(/\s/g, '')
   if (!normalized) return null
 
-  const hasKoreanUnit = /억|만/.test(normalized)
-  if (!hasKoreanUnit) {
-    const numericOnly = normalized.replace(/[^\d.-]/g, '')
-    const parsed = Number(numericOnly)
+  const plainNumber = normalized.match(/^(-?\d+(?:\.\d+)?)원?$/)
+  if (plainNumber) {
+    const parsed = Number(plainNumber[1])
     return Number.isFinite(parsed) ? parsed : null
   }
 
-  let total = 0
-  const eokMatch = normalized.match(/(-?\d+(?:\.\d+)?)억/)
-  const manMatch = normalized.match(/(-?\d+(?:\.\d+)?)만/)
-  const directNumber = normalized.match(/^(-?\d+(?:\.\d+)?)$/)
+  const unitNumber = normalized.match(/^(-)?(?:(\d+(?:\.\d+)?)억)?(?:(\d+(?:\.\d+)?)만)?원?$/)
+  if (!unitNumber || (!unitNumber[2] && !unitNumber[3])) return null
 
-  if (eokMatch) total += Number(eokMatch[1]) * 100_000_000
-  if (manMatch) total += Number(manMatch[1]) * 10_000
-  if (!eokMatch && !manMatch && directNumber) total += Number(directNumber[1])
+  const sign = unitNumber[1] ? -1 : 1
+  const eok = unitNumber[2] ? Number(unitNumber[2]) * 100_000_000 : 0
+  const man = unitNumber[3] ? Number(unitNumber[3]) * 10_000 : 0
+  const total = sign * (eok + man)
 
-  return Number.isFinite(total) && total !== 0 ? total : null
+  return Number.isFinite(total) ? total : null
 }
 
 function getFinancialStatus(netProfit: number | null, margin: number | null): FinancialAnalysis['status'] {
@@ -73,7 +71,7 @@ export function analyzeFinancialSnapshot(snapshot: FinancialSnapshot | null): Fi
     ? (netProfit / revenue) * 100
     : null
   const status = getFinancialStatus(netProfit, netProfitMargin)
-  const hasEvidence = snapshot.evidenceFileNames.length > 0
+  const hasEvidenceFileNames = snapshot.evidenceFileNames.length > 0
 
   let headline = '입력한 매출과 순이익을 기준으로 재무 상태를 해석합니다.'
   let recommendation = '매출과 순이익을 다시 확인하면 더 정확한 재무 해석이 가능합니다.'
@@ -102,6 +100,6 @@ export function analyzeFinancialSnapshot(snapshot: FinancialSnapshot | null): Fi
     status,
     headline,
     recommendation,
-    hasEvidence,
+    hasEvidenceFileNames,
   }
 }

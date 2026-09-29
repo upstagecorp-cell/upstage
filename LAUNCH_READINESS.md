@@ -1,46 +1,58 @@
 # Launch Readiness
 
-Last updated: 2026-06-29
+Last updated: 2026-09-29
 
 This file tracks the concrete work needed before a worldwide production launch.
 
 ## Completed in this pass
 
-- Updated Next.js from `16.2.4` to a patched `16.2.9` line.
-- Added baseline security headers in `next.config.ts`.
-- Added `robots.ts` and `sitemap.ts` for production indexing.
-- Added `.env.example` for production app URL, Supabase, Stripe, and monitoring secrets.
-- Removed the current lint warning from the question data.
-- Added `npm run check` and `npm run audit:high` release verification scripts.
-- Added GitHub Actions CI for install, lint, build, and high-severity audit checks.
+- Updated Next.js and `eslint-config-next` to `16.3.6`.
+- Resolved all currently reported npm dependency vulnerabilities.
+- Removed production `unsafe-eval` and unused external origins from the CSP.
+- Added versioned and validated Zustand persistence with migration support.
+- Replaced page-local counters with collision-resistant IDs.
+- Added browser-time-zone date handling while retaining UTC audit timestamps.
+- Added recurrence-aware action recommendations.
+- Fixed weekly goal deletion and date-scoped progress.
+- Added financial, metric, and local upload validation.
+- Clarified that selected evidence files are not uploaded without server storage.
+- Added Vitest coverage for date boundaries, streaks, scoring, recurrence, finance parsing, and persisted-state validation.
+- Limited search indexing to public routes and disabled indexing when the production URL is not configured.
+- Hardened GitHub Actions with read-only permissions, type checks, and unit tests.
 
 ## Current verification status
 
 - `npm.cmd run lint`: passing.
-- `npm.cmd run build`: passing.
-- `npm.cmd audit --audit-level=high`: passing after the Next.js patch.
-- `npm.cmd audit`: still reports 2 moderate findings from `next` bundling `postcss@8.4.31`.
+- `npm.cmd run typecheck`: passing.
+- `npm.cmd run test:run`: 14 tests passing.
+- `npm.cmd run build`: passing on Next.js `16.3.6`.
+- `npm.cmd audit`: 0 vulnerabilities.
 
-The latest stable `next` version available from npm on 2026-06-29 is `16.2.9`. An attempted npm override for Next's nested `postcss` made the install tree invalid, so it was not kept. Do not run `npm audit fix --force` blindly here; npm currently proposes a breaking downgrade path.
+## Worldwide behavior status
+
+- UTC timestamps are stored for chronological audit data.
+- User-facing calendar dates, streaks, and weekly windows use the browser's IANA time zone.
+- The time zone and browser locale at record creation are retained with new records.
+- The current UI is Korean only.
+- Locale-prefixed routing, `Accept-Language` negotiation, translation dictionaries, localized metadata, and a language switcher are not implemented yet.
 
 ## Still blocking a real worldwide paid launch
 
-- Auth is not implemented.
+- Authentication and account recovery are not implemented.
 - Server database persistence is not implemented.
-- Supabase RLS policies and migrations are not implemented.
-- Stripe Checkout/Billing and webhooks are not implemented.
-- Legal pages need real company, jurisdiction, support, refund, and privacy details.
-- Automated unit and E2E tests are not implemented.
-- Error monitoring is not connected.
-- Backup, restore, incident response, and support processes are not operational.
+- Supabase migrations, RLS policies, and private file storage are not implemented.
+- Stripe Checkout, Billing, and webhook verification are not implemented.
+- Legal pages need real company, jurisdiction, privacy, cookie, refund, and support details.
+- End-to-end tests are not implemented.
+- Error monitoring, backups, restore drills, incident response, and support operations are not connected.
+- A stricter nonce- or hash-based CSP requires a deliberate rendering and caching decision.
 
 ## Production environment checklist
 
-- Set `NEXT_PUBLIC_SITE_URL` to the final HTTPS domain.
-- Configure production Supabase project and rotate service role keys outside source control.
-- Configure Stripe live mode products, prices, customer portal, and webhook endpoint.
+- Set `NEXT_PUBLIC_SITE_URL` to the final HTTPS origin; indexing remains disabled without it.
+- Configure the production database, Auth providers, RLS, backups, and key rotation.
+- Configure private evidence storage with server-side type and size validation and signed URLs.
+- Configure Stripe live products, prices, customer portal, and webhook endpoint.
 - Configure Sentry or equivalent monitoring for client and server errors.
-- Verify security headers with the deployed domain.
-- Run `npm.cmd run lint`, `npm.cmd run build`, and `npm.cmd audit --audit-level=high` before every release.
-- Prefer `npm.cmd run check` locally and in CI once production network access is available.
-- Complete privacy policy, terms, cookie policy, and refund policy review with legal counsel.
+- Implement locale routes and translated legal/product content for each supported market.
+- Run `npm.cmd run check` before every release.

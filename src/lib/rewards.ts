@@ -1,4 +1,5 @@
 import type { ExecutionRecord, WeeklyGoal } from '@/data/types'
+import { isDateKeyInRange } from '@/lib/date-time'
 
 export interface RewardItem {
   id: string
@@ -53,7 +54,10 @@ export function getRewardState(
     weeklyGoal &&
       weeklyGoal.targetActions.length > 0 &&
       weeklyGoal.targetActions.every((actionId) =>
-        executionRecords.some((record) => record.action_id === actionId)
+        executionRecords.some((record) =>
+          record.action_id === actionId &&
+          isDateKeyInRange(record.execution_date, weeklyGoal.startDate, weeklyGoal.endDate)
+        )
       )
   )
 

@@ -18,6 +18,18 @@ import { INDICATORS, getIndicatorsForOperationType } from '@/data/constants'
 import { getTodayActions } from '@/lib/actions'
 import { getStatusLevel } from '@/lib/scoring'
 import type { OperationType, IndicatorId, WeeklyGoal } from '@/data/types'
+import {
+  addCalendarDays,
+  formatDateKey,
+  getTemporalContext,
+  isDateKeyInRange,
+} from '@/lib/date-time'
+import { createId } from '@/lib/id'
+import { useLocalDateKey } from '@/lib/use-local-date-key'
+
+function getDefaultEndDate(startDate: string) {
+  return addCalendarDays(startDate, 6)
+}
 
 export default function GoalsPage() {
   const router = useRouter()
@@ -32,57 +44,63 @@ export default function GoalsPage() {
 
   const effectiveOpType: OperationType = operationType ?? 'hall'
   const activeIndicators = getIndicatorsForOperationType(effectiveOpType)
+  const today = useLocalDateKey()
 
   const [showForm, setShowForm] = useState(false)
   const [formData, setFormData] = useState({
     title: '',
     targetIndicator: '' as IndicatorId | '',
-    endDate: getDefaultEndDate(),
+    endDate: '',
   })
+  const [formError, setFormError] = useState('')
 
-  const [goalCounter, setGoalCounter] = useState(1)
-
-  function getDefaultEndDate() {
-    const d = new Date()
-    d.setDate(d.getDate() + 6)
-    return d.toISOString().split('T')[0]
-  }
-
-  const todayActions = getTodayActions(scores, effectiveOpType, [])
+  const todayActions = getTodayActions(scores, effectiveOpType, executionRecords, today)
+  const weekStart = addCalendarDays(today, -6)
   const completedThisWeek = executionRecords.filter((r) => {
-    const weekAgo = new Date()
-    weekAgo.setDate(weekAgo.getDate() - 6)
-    return r.execution_date >= weekAgo.toISOString().split('T')[0]
+    return r.execution_date >= weekStart && r.execution_date <= today
   })
 
   function handleCreateGoal(e: React.FormEvent) {
     e.preventDefault()
-    if (!formData.title || !formData.targetIndicator) return
+    const title = formData.title.trim()
+    if (!title || !formData.targetIndicator) return
+    if (formData.endDate < today) {
+      setFormError('종료일은 오늘 이후로 선택해주세요.')
+      return
+    }
     const actionIds = todayActions
       .filter((a) => a.related_indicator === formData.targetIndicator)
       .map((a) => a.action_id)
 
-    const goalId = `goal_${goalCounter}`
-    setGoalCounter(c => c + 1)
+    const temporal = getTemporalContext()
     const goal: WeeklyGoal = {
-      id: goalId,
-      title: formData.title,
+      id: createId('goal'),
+      title,
       targetIndicator: formData.targetIndicator as IndicatorId,
-      startDate: new Date().toISOString().split('T')[0],
+      startDate: temporal.localDate,
       endDate: formData.endDate,
+      createdAt: temporal.recordedAt,
+      timeZone: temporal.timeZone,
+      locale: temporal.locale,
       targetActions: actionIds,
-      completedActions: executionRecords
-        .filter((r) => actionIds.includes(r.action_id))
-        .map((r) => r.action_id),
+      completedActions: [],
     }
     setWeeklyGoal(goal)
+    setFormError('')
     setShowForm(false)
   }
 
   function getGoalProgress(goal: WeeklyGoal): number {
     if (goal.targetActions.length === 0) return 0
-    const done = executionRecords.filter((r) => goal.targetActions.includes(r.action_id)).length
-    return Math.min(100, Math.round((done / goal.targetActions.length) * 100))
+    const done = new Set(
+      executionRecords
+        .filter((record) =>
+          goal.targetActions.includes(record.action_id) &&
+          isDateKeyInRange(record.execution_date, goal.startDate, goal.endDate)
+        )
+        .map((record) => record.action_id)
+    )
+    return Math.min(100, Math.round((done.size / goal.targetActions.length) * 100))
   }
 
   if (!diagnosisCompleted) {
@@ -153,13 +171,11 @@ export default function GoalsPage() {
               <button
                 onClick={() => {
                   if (confirm('목표를 삭제하시겠습니까?')) {
-                    setWeeklyGoal({
-                      ...weeklyGoal,
-                      completedActions: [],
-                    })
+                    setWeeklyGoal(null)
                   }
                 }}
                 className="p-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-400"
+                aria-label="목표 삭제"
               >
                 <Trash2 className="w-4 h-4" />
               </button>
@@ -210,7 +226,7 @@ export default function GoalsPage() {
             {/* Date range */}
             <div className="flex items-center gap-2 mt-4 text-xs text-slate-400">
               <Calendar className="w-3 h-3" />
-              {weeklyGoal.startDate} ~ {weeklyGoal.endDate}
+              {formatDateKey(weeklyGoal.startDate)} ~ {formatDateKey(weeklyGoal.endDate)}
             </div>
 
             {/* Target actions */}
@@ -246,7 +262,14 @@ export default function GoalsPage() {
             )}
 
             <button
-              onClick={() => setShowForm(true)}
+              onClick={() => {
+                setFormError('')
+                setFormData((current) => ({
+                  ...current,
+                  endDate: current.endDate || getDefaultEndDate(today),
+                }))
+                setShowForm(true)
+              }}
               className="mt-4 w-full py-2.5 rounded-2xl border-2 border-indigo-200 dark:border-indigo-700 text-indigo-600 dark:text-indigo-400 font-semibold text-sm hover:bg-indigo-50 dark:hover:bg-indigo-950/30 transition-colors"
             >
               목표 변경하기
@@ -299,8 +322,9 @@ export default function GoalsPage() {
                     setFormData({
                       title: `${ind.label} 개선 목표`,
                       targetIndicator: ind.id as IndicatorId,
-                      endDate: getDefaultEndDate(),
+                      endDate: getDefaultEndDate(today),
                     })
+                    setFormError('')
                     setShowForm(true)
                   }}
                 >
@@ -332,10 +356,13 @@ export default function GoalsPage() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 60 }}
                 className="fixed inset-x-4 bottom-4 md:inset-x-auto md:left-1/2 md:-translate-x-1/2 md:w-full md:max-w-lg z-50 bg-white dark:bg-[#202020] rounded-2xl border border-[#e9e9e7] dark:border-[#313131] p-6"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="goal-dialog-title"
               >
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-extrabold text-slate-900 dark:text-white">주간 목표 설정</h3>
-                  <button onClick={() => setShowForm(false)}>
+                  <h3 id="goal-dialog-title" className="font-extrabold text-slate-900 dark:text-white">주간 목표 설정</h3>
+                  <button onClick={() => setShowForm(false)} aria-label="목표 설정 닫기">
                     <X className="w-5 h-5 text-slate-400" />
                   </button>
                 </div>
@@ -347,9 +374,13 @@ export default function GoalsPage() {
                     <input
                       type="text"
                       required
+                      maxLength={160}
                       placeholder="예: 이번 주 배달앱 노출 개선"
                       value={formData.title}
-                      onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                      onChange={(e) => {
+                        setFormData({ ...formData, title: e.target.value })
+                        setFormError('')
+                      }}
                       className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-indigo-400"
                     />
                   </div>
@@ -377,11 +408,19 @@ export default function GoalsPage() {
                     </label>
                     <input
                       type="date"
+                      min={today}
+                      required
                       value={formData.endDate}
-                      onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
+                      onChange={(e) => {
+                        setFormData({ ...formData, endDate: e.target.value })
+                        setFormError('')
+                      }}
                       className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-indigo-400"
                     />
                   </div>
+                  {formError && (
+                    <p className="text-sm font-medium text-red-500" role="alert">{formError}</p>
+                  )}
                   <button
                     type="submit"
                     className="w-full py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold transition-colors"

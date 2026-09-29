@@ -7,7 +7,6 @@ import { ChevronRight, ChevronLeft } from 'lucide-react'
 import { useStore } from '@/lib/store'
 import { QUESTIONS_BY_INDUSTRY, RESTAURANT_QUESTIONS } from '@/data/questions'
 import { calculateIndicatorScores } from '@/lib/scoring'
-import { getTodayActions } from '@/lib/actions'
 import type { OperationType } from '@/data/types'
 
 export default function DiagnosisPage() {
@@ -18,7 +17,6 @@ export default function DiagnosisPage() {
     answers,
     setAnswer,
     completeDiagnosis,
-    setTodayActions,
     diagnosisCompleted,
     resetDiagnosis,
   } = useStore()
@@ -61,9 +59,7 @@ export default function DiagnosisPage() {
       // All done — calculate scores
       const effectiveOpType: OperationType = operationType ?? 'hall'
       const scores = calculateIndicatorScores(answers, questions, effectiveOpType)
-      const todayActions = getTodayActions(scores, effectiveOpType, [])
       completeDiagnosis(scores)
-      setTodayActions(todayActions.map((a) => a.action_id))
       router.push('/diagnosis/result')
     }
   }

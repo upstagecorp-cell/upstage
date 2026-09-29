@@ -7,8 +7,13 @@ import { ArrowRight, ArrowLeft, CheckCircle, Upload, X } from 'lucide-react'
 import { useStore } from '@/lib/store'
 import { INDUSTRIES, STAGES, getOperationTypesForIndustry } from '@/data/constants'
 import type { IndustryId, StageId, OperationType } from '@/data/types'
+import { getTemporalContext } from '@/lib/date-time'
+import { parseKoreanMoneyText } from '@/lib/financial'
 
 const BASE_TOTAL_STEPS = 3
+const MAX_EVIDENCE_FILES = 5
+const MAX_EVIDENCE_FILE_BYTES = 10 * 1024 * 1024
+const ALLOWED_EVIDENCE_EXTENSIONS = /\.(jpe?g|png|webp|pdf|xlsx?|csv|txt)$/i
 
 function requiresFinancialSnapshot(stage: StageId | null) {
   return stage === 'operating' || stage === 'plateau' || stage === 'expansion'
@@ -25,6 +30,8 @@ export default function OnboardingPage() {
   const [monthlyRevenueText, setMonthlyRevenueText] = useState('')
   const [monthlyNetProfitText, setMonthlyNetProfitText] = useState('')
   const [evidenceFileNames, setEvidenceFileNames] = useState<string[]>([])
+  const [financialError, setFinancialError] = useState('')
+  const [evidenceError, setEvidenceError] = useState('')
 
   const totalSteps = requiresFinancialSnapshot(selectedStage) || step === 4 ? 4 : BASE_TOTAL_STEPS
   const progress = (step / totalSteps) * 100
@@ -36,7 +43,7 @@ export default function OnboardingPage() {
       setStep(2)
     } else if (step === 2) {
       if ((selectedIndustry === 'restaurant' || selectedIndustry === 'cafe' || selectedIndustry === 'accommodation') && !selectedOpType) return
-      if (selectedOpType) setOperationType(selectedOpType)
+      setOperationType(selectedOpType ?? 'hall')
       setStep(3)
     } else if (step === 3) {
       if (!selectedStage) return
@@ -49,11 +56,25 @@ export default function OnboardingPage() {
       router.push('/diagnosis')
     } else if (step === 4) {
       if (!monthlyRevenueText.trim() || !monthlyNetProfitText.trim()) return
+      const revenue = parseKoreanMoneyText(monthlyRevenueText)
+      const netProfit = parseKoreanMoneyText(monthlyNetProfitText)
+      if (revenue === null || revenue <= 0) {
+        setFinancialError('매출은 0보다 큰 숫자로 입력해주세요. 예: 2,500만원')
+        return
+      }
+      if (netProfit === null) {
+        setFinancialError('순이익 형식을 확인해주세요. 적자는 -320만원처럼 입력할 수 있습니다.')
+        return
+      }
+      const temporal = getTemporalContext()
+      setFinancialError('')
       setFinancialSnapshot({
         monthlyRevenueText: monthlyRevenueText.trim(),
         monthlyNetProfitText: monthlyNetProfitText.trim(),
         evidenceFileNames,
-        capturedAt: new Date().toISOString(),
+        capturedAt: temporal.recordedAt,
+        timeZone: temporal.timeZone,
+        locale: temporal.locale,
       })
       router.push('/diagnosis')
     }
@@ -66,7 +87,30 @@ export default function OnboardingPage() {
   function handleEvidenceUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const files = e.target.files
     if (!files) return
-    setEvidenceFileNames(prev => Array.from(new Set([...prev, ...Array.from(files).map(file => file.name)])))
+    const selectedFiles = Array.from(files)
+    const invalidType = selectedFiles.find((file) => !ALLOWED_EVIDENCE_EXTENSIONS.test(file.name))
+    const oversized = selectedFiles.find((file) => file.size > MAX_EVIDENCE_FILE_BYTES)
+
+    if (invalidType) {
+      setEvidenceError(`${invalidType.name}: 지원하지 않는 파일 형식입니다.`)
+      e.target.value = ''
+      return
+    }
+    if (oversized) {
+      setEvidenceError(`${oversized.name}: 파일 크기는 10MB 이하여야 합니다.`)
+      e.target.value = ''
+      return
+    }
+
+    setEvidenceFileNames((prev) => {
+      const next = Array.from(new Set([...prev, ...selectedFiles.map((file) => file.name)]))
+      if (next.length > MAX_EVIDENCE_FILES) {
+        setEvidenceError(`파일은 최대 ${MAX_EVIDENCE_FILES}개까지 선택할 수 있습니다.`)
+        return prev
+      }
+      setEvidenceError('')
+      return next
+    })
     e.target.value = ''
   }
 
@@ -127,7 +171,10 @@ export default function OnboardingPage() {
                 {INDUSTRIES.map((ind) => (
                   <button
                     key={ind.id}
-                    onClick={() => setSelectedIndustry(ind.id)}
+                    onClick={() => {
+                      setSelectedIndustry(ind.id)
+                      setSelectedOpType(null)
+                    }}
                     className={`flex flex-col items-start gap-2 p-4 rounded-2xl border-2 transition-all text-left ${
                       selectedIndustry === ind.id
                         ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-950 dark:border-indigo-400'
@@ -249,9 +296,13 @@ export default function OnboardingPage() {
                     type="text"
                     required
                     inputMode="text"
+                    maxLength={100}
                     placeholder="예: 2,500만원 또는 25000000"
                     value={monthlyRevenueText}
-                    onChange={(e) => setMonthlyRevenueText(e.target.value)}
+                    onChange={(e) => {
+                      setMonthlyRevenueText(e.target.value)
+                      setFinancialError('')
+                    }}
                     className="w-full px-4 py-3 rounded-2xl border-2 border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-700 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-indigo-400"
                   />
                 </div>
@@ -264,19 +315,23 @@ export default function OnboardingPage() {
                     type="text"
                     required
                     inputMode="text"
+                    maxLength={100}
                     placeholder="예: 320만원 또는 3200000"
                     value={monthlyNetProfitText}
-                    onChange={(e) => setMonthlyNetProfitText(e.target.value)}
+                    onChange={(e) => {
+                      setMonthlyNetProfitText(e.target.value)
+                      setFinancialError('')
+                    }}
                     className="w-full px-4 py-3 rounded-2xl border-2 border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-700 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-indigo-400"
                   />
                 </div>
 
                 <div>
                   <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
-                    재무 증빙 자료 <span className="text-slate-400 font-medium">(선택)</span>
+                    증빙 파일명 메모 <span className="text-slate-400 font-medium">(선택)</span>
                   </label>
                   <p className="text-xs text-slate-400 mb-3">
-                    매출표, 손익 자료, POS 캡처, 통장 내역, 스크린샷 등을 첨부할 수 있습니다.
+                    현재 파일 자체는 저장되지 않으며, 선택한 파일명만 이 브라우저에 기록됩니다.
                   </p>
                   <label className="flex items-center justify-center gap-2 w-full py-3 rounded-2xl border-2 border-dashed border-slate-300 dark:border-slate-600 text-slate-500 dark:text-slate-400 text-sm font-semibold hover:border-indigo-400 hover:text-indigo-500 dark:hover:border-indigo-500 dark:hover:text-indigo-400 transition-colors cursor-pointer">
                     <Upload className="w-4 h-4" />
@@ -284,7 +339,7 @@ export default function OnboardingPage() {
                     <input
                       type="file"
                       multiple
-                      accept="image/*,.pdf,.xlsx,.xls,.csv,.txt"
+                      accept=".jpg,.jpeg,.png,.webp,.pdf,.xlsx,.xls,.csv,.txt"
                       onChange={handleEvidenceUpload}
                       className="hidden"
                     />
@@ -310,7 +365,13 @@ export default function OnboardingPage() {
                       ))}
                     </div>
                   )}
+                  {evidenceError && (
+                    <p className="mt-2 text-xs font-medium text-red-500" role="alert">{evidenceError}</p>
+                  )}
                 </div>
+                {financialError && (
+                  <p className="text-sm font-medium text-red-500" role="alert">{financialError}</p>
+                )}
               </div>
             </motion.div>
           )}

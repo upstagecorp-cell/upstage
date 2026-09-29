@@ -28,6 +28,7 @@ import { generateDiagnosisFeedback } from '@/lib/ai-feedback'
 import { analyzeFinancialSnapshot } from '@/lib/financial'
 import type { OperationType, IndicatorId, ActionCard } from '@/data/types'
 import type { FinancialAnalysis } from '@/lib/financial'
+import { useLocalDateKey } from '@/lib/use-local-date-key'
 
 export default function DiagnosisResultPage() {
   const router = useRouter()
@@ -41,6 +42,7 @@ export default function DiagnosisResultPage() {
   } = useStore()
 
   const effectiveOpType: OperationType = operationType ?? 'hall'
+  const today = useLocalDateKey()
 
   useEffect(() => {
     if (!diagnosisCompleted) {
@@ -56,8 +58,8 @@ export default function DiagnosisResultPage() {
   const priorityIndicators = getIndicatorsByPriority(effectiveOpType).slice(0, 5)
   const feedbacks = generateDiagnosisFeedback(scores, effectiveOpType)
   const financialAnalysis = analyzeFinancialSnapshot(financialSnapshot)
-  const todayActions = prioritizeActionsByFinancial(getTodayActions(scores, effectiveOpType, []), financialAnalysis)
-  const weekActions = prioritizeActionsByFinancial(getWeekActions(scores, effectiveOpType, []), financialAnalysis)
+  const todayActions = prioritizeActionsByFinancial(getTodayActions(scores, effectiveOpType, executionRecords, today), financialAnalysis)
+  const weekActions = prioritizeActionsByFinancial(getWeekActions(scores, effectiveOpType, executionRecords, today), financialAnalysis)
   const primaryRisk = topRisks[0]
   const primaryIndicator = primaryRisk ? INDICATORS.find((ind) => ind.id === primaryRisk.indicator) : null
   const primaryAction = todayActions[0] ?? weekActions[0]
@@ -67,7 +69,7 @@ export default function DiagnosisResultPage() {
 
   function handleReDiagnose() {
     resetDiagnosis()
-    router.push('/diagnosis')
+    router.push('/onboarding')
   }
 
   const riskLevelColors: Record<string, string> = {
@@ -162,7 +164,9 @@ export default function DiagnosisResultPage() {
               </div>
             </div>
             <p className="text-xs text-slate-400 mt-3">
-              증빙 자료: {financialAnalysis.hasEvidence ? `${financialSnapshot?.evidenceFileNames.length ?? 0}개 첨부됨` : '자가 입력 기준'}
+              {financialAnalysis.hasEvidenceFileNames
+                ? `참고 파일명 ${financialSnapshot?.evidenceFileNames.length ?? 0}개 기록됨 (파일 미저장)`
+                : '자가 입력 기준'}
             </p>
           </motion.div>
         )}

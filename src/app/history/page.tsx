@@ -17,6 +17,7 @@ import { useStore } from '@/lib/store'
 import { getIndicatorsForOperationType } from '@/data/constants'
 import { getActionById } from '@/data/actions'
 import { getStatusLevel } from '@/lib/scoring'
+import { formatDateKey } from '@/lib/date-time'
 import type { IndicatorId, OperationType } from '@/data/types'
 
 export default function HistoryPage() {
@@ -41,7 +42,7 @@ export default function HistoryPage() {
 
   // Prepare score trend data
   const trendData = scoreHistory.map((snap) => ({
-    date: snap.date.slice(5), // MM-DD
+    date: formatDateKey(snap.date, undefined, { month: 'short', day: 'numeric' }),
     fullDate: snap.date,
     전체점수: snap.totalScore,
     ...Object.fromEntries(
@@ -231,7 +232,7 @@ export default function HistoryPage() {
                 <div key={date}>
                   <div className="flex items-center gap-2 mb-3">
                     <div className="w-2 h-2 rounded-full bg-indigo-500" />
-                    <span className="text-sm font-bold text-slate-500 dark:text-slate-400">{date}</span>
+                    <span className="text-sm font-bold text-slate-500 dark:text-slate-400">{formatDateKey(date)}</span>
                     <div className="flex-1 h-px bg-slate-100 dark:bg-slate-700" />
                     <span className="text-xs text-slate-400">{grouped[date].length}개 완료</span>
                   </div>

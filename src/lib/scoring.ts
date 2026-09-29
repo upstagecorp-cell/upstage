@@ -1,5 +1,5 @@
 import { IndicatorId, DiagnosisQuestion, OperationType, RiskLevel } from '@/data/types'
-import { INDICATOR_WEIGHTS, getIndicatorsForOperationType } from '@/data/constants'
+import { INDICATORS, INDICATOR_WEIGHTS, getIndicatorsForOperationType } from '@/data/constants'
 
 // 진단 답변으로부터 지표별 점수 계산
 export function calculateIndicatorScores(
@@ -7,34 +7,31 @@ export function calculateIndicatorScores(
   questions: DiagnosisQuestion[],
   operationType: OperationType
 ): Record<IndicatorId, number> {
-  const sums: Record<string, { total: number; count: number; weightedTotal: number; weightedCount: number }> = {}
+  const sums: Record<string, { total: number; count: number }> = {}
 
   const indicators = getIndicatorsForOperationType(operationType)
   indicators.forEach(ind => {
-    sums[ind.id] = { total: 0, count: 0, weightedTotal: 0, weightedCount: 0 }
+    sums[ind.id] = { total: 0, count: 0 }
   })
-
-  const weights = INDICATOR_WEIGHTS[operationType]
 
   questions.forEach(q => {
     const score = answers[q.question_id]
-    if (score !== undefined) {
-      const weight = weights[q.category] || 5
-      sums[q.category].total += score
-      sums[q.category].count += 1
-      sums[q.category].weightedTotal += score * weight
-      sums[q.category].weightedCount += weight
-    }
+    const sum = sums[q.category]
+    if (!sum || typeof score !== 'number' || !Number.isFinite(score) || score < 1 || score > 5) return
+    sum.total += score
+    sum.count += 1
   })
 
-  const scores: Partial<Record<IndicatorId, number>> = {}
+  const scores = Object.fromEntries(
+    INDICATORS.map((indicator) => [indicator.id, 0])
+  ) as Record<IndicatorId, number>
   indicators.forEach(ind => {
     const { total, count } = sums[ind.id]
     // 점수를 1~5점 기반에서 0~100점으로 변환
     scores[ind.id] = count > 0 ? Math.round((total / count) * 20) : 0
   })
 
-  return scores as Record<IndicatorId, number>
+  return scores
 }
 
 // 전체 점수 계산 (가중 평균)

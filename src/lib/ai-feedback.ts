@@ -1,6 +1,7 @@
 import { IndicatorId, OperationType, ExecutionRecord, ScoreSnapshot } from '@/data/types'
 import { INDICATORS, getIndicatorsForOperationType } from '@/data/constants'
 import { getActionById } from '@/data/actions'
+import { addCalendarDays, getLocalDateKey } from '@/lib/date-time'
 
 export interface WeeklyInsight {
   summary: string
@@ -106,12 +107,10 @@ export function generateWeeklyInsight(
   records: ExecutionRecord[],
   scoreHistory: ScoreSnapshot[],
 ): WeeklyInsight {
-  const today = new Date()
-  const weekAgo = new Date(today)
-  weekAgo.setDate(today.getDate() - 6)
-  const weekAgoStr = weekAgo.toISOString().split('T')[0]
+  const today = getLocalDateKey()
+  const weekAgo = addCalendarDays(today, -6)
 
-  const weekRecords = records.filter(r => r.execution_date >= weekAgoStr)
+  const weekRecords = records.filter(r => r.execution_date >= weekAgo && r.execution_date <= today)
   const weekCompleted = weekRecords.length
 
   let trendLabel: 'growth' | 'stagnant' | 'decline' = 'stagnant'

@@ -20,10 +20,16 @@ import { getTodayActions } from '@/lib/actions'
 import { generateActionFeedback } from '@/lib/ai-feedback'
 import { getRewardMessage, getRewardState } from '@/lib/rewards'
 import type { OperationType, ExecutionRecord } from '@/data/types'
+import { getTemporalContext } from '@/lib/date-time'
+import { createId } from '@/lib/id'
+import { useLocalDateKey } from '@/lib/use-local-date-key'
 
 const diffLabels: Record<string, string> = { easy: '쉬움', normal: '보통', hard: '어려움' }
 const impactLabels: Record<string, string> = { low: '낮음', medium: '중간', high: '높음' }
 const costLabels: Record<string, string> = { none: '무료', low: '소액', medium: '중간 비용' }
+const MAX_PREVIEW_IMAGES = 3
+const MAX_PREVIEW_IMAGE_BYTES = 5 * 1024 * 1024
+const ALLOWED_PREVIEW_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp'])
 
 export default function ActionPage() {
   const router = useRouter()
@@ -38,8 +44,8 @@ export default function ActionPage() {
   } = useStore()
 
   const effectiveOpType: OperationType = operationType ?? 'hall'
-  const completedIds = executionRecords.map((r) => r.action_id)
-  const todayActions = getTodayActions(scores, effectiveOpType, completedIds)
+  const today = useLocalDateKey()
+  const todayActions = getTodayActions(scores, effectiveOpType, executionRecords, today)
   const rewardState = getRewardState(executionRecords, weeklyGoal)
 
   const [expandedId, setExpandedId] = useState<string | null>(null)
@@ -54,13 +60,14 @@ export default function ActionPage() {
   const [submittedId, setSubmittedId] = useState<string | null>(null)
   const [feedbackMsg, setFeedbackMsg] = useState<string>('')
   const [uploadedImages, setUploadedImages] = useState<string[]>([])
+  const [uploadError, setUploadError] = useState('')
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const [recordCounter, setRecordCounter] = useState(1)
 
   function openForm(actionId: string) {
     setFormActionId(actionId)
     setFormData({ time_spent: '', difficulty_note: '', result_memo: '', evidence: '', next_recommended_action: '' })
     setUploadedImages([])
+    setUploadError('')
     setSubmittedId(null)
     setFeedbackMsg('')
   }
@@ -72,8 +79,28 @@ export default function ActionPage() {
   function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const files = e.target.files
     if (!files) return
-    Array.from(files).forEach(file => {
-      if (!file.type.startsWith('image/')) return
+    const selectedFiles = Array.from(files)
+    if (uploadedImages.length + selectedFiles.length > MAX_PREVIEW_IMAGES) {
+      setUploadError(`이미지 미리보기는 최대 ${MAX_PREVIEW_IMAGES}개까지 가능합니다.`)
+      e.target.value = ''
+      return
+    }
+
+    const invalidType = selectedFiles.find((file) => !ALLOWED_PREVIEW_TYPES.has(file.type))
+    const oversized = selectedFiles.find((file) => file.size > MAX_PREVIEW_IMAGE_BYTES)
+    if (invalidType) {
+      setUploadError(`${invalidType.name}: JPG, PNG, WebP 이미지만 사용할 수 있습니다.`)
+      e.target.value = ''
+      return
+    }
+    if (oversized) {
+      setUploadError(`${oversized.name}: 이미지 크기는 5MB 이하여야 합니다.`)
+      e.target.value = ''
+      return
+    }
+
+    setUploadError('')
+    selectedFiles.forEach(file => {
       const reader = new FileReader()
       reader.onload = () => {
         if (typeof reader.result === 'string') {
@@ -91,25 +118,23 @@ export default function ActionPage() {
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (!formActionId) return
-    // 근거 자료: 텍스트 + 업로드 이미지 모두 포함
-    const evidenceParts: string[] = []
-    if (formData.evidence.trim()) evidenceParts.push(formData.evidence.trim())
-    uploadedImages.forEach((_img, i) => evidenceParts.push(`[첨부 이미지 ${i + 1}]`))
-    const combinedEvidence = evidenceParts.join(' | ')
+    if (!formActionId || !formData.time_spent.trim() || !formData.result_memo.trim() || !formData.evidence.trim()) return
+    const temporal = getTemporalContext()
 
     const record: ExecutionRecord = {
-      id: `rec_${recordCounter}`,
+      id: createId('rec'),
       action_id: formActionId,
-      execution_date: new Date().toISOString().split('T')[0],
-      time_spent: formData.time_spent,
-      difficulty_note: formData.difficulty_note,
-      result_memo: formData.result_memo,
-      evidence: combinedEvidence || undefined,
-      next_recommended_action: formData.next_recommended_action || undefined,
+      execution_date: temporal.localDate,
+      recorded_at: temporal.recordedAt,
+      time_zone: temporal.timeZone,
+      locale: temporal.locale,
+      time_spent: formData.time_spent.trim(),
+      difficulty_note: formData.difficulty_note.trim(),
+      result_memo: formData.result_memo.trim(),
+      evidence: formData.evidence.trim(),
+      next_recommended_action: formData.next_recommended_action.trim() || undefined,
     }
     addExecutionRecord(record)
-    setRecordCounter(c => c + 1)
     calculateStreak()
     const feedback = generateActionFeedback(record, scores)
     const rewardFeedback = getRewardMessage([record, ...executionRecords])
@@ -210,7 +235,6 @@ export default function ActionPage() {
         ) : (
           <div className="flex flex-col gap-4">
             {todayActions.map((action, i) => {
-              const isCompleted = completedIds.includes(action.action_id)
               const isExpanded = expandedId === action.action_id
               const isSubmittedNow = submittedId === action.action_id
 
@@ -221,7 +245,7 @@ export default function ActionPage() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.08 }}
                   className={`bg-white dark:bg-[#202020] rounded-2xl overflow-hidden border transition-colors ${
-                    isCompleted || isSubmittedNow
+                    isSubmittedNow
                       ? 'border-emerald-200 dark:border-emerald-800'
                       : 'border-transparent'
                   }`}
@@ -231,12 +255,12 @@ export default function ActionPage() {
                     <div className="flex items-start gap-3 mb-3">
                       <div
                         className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 ${
-                          isCompleted || isSubmittedNow
+                          isSubmittedNow
                             ? 'bg-emerald-100 dark:bg-emerald-900'
                             : 'bg-amber-100 dark:bg-amber-900'
                         }`}
                       >
-                        {isCompleted || isSubmittedNow ? (
+                        {isSubmittedNow ? (
                           <CheckCircle className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
                         ) : (
                           <span className="text-sm font-bold text-amber-600 dark:text-amber-400">{i + 1}</span>
@@ -297,7 +321,7 @@ export default function ActionPage() {
                     </AnimatePresence>
 
                     {/* CTA */}
-                    {!isCompleted && !isSubmittedNow && (
+                    {!isSubmittedNow && (
                       <button
                         onClick={() => openForm(action.action_id)}
                         className="mt-3 w-full flex items-center justify-center gap-2 py-2.5 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-sm transition-colors"
@@ -306,7 +330,7 @@ export default function ActionPage() {
                         실행 완료 기록하기
                       </button>
                     )}
-                    {(isCompleted || isSubmittedNow) && (
+                    {isSubmittedNow && (
                       <div className="mt-3 flex items-center justify-center gap-2 py-2.5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 text-sm font-bold">
                         <CheckCircle className="w-4 h-4" />
                         완료됨
@@ -350,6 +374,7 @@ export default function ActionPage() {
                     <input
                       type="text"
                       required
+                      maxLength={100}
                       placeholder="예: 45분"
                       value={formData.time_spent}
                       onChange={(e) => setFormData({ ...formData, time_spent: e.target.value })}
@@ -362,6 +387,7 @@ export default function ActionPage() {
                     </label>
                     <input
                       type="text"
+                      maxLength={1000}
                       placeholder="실행 중 어려웠던 점을 적어주세요"
                       value={formData.difficulty_note}
                       onChange={(e) => setFormData({ ...formData, difficulty_note: e.target.value })}
@@ -375,6 +401,7 @@ export default function ActionPage() {
                     <textarea
                       required
                       rows={3}
+                      maxLength={5000}
                       placeholder="실행 결과를 간단히 적어주세요"
                       value={formData.result_memo}
                       onChange={(e) => setFormData({ ...formData, result_memo: e.target.value })}
@@ -388,7 +415,8 @@ export default function ActionPage() {
                     <p className="text-xs text-slate-400 mb-2">URL, 수치, 텍스트 입력 또는 스크린샷을 첨부하세요</p>
                     <input
                       type="text"
-                      required={uploadedImages.length === 0}
+                      required
+                      maxLength={5000}
                       placeholder="예: 네이버 플레이스 URL, 원가율 32%, 리뷰 응답 완료 등"
                       value={formData.evidence}
                       onChange={(e) => setFormData({ ...formData, evidence: e.target.value })}
@@ -398,7 +426,7 @@ export default function ActionPage() {
                     <input
                       ref={fileInputRef}
                       type="file"
-                      accept="image/*"
+                      accept="image/jpeg,image/png,image/webp"
                       multiple
                       onChange={handleFileUpload}
                       className="hidden"
@@ -409,8 +437,14 @@ export default function ActionPage() {
                       className="mt-2 w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border-2 border-dashed border-slate-300 dark:border-slate-600 text-slate-500 dark:text-slate-400 text-sm font-medium hover:border-indigo-400 hover:text-indigo-500 dark:hover:border-indigo-500 dark:hover:text-indigo-400 transition-colors"
                     >
                       <ImagePlus className="w-4 h-4" />
-                      스크린샷 첨부하기
+                      스크린샷 로컬 미리보기
                     </button>
+                    <p className="mt-2 text-xs text-slate-400">
+                      이미지는 현재 저장되지 않습니다. 저장할 근거는 위 입력란에 텍스트나 URL로 남겨주세요.
+                    </p>
+                    {uploadError && (
+                      <p className="mt-2 text-xs font-medium text-red-500" role="alert">{uploadError}</p>
+                    )}
                     {/* Image previews */}
                     {uploadedImages.length > 0 && (
                       <div className="mt-3 grid grid-cols-3 gap-2">
@@ -436,6 +470,7 @@ export default function ActionPage() {
                     </label>
                     <input
                       type="text"
+                      maxLength={1000}
                       placeholder="다음에 도전하고 싶은 것"
                       value={formData.next_recommended_action}
                       onChange={(e) => setFormData({ ...formData, next_recommended_action: e.target.value })}

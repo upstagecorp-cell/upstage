@@ -130,7 +130,7 @@ export default function LandingPage() {
               <br />
               실행으로 성장시키는
               <span className="block pb-2 bg-gradient-to-r from-violet-700 via-fuchsia-600 to-indigo-500 bg-clip-text leading-[1.12] text-transparent">
-                UpStage
+                NEXSORA
               </span>
             </h1>
 
@@ -259,7 +259,7 @@ export default function LandingPage() {
       <section className="px-4 py-20">
         <div className="mx-auto max-w-6xl">
           <div className="max-w-2xl">
-            <p className="text-sm font-bold uppercase tracking-[0.18em] text-violet-500">Why UpStage</p>
+            <p className="text-sm font-bold uppercase tracking-[0.18em] text-violet-500">Why NEXSORA</p>
             <h2 className="mt-4 text-3xl font-extrabold md:text-5xl">분석으로 끝나지 않는 성장 시스템</h2>
             <p className="mt-5 text-base leading-8 text-slate-600 dark:text-slate-300">
               보고서를 더 많이 보여주는 대신, 사업자가 다음 행동을 더 빨리 결정하도록 돕습니다.
@@ -487,7 +487,7 @@ export default function LandingPage() {
             <div>
               <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-2 text-sm font-semibold">
                 <Layers3 className="h-4 w-4" />
-                UpStage
+                NEXSORA
               </div>
               <h2 className="max-w-3xl text-3xl font-extrabold md:text-5xl">
                 더 많은 정보보다,

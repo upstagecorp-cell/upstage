@@ -24,31 +24,48 @@ import {
 } from 'lucide-react'
 import { useStore } from '@/lib/store'
 import type { BusinessMetricEntry } from '@/data/types'
+import { formatDateKey, getTemporalContext } from '@/lib/date-time'
+import { useLocalDateKey } from '@/lib/use-local-date-key'
+
+type MetricFieldKey =
+  | 'revenue'
+  | 'customers'
+  | 'visitors'
+  | 'reservations'
+  | 'conversionRate'
+  | 'reviews'
+  | 'returnVisitors'
+  | 'inquiries'
 
 const METRIC_FIELDS: {
-  key: keyof BusinessMetricEntry
+  key: MetricFieldKey
   label: string
   prefix?: string
   suffix?: string
   color: string
+  max: number
+  step: number | 'any'
 }[] = [
-  { key: 'revenue', label: '매출액', prefix: '₩', color: '#6366f1' },
-  { key: 'customers', label: '고객 수', suffix: '명', color: '#ec4899' },
-  { key: 'visitors', label: '방문자 수', suffix: '명', color: '#f59e0b' },
-  { key: 'reservations', label: '예약 건수', suffix: '건', color: '#10b981' },
-  { key: 'conversionRate', label: '전환율', suffix: '%', color: '#3b82f6' },
-  { key: 'reviews', label: '신규 리뷰', suffix: '개', color: '#eab308' },
-  { key: 'returnVisitors', label: '재방문 고객', suffix: '명', color: '#a855f7' },
+  { key: 'revenue', label: '매출액', prefix: '₩', color: '#6366f1', max: 1_000_000_000_000_000, step: 'any' },
+  { key: 'customers', label: '고객 수', suffix: '명', color: '#ec4899', max: 1_000_000_000, step: 1 },
+  { key: 'visitors', label: '방문자 수', suffix: '명', color: '#f59e0b', max: 1_000_000_000, step: 1 },
+  { key: 'reservations', label: '예약 건수', suffix: '건', color: '#10b981', max: 1_000_000_000, step: 1 },
+  { key: 'conversionRate', label: '전환율', suffix: '%', color: '#3b82f6', max: 100, step: 'any' },
+  { key: 'reviews', label: '신규 리뷰', suffix: '개', color: '#eab308', max: 1_000_000_000, step: 1 },
+  { key: 'returnVisitors', label: '재방문 고객', suffix: '명', color: '#a855f7', max: 1_000_000_000, step: 1 },
+  { key: 'inquiries', label: '문의 수', suffix: '건', color: '#14b8a6', max: 1_000_000_000, step: 1 },
 ]
 
 export default function MetricsPage() {
   const router = useRouter()
   const { businessMetrics, addBusinessMetric, diagnosisCompleted } = useStore()
+  const today = useLocalDateKey()
 
   const [showForm, setShowForm] = useState(false)
   const [formData, setFormData] = useState<Partial<BusinessMetricEntry>>({
-    date: new Date().toISOString().split('T')[0],
+    date: '',
   })
+  const [formError, setFormError] = useState('')
   const [activeFields, setActiveFields] = useState<Set<string>>(new Set(['revenue', 'customers']))
   const [expandedChart, setExpandedChart] = useState(true)
 
@@ -67,18 +84,36 @@ export default function MetricsPage() {
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!formData.date) return
+    const values: Partial<Record<MetricFieldKey, number>> = {}
+    for (const field of METRIC_FIELDS) {
+      const value = formData[field.key]
+      if (value === undefined) continue
+      if (typeof value !== 'number' || !Number.isFinite(value) || value < 0 || value > field.max) {
+        setFormError(`${field.label} 값의 범위를 확인해주세요.`)
+        return
+      }
+      values[field.key] = value
+    }
+    if (Object.keys(values).length === 0) {
+      setFormError('한 개 이상의 지표를 입력해주세요.')
+      return
+    }
+    if (formData.date > today) {
+      setFormError('미래 날짜의 운영 지표는 저장할 수 없습니다.')
+      return
+    }
+
+    const temporal = getTemporalContext()
     const entry: BusinessMetricEntry = {
       date: formData.date,
-      revenue: formData.revenue ? Number(formData.revenue) : undefined,
-      customers: formData.customers ? Number(formData.customers) : undefined,
-      visitors: formData.visitors ? Number(formData.visitors) : undefined,
-      reservations: formData.reservations ? Number(formData.reservations) : undefined,
-      conversionRate: formData.conversionRate ? Number(formData.conversionRate) : undefined,
-      reviews: formData.reviews ? Number(formData.reviews) : undefined,
-      returnVisitors: formData.returnVisitors ? Number(formData.returnVisitors) : undefined,
+      ...values,
+      recordedAt: temporal.recordedAt,
+      timeZone: temporal.timeZone,
+      locale: temporal.locale,
     }
     addBusinessMetric(entry)
-    setFormData({ date: new Date().toISOString().split('T')[0] })
+    setFormData({ date: today })
+    setFormError('')
     setShowForm(false)
   }
 
@@ -86,7 +121,7 @@ export default function MetricsPage() {
   const sortedMetrics = [...businessMetrics].sort((a, b) => a.date.localeCompare(b.date))
   const chartData = sortedMetrics.map((m) => ({
     ...m,
-    date: m.date.slice(5),
+    date: formatDateKey(m.date, undefined, { month: 'short', day: 'numeric' }),
   }))
 
   // Compute latest vs prev for trend display
@@ -131,7 +166,11 @@ export default function MetricsPage() {
               </p>
             </div>
             <button
-              onClick={() => setShowForm(!showForm)}
+              onClick={() => {
+                setFormData((current) => ({ ...current, date: current.date || today }))
+                setFormError('')
+                setShowForm(!showForm)
+              }}
               className="flex items-center gap-2 px-4 py-2 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm transition-colors"
             >
               <Plus className="w-4 h-4" />
@@ -153,8 +192,13 @@ export default function MetricsPage() {
                 <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">날짜</label>
                 <input
                   type="date"
+                  required
+                  max={today}
                   value={formData.date}
-                  onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                  onChange={(e) => {
+                    setFormData({ ...formData, date: e.target.value })
+                    setFormError('')
+                  }}
                   className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-indigo-400"
                 />
               </div>
@@ -166,18 +210,23 @@ export default function MetricsPage() {
                     </label>
                     <input
                       type="number"
-                      min="0"
-                      step="any"
+                      min={0}
+                      max={field.max}
+                      step={field.step}
                       placeholder="입력..."
                       value={(formData[field.key] as number | undefined) ?? ''}
-                      onChange={(e) =>
-                        setFormData({ ...formData, [field.key]: e.target.value ? Number(e.target.value) : undefined })
-                      }
+                      onChange={(e) => {
+                        setFormData({ ...formData, [field.key]: e.target.value === '' ? undefined : Number(e.target.value) })
+                        setFormError('')
+                      }}
                       className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-indigo-400"
                     />
                   </div>
                 ))}
               </div>
+              {formError && (
+                <p className="text-sm font-medium text-red-500" role="alert">{formError}</p>
+              )}
               <div className="flex gap-3 mt-2">
                 <button
                   type="button"
@@ -347,7 +396,7 @@ export default function MetricsPage() {
                   .slice(0, 10)
                   .map((m, i) => (
                     <tr key={i} className="border-b border-slate-50 dark:border-slate-700/50">
-                      <td className="py-2 pr-3 text-slate-600 dark:text-slate-400 font-medium text-xs whitespace-nowrap">{m.date}</td>
+                      <td className="py-2 pr-3 text-slate-600 dark:text-slate-400 font-medium text-xs whitespace-nowrap">{formatDateKey(m.date)}</td>
                       {METRIC_FIELDS.map((f) => {
                         const val = m[f.key] as number | undefined
                         return (

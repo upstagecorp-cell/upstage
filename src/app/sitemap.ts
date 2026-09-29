@@ -1,23 +1,17 @@
 import type { MetadataRoute } from 'next'
-
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://upstage.example.com'
+import { getConfiguredSiteUrl } from '@/lib/site-url'
 
 const routes = [
   '',
   '/guide',
-  '/onboarding',
-  '/diagnosis',
-  '/diagnosis/result',
-  '/dashboard',
-  '/action',
-  '/history',
-  '/goals',
-  '/metrics',
   '/explore',
   '/pricing',
 ]
 
 export default function sitemap(): MetadataRoute.Sitemap {
+  const siteUrl = getConfiguredSiteUrl()
+  if (!siteUrl) return []
+
   const now = new Date()
 
   return routes.map((route) => ({
