@@ -1,6 +1,6 @@
 const DATE_KEY_PATTERN = /^(\d{4})-(\d{2})-(\d{2})$/
 
-export const FALLBACK_LOCALE = 'ko-KR'
+export const FALLBACK_LOCALE = 'en-US'
 export const FALLBACK_TIME_ZONE = 'UTC'
 
 export interface TemporalContext {

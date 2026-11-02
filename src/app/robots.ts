@@ -9,6 +9,10 @@ const privateRoutes = [
   '/history',
   '/metrics',
   '/onboarding',
+  '/workspace',
+  '/login',
+  '/register',
+  '/api',
 ]
 
 export default function robots(): MetadataRoute.Robots {

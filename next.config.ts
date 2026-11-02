@@ -1,6 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Isolated local verification must not interrupt an existing developer server.
+  distDir: process.env.NEXORA_ISOLATED_DEV === "1" ? ".next-qa" : ".next",
   poweredByHeader: false,
   turbopack: {
     root: process.cwd(),

@@ -3,10 +3,17 @@ import './globals.css'
 import { ThemeProvider } from '@/components/layout/ThemeProvider'
 import { Navbar } from '@/components/layout/Navbar'
 import { BottomNav } from '@/components/layout/BottomNav'
+import { LocaleProvider } from '@/lib/i18n/locale-provider'
 
 export const metadata: Metadata = {
-  title: 'NEXSORA - BRING YOUR BRAND TO THE STAGE',
-  description: '업종별 맞춤 진단으로 창업 준비도를 측정하고, 오늘 당장 실행할 수 있는 액션을 제안합니다.',
+  title: { default: 'NEXORA — Business Assessment and Marketing Assets', template: '%s | NEXORA' },
+  description: 'Understand your business challenges, choose your next action, and create marketing assets based on the evidence you provide.',
+  openGraph: {
+    title: 'NEXORA — Understand your business. Act with a purpose.',
+    description: 'Connect business assessment with recommended actions, marketing drafts, and measured results.',
+    locale: 'en_US',
+    type: 'website',
+  },
 }
 
 export default function RootLayout({
@@ -15,14 +22,16 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="ko" suppressHydrationWarning>
+    <html lang="en-US" suppressHydrationWarning>
       <body className="min-h-screen bg-[#f7f7f5] dark:bg-[#191919] text-[#37352f] dark:text-[#f1f1ef] antialiased">
         <ThemeProvider>
-          <Navbar />
-          <main className="pb-20 md:pb-0">
-            {children}
-          </main>
-          <BottomNav />
+          <LocaleProvider>
+            <Navbar />
+            <main className="pb-20 md:pb-0">
+              {children}
+            </main>
+            <BottomNav />
+          </LocaleProvider>
         </ThemeProvider>
       </body>
     </html>

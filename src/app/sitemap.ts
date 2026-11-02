@@ -4,6 +4,7 @@ import { getConfiguredSiteUrl } from '@/lib/site-url'
 const routes = [
   '',
   '/guide',
+  '/demo',
   '/explore',
   '/pricing',
 ]

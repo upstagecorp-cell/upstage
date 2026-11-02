@@ -1,240 +1,53 @@
-# NEXSORA 창업 실행 플랫폼 MVP
+# NEXORA
 
-업종별 창업자와 소상공인이 현재 사업 상태를 진단하고, 오늘 실행할 액션을 추천받고, 실행 기록을 통해 점수와 다음 추천을 개선해 나가는 Next.js 기반 MVP입니다.
+NEXORA connects guided business understanding, assessment, marketing text drafts, human approval, weekly execution plans, measured performance, and reassessment. The product interface and generation language are American English for the US launch. Contextual investigation templates cover restaurants, cafes, lodging, physical retail, e-commerce, services, and creator businesses. Other businesses use general questions; no industry performance averages or success thresholds are assumed.
 
-현재 구현은 PDF 전략 문서의 방향성 중 **음식점 진단 DB / 추천 엔진 / 실행 기록 루프**를 중심으로 반영한 상태입니다. 서비스의 핵심은 단순한 분석 리포트가 아니라 아래 흐름입니다.
+## Run locally
 
-```text
-진단 → 추천 → 실행 → 기록 → 피드백 → 재진단
-```
-
-## 현재 상태
-
-마지막 점검일: 2026-09-29
-
-- Next.js App Router 기반 프론트엔드 MVP입니다.
-- 음식점 업종을 중심으로 진단 질문, 지표, 가중치, 액션 카드가 구현되어 있습니다.
-- Zustand persist를 사용해 브라우저 `localStorage`에 로컬 상태를 저장합니다.
-- Supabase, Auth, 결제, 서버 DB 연동은 아직 없습니다.
-- `npm.cmd run lint` 통과 확인.
-- `npm.cmd run typecheck` 통과 확인.
-- `npm.cmd run test:run` 14개 단위 테스트 통과 확인.
-- `npm.cmd run build` 통과 확인.
-- `npm.cmd audit` 취약점 0건 확인.
-
-## 기술 스택
-
-- Next.js `16.3.6`
-- React `19.2.4`
-- TypeScript `5`
-- Tailwind CSS `4`
-- Zustand `5`
-- Recharts `3`
-- Framer Motion `12`
-- Lucide React `1`
-- next-themes `0.4`
-
-## 실행 방법
-
-Windows PowerShell 기준:
+Requires **Node.js 24.14 or later** (the server uses built-in node:sqlite).
 
 ```powershell
 npm.cmd ci
+if (!(Test-Path -LiteralPath .env.local)) { Copy-Item -LiteralPath .env.example -Destination .env.local }
 npm.cmd run dev
 ```
 
-브라우저에서 아래 주소를 엽니다.
+Open http://localhost:3000. Explore the explicitly fictional example at /demo and the public guides at /explore before signup. Create an account, save a Business Profile with step-by-step help, optionally add evidence, and run an assessment. No external account is needed for these steps. Authentication uses a server session cookie and scrypt-hashed passwords. Business records are scoped to the authenticated owner on every API operation.
 
-```text
-http://localhost:3000
-```
+To generate marketing drafts, set server-only **OPENAI_API_KEY** and **OPENAI_MODEL** in .env.local and restart the server. Choose an accessible model supporting the Responses API and structured outputs. No model or price is assumed. Without these settings, generation reports an explicit configuration error, never a mock success.
 
-빌드 확인:
+## Connected workflow
 
-```powershell
-npm.cmd run build
-```
+1. **Business Profile:** five guided steps with explanations and examples, business type and stage, industry-specific questions, ownership/team, offering, customers, market, goal, channels, tone, currency, time zone, optional URL. Unknown business details may be skipped. Tailored draft generation requires an offering, customer description, and sales channel in the saved assessment snapshot. URLs are references only, not fetched.
+2. **Evidence:** measurements with inclusive reporting dates, unit, currency for money, and manually reported source. Unknown measurements remain absent; zero is preserved.
+3. **Assessment:** deterministic calculations separate observed facts, opportunities, possible causes, alternatives, missing information, recommended actions, and evaluation metrics. Industry and stage change interpretation and investigation guidance; answers are self-reported context, not verified measurements. No synthetic business-health score or success probability.
+4. **Marketing assets:** eligible actions request configurable hooks, ad copy, short-form video scripts, and CTAs through an actual provider call. Optional reference text is untrusted source material. No reference analysis is claimed when none was provided.
+5. **Review:** edit into a new version, approve the exact version, copy or download approved text, explicitly record actual use. Downloads never count as publishing or sales. Regeneration retains older jobs and assets.
+6. **Weekly plan (/goals):** turn a saved recommendation into a goal with a deadline, status, exact related asset versions, notes, and evaluation metric. Browse weeks, edit goals, and track activity completion separately from business performance. Guides retain the route back to the original assessment or plan. Completing a goal never creates an asset-use or outcome record.
+7. **Results:** record metrics, period, source, currency, advertising spend/currency, price changes, and notes. Results become linked evidence for a new assessment. Earlier assessments/profile snapshots remain unchanged.
+8. **Performance (/metrics):** inspect saved measurements by period, unit, currency, and source. Different currencies/durations stay separate; conversion needs matching periods and a positive visitor denominator. An empty dataset produces no graph. Lines between compatible observations require confirmation of comparable definitions and populations; missing values are never filled in.
 
-린트 확인:
+Text generation is the only AI-provider integration. Finished images/videos, automatic posting, advertising budgets, payments, email delivery, and analytics connectors are unavailable. US sales pricing and operational/legal conditions remain unconfigured.
+
+## Storage and compatibility
+
+The server creates an additive schema migration in .data/nexora.sqlite (ignored by Git). SQLite WAL mode is enabled. Use persistent storage with a single Node.js application instance; ephemeral hosting or separate disks across instances will not preserve a consistent account database.
+
+Existing startup-platform-store browser records are not deleted, rewritten, automatically uploaded, or converted to USD. The workspace offers explicit backup and import into a read-only legacy archive. Historic money stays KRW. Historic scores are not interpreted as validated health or mixed into new assessments. Raw source text stays intact while the interface stays English.
+
+Fresh profiles propose United States, USD, en-US, and the browser IANA time zone. Each monetary record keeps its own currency. Added profile guidance fields are optional for old records. Weekly plans use owner-scoped records in the same database and preserve the assessment time zone for deadlines; no legacy record rewrite is needed.
+
+Before a future migration, stop the app and back up the entire .data directory, including any WAL files, to a protected location. Restore that directory with the app stopped and use the matching app revision. Browser records can also be exported before explicit import. This change performs no production deletion or remote migration. Database backups contain private business data and password hashes.
+
+## Validation
 
 ```powershell
 npm.cmd run lint
+npm.cmd run typecheck
+npm.cmd run test:run
+npm.cmd run build
 ```
 
-## 주요 화면
+Vitest uses its native config loader to avoid Windows sandbox ancestor scans. Provider fixtures simulate responses without charges; they are not proof that a live provider account is connected. Current verification: 63 tests across 10 files, type checking, lint, production build, and real Chromium desktop/mobile workflow checks. See RESTORATION_REPORT.md for the restoration acceptance criteria, PROJECT_STATUS.md for scope, and LAUNCH_READINESS.md for operations.
 
-- `/` : 랜딩 페이지
-- `/guide` : 서비스 흐름과 화면 예시 가이드
-- `/onboarding` : 업종, 운영 유형, 창업 단계 선택
-- `/diagnosis` : 음식점 진단 질문
-- `/diagnosis/result` : 진단 결과, 위험 지표, 오늘 할 일, 이번 주 할 일
-- `/dashboard` : 점수 요약, 위험 지표, 추천 액션
-- `/action` : 오늘의 액션 실행 및 기록
-- `/history` : 점수 변화와 실행 기록
-- `/goals` : 주간 목표 설정
-- `/metrics` : 매출, 고객 수, 방문자 수 등 운영 지표 기록
-- `/explore` : 전략, 액션, 학습 콘텐츠 탐색
-- `/pricing` : 요금제 UI
-
-## 구현된 핵심 기능
-
-### 1. 음식점 진단 DB
-
-음식점 운영 상태를 11개 지표로 진단합니다.
-
-- 주 고객층
-- 상권 유동 인구
-- 점심/저녁/주말 매출 차이
-- 대표 메뉴 경쟁력
-- 메뉴 원가율
-- 객단가
-- 테이블 회전율
-- 배달앱 노출
-- 리뷰 수/평점
-- 네이버 플레이스 상태
-- 재방문율
-
-각 질문은 다음 정보를 포함합니다.
-
-- 질문 ID
-- 지표 카테고리
-- 답변 선택지
-- 답변별 점수
-- 상태 문장
-- 위험도
-- 추천 액션
-- 벤치마크 문장
-- 운영 유형별 가중치
-
-### 2. 운영 유형별 가중치
-
-음식점을 하나의 업종으로만 보지 않고 운영 유형별로 중요 지표를 다르게 봅니다.
-
-- 홀 중심
-- 배달 중심
-- 테이크아웃 중심
-
-예를 들어 홀 중심은 테이블 회전율과 상권 유동 인구가 중요하고, 배달 중심은 배달앱 노출과 리뷰/평점이 더 중요하게 반영됩니다.
-
-### 3. 액션 추천 엔진
-
-점수와 운영 유형 가중치를 기반으로 오늘 할 일을 추천합니다.
-
-점수별 기본 규칙:
-
-- 5점: 액션 없음
-- 4점: 유지 액션
-- 3점: 개선 액션 1개
-- 2점: 개선 액션 2개
-- 1점: 긴급 액션 3개
-
-현재 액션 카드는 대표 메뉴 원가 계산, 경쟁 음식점 분석, 배달앱 사진 교체, 리뷰 요청 문구 작성, 네이버 플레이스 정보 수정, 재방문 쿠폰 테스트 등으로 구성되어 있습니다.
-
-### 4. 실행 기록과 점수 반영
-
-사용자가 액션을 완료하면 실행 기록이 저장됩니다.
-
-기록 항목:
-
-- 실행한 액션
-- 실행 날짜
-- 소요 시간
-- 어려웠던 점
-- 결과 메모
-- 근거 자료
-- 다음 추천 액션
-
-액션 완료 시 관련 지표 점수가 자동으로 상승합니다.
-
-- 근거 자료 없음: +3점
-- 근거 자료 있음: +5점
-
-### 5. 벤치마크와 피드백
-
-각 지표는 좋음/보통/위험 상태 문장을 가지고 있습니다. 진단 결과와 액션 실행 후 피드백은 현재 로컬 규칙 기반으로 생성됩니다.
-
-외부 AI API와는 아직 연결되어 있지 않습니다.
-
-### 6. 학습 콘텐츠 분리
-
-진단 DB와 학습 콘텐츠를 분리했습니다.
-
-학습 콘텐츠 예시:
-
-- 디지털 지역주의와 검색 노출 전략
-- AI 검색 대응 전략
-- 네이버 플레이스 고도화 전략
-- 당근비즈니스 활용법
-- 리텐션 자동화 전략
-- 인플루언서 협업 전략
-- 슬로우데이 이벤트 전략
-- 메뉴 데이터 구조화 가이드
-
-## 현재 한계
-
-### 1. 음식점 외 업종은 아직 실제 진단 DB가 부족함
-
-온보딩에서는 카페, 숙박, 서비스업, 온라인 사업 등을 선택할 수 있지만 현재 진단 질문은 음식점 중심입니다. 다음 단계에서는 업종별 질문 DB를 추가하거나, MVP 범위를 음식점으로 명확히 제한해야 합니다.
-
-### 2. 서버 저장소가 없음
-
-현재 데이터는 브라우저 `localStorage`에만 저장됩니다.
-
-따라서:
-
-- 다른 기기와 동기화되지 않습니다.
-- 브라우저 데이터를 삭제하면 기록이 사라집니다.
-- 사용자 계정, 팀 관리, 관리자 분석이 불가능합니다.
-
-### 3. 실제 AI 피드백은 미연동
-
-현재 피드백은 로컬 규칙 기반입니다. 추후 OpenAI API 등과 연결하면 실행 기록, 점수 변화, 업종 맥락을 바탕으로 더 구체적인 피드백을 제공할 수 있습니다.
-
-### 4. 결제 기능 없음
-
-`/pricing` 페이지는 UI만 구현되어 있습니다. Stripe Checkout, 구독 관리, 결제 웹훅은 아직 없습니다.
-
-### 5. 자동 테스트
-
-Vitest 기반 단위 테스트가 다음 영역을 검증합니다.
-
-- 점수 계산
-- 액션 반복 주기
-- IANA 시간대별 날짜 경계와 스트릭
-- 재무 입력 파싱
-- Zustand 영속 데이터 검증과 중복 ID 마이그레이션
-
-브라우저 전체 흐름을 검증하는 E2E 테스트는 아직 필요합니다.
-
-### 6. 시간대와 다국어 준비 상태
-
-- 사건 발생 시각은 UTC ISO 타임스탬프로 기록합니다.
-- `오늘`, 스트릭, 주간 범위는 접속 브라우저의 IANA 시간대를 사용합니다.
-- 기록 당시의 시간대와 브라우저 locale도 함께 저장합니다.
-- 현재 화면 언어는 한국어만 지원합니다.
-- 다국어 출시는 Next.js의 `[lang]` 라우트, `Accept-Language` 감지, 번역 사전, 언어 선택기를 별도 구현해야 합니다.
-
-## 다음 작업 우선순위
-
-1. MVP 범위를 음식점으로 명확히 제한하거나 업종별 진단 DB를 추가합니다.
-2. Supabase Auth/DB와 사용자별 RLS 정책을 구현합니다.
-3. `[lang]` 라우팅과 번역 사전으로 실제 다국어 UI를 구현합니다.
-4. 비즈니스 지표 입력이 점수와 추천에 반영되도록 연결합니다.
-5. 추천 엔진에 창업 단계와 난이도를 추가 반영합니다.
-6. 실제 파일 저장이 필요하면 비공개 Storage와 signed URL을 구현합니다.
-7. 결제 연동이 필요하면 Stripe Checkout과 웹훅을 추가합니다.
-8. 인증·결제·핵심 사용자 흐름 E2E 테스트를 추가합니다.
-
-## 개발 메모
-
-이 프로젝트는 Next.js 16 기반입니다. Next.js 관련 코드를 수정할 때는 `node_modules/next/dist/docs/`의 현재 버전 문서를 먼저 확인해야 합니다.
-
-개발 서버는 Windows 안정성을 위해 아래처럼 webpack 모드로 실행합니다.
-
-```json
-{
-  "dev": "next dev --webpack"
-}
-```
-
-현재 소스 파일의 한글은 UTF-8 기준으로 정상입니다. PowerShell 출력 환경에 따라 한글이 깨져 보일 수 있지만, 실제 파일 인코딩 문제와는 별개입니다.
+Read current Next.js guides in node_modules/next/dist/docs/ before editing Next code, as AGENTS.md requires.
