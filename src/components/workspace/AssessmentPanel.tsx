@@ -34,6 +34,8 @@ export function AssessmentPanel({ profile, evidence, assessments, selected, sele
       <div className="mt-5 flex flex-wrap gap-3"><button className={buttonClass} disabled={busy} onClick={assess}><ClipboardList size={16} aria-hidden="true" />{busy ? 'Assessing…' : assessments.length ? 'Reassess with selected evidence' : 'Run assessment'}</button><button className={secondaryClass} onClick={openEvidence}>Add evidence</button></div>
     </Card>
 
+    {profile.businessType === 'ecommerce' && <Card title="Go deeper on one online-shop problem" description="Follow the funnel, answer the next question, and finish a cost worksheet or a concrete improvement plan."><Link href="/workspace#focus" className={buttonClass}>Open the focused workflow <ArrowRight size={15} aria-hidden="true" /></Link></Card>}
+
     {selected ? <>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div><h2 className="text-xl font-semibold">Assessment report</h2><p className="mt-1 text-xs opacity-65">{timestamp(selected.createdAt, 'en-US', profile.timeZone)} · Profile version {selected.profileVersion} · {selected.evidenceIds.length} evidence records</p></div>

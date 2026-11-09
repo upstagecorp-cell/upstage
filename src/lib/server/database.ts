@@ -85,6 +85,7 @@ export function workspace(owner: string): WorkspaceData {
   recoverInterruptedJobs(owner)
   return {
     profile: getRecord(owner, 'profile', 'current'),
+    investigations: listRecords(owner, 'investigation'),
     evidence: listRecords(owner, 'evidence'),
     assessments: listRecords(owner, 'assessment'),
     jobs: listRecords(owner, 'job'),

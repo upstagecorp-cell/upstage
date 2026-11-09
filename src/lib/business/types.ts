@@ -1,3 +1,5 @@
+import type { FocusedInvestigation } from './focused-types'
+
 export type AppLocale = 'en-US' | 'ko-KR'
 export type BusinessGoal = 'awareness' | 'conversion' | 'retention' | 'profitability' | 'operations'
 export type AssessmentArea = 'acquisition' | 'conversion' | 'retention' | 'profitability' | 'operations'
@@ -197,6 +199,7 @@ export interface LegacyImport {
   data: Record<string, unknown>
 }
 export interface WorkspaceData {
+  investigations?: FocusedInvestigation[]
   profile: BusinessProfile | null
   evidence: Evidence[]
   assessments: Assessment[]

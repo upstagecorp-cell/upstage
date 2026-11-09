@@ -2,6 +2,10 @@
 
 NEXORA connects guided business understanding, assessment, marketing text drafts, human approval, weekly execution plans, measured performance, and reassessment. The product interface and generation language are American English for the US launch. Contextual investigation templates cover restaurants, cafes, lodging, physical retail, e-commerce, services, and creator businesses. Other businesses use general questions; no industry performance averages or success thresholds are assumed.
 
+## Focused online-shop workflow
+
+The new **Your next move** section goes deeper on one product and funnel: adaptive follow-up questions, a precise unit-cost worksheet, a concrete revision, an exportable experiment plan, and a later review against the preserved baseline. Try the clearly fictional `/focus-demo` before signup. Saved cases use your existing account and server database. See [FOCUSED_WORKFLOW.md](FOCUSED_WORKFLOW.md) for the flow, API, and actual-user validation plan.
+
 ## Run locally
 
 Requires **Node.js 24.14 or later** (the server uses built-in node:sqlite).

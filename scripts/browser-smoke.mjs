@@ -173,7 +173,9 @@ try {
   await click('Continue')
   await until(()=>evaluate("document.body.innerText.includes('Review and save')"),'Review step did not open')
   await click('Save Business Profile')
-  await until(() => evaluate(`location.hash==='#evidence' && document.body.innerText.includes('Business evidence')`), 'Profile did not persist and advance to evidence')
+  await until(() => evaluate(`location.hash==='#focus' && document.body.innerText.includes('One problem, a deeper answer')`), 'Profile did not persist and advance to the focused workflow')
+  await click('Business Evidence')
+  await until(() => evaluate("document.body.innerText.includes('Business evidence')"), 'Evidence section did not open')
   await expectEnglish('Saved profile and evidence form')
 
   const periodStart = '2026-01-01'
