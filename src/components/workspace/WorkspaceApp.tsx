@@ -11,16 +11,17 @@ import { ResultsPanel } from './ResultsPanel'
 import { HistoryPanel } from './HistoryPanel'
 import { WeeklyPlanPanel } from './WeeklyPlanPanel'
 import { PerformancePanel } from './PerformancePanel'
+import { FocusedPanel } from './FocusedPanel'
 import { ApiError, buttonClass, Card, ErrorText, friendlyError, requestJson, secondaryClass, type Mutation } from './shared'
 
 const sections = [
-  ['profile', 'Business Profile'], ['evidence', 'Business Evidence'], ['assessment', 'Business Assessment'],
+  ['focus', 'Your next move'], ['profile', 'Business Profile'], ['evidence', 'Business Evidence'], ['assessment', 'Business Assessment'],
   ['assets', 'Marketing Assets'], ['goals','Weekly Plan'], ['results', 'Results'], ['performance','Performance'], ['history', 'History'],
 ] as const
 type Section = typeof sections[number][0]
 function currentSection(fallback: Section): Section { const hash = window.location.hash.slice(1); return sections.find(([id]) => id === hash)?.[0] ?? fallback }
 
-export function WorkspaceApp({ initialSection = 'profile' }: { initialSection?: Section }) {
+export function WorkspaceApp({ initialSection = 'focus' }: { initialSection?: Section }) {
   const [user, setUser] = useState<SessionUser | null>(null)
   const [data, setData] = useState<WorkspaceData | null>(null)
   const [loading, setLoading] = useState(true)
@@ -136,8 +137,9 @@ export function WorkspaceApp({ initialSection = 'profile' }: { initialSection?: 
     <nav aria-label="Workspace sections" className="mb-6 flex flex-wrap gap-2">{sections.map(([id, label]) => <button key={id} aria-current={section === id ? 'page' : undefined} className={`rounded-xl px-3 py-2.5 text-sm font-medium transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-500 ${section === id ? 'bg-violet-700 text-white' : 'border border-[var(--border)] bg-[var(--surface)] hover:border-violet-400'}`} onClick={() => navigate(id)}>{label}</button>)}</nav>
     <div className="mb-5 space-y-3" aria-live="polite"><ErrorText error={error} />{notice && <p role="status" className="flex items-start gap-2 rounded-xl border border-violet-200 bg-violet-50 p-3 text-sm leading-relaxed text-violet-900 dark:border-violet-900 dark:bg-violet-950/40 dark:text-violet-200"><CheckCircle2 size={17} className="mt-0.5 shrink-0" aria-hidden="true" />{notice}</p>}{busy && <p role="status" className="text-sm opacity-65">Processing your request. Keep this page open…</p>}</div>
     <div aria-busy={busy}>
-      {section === 'profile' && <ProfileEditor key={data.profile?.version ?? 'new'} profile={data.profile} mutate={mutate} busy={busy} onSaved={() => navigate('evidence')} />}
-      {section !== 'profile' && section !== 'history' && !data.profile && <Card title="Save your Business Profile first"><p className="text-sm leading-relaxed opacity-65">Your assessment and assets need a saved profile to provide context.</p><button className={`${buttonClass} mt-5`} onClick={() => navigate('profile')}>Create Business Profile</button></Card>}
+      {data.profile && section === 'focus' && <FocusedPanel data={data} mutate={mutate} busy={busy} openProfile={() => navigate('profile')} />}
+      {(section === 'profile' || section === 'focus' && !data.profile) && <ProfileEditor key={data.profile?.version ?? 'new'} profile={data.profile} mutate={mutate} busy={busy} onSaved={() => navigate('focus')} />}
+      {section !== 'profile' && section !== 'focus' && section !== 'history' && !data.profile && <Card title="Save your Business Profile first"><p className="text-sm leading-relaxed opacity-65">Your assessment and assets need a saved profile to provide context.</p><button className={`${buttonClass} mt-5`} onClick={() => navigate('profile')}>Create Business Profile</button></Card>}
       {data.profile && section === 'evidence' && <EvidenceEditor profile={data.profile} evidence={data.evidence} mutate={mutate} busy={busy} />}
       {data.profile && section === 'assessment' && <AssessmentPanel profile={data.profile} evidence={data.evidence} assessments={data.assessments} selected={selectedAssessment} selectAssessment={setSelectedAssessmentId} mutate={mutate} busy={busy} openAssets={openAssets} openEvidence={() => navigate('evidence')} openResults={openResults} openPlan={openPlan} />}
       {data.profile && section === 'assets' && <AssetsPanel data={data} assessment={selectedAssessment} selectedActionId={selectedActionId} userId={user.id} mutate={mutate} busy={busy} refresh={refresh} openAssessment={() => navigate('assessment')} />}
