@@ -34,8 +34,12 @@ Ask each owner to use one real product and complete a direction plus usable work
 
 Invite owners back on their actual review date. Record later-day return, actual use of the change (interview-confirmed; plan save alone does not count), whether they can recover the prior context, and whether they make a next decision. Measure willingness to pay separately; this flow has no billing integration. Use the current-account product feedback export (up to 500 recent events and feedback entries) and qualitative notes to identify drop-off and invalid recommendations; do not interpret this small sample as a causal sales effect or a population retention estimate.
 
-## Verification limits
+## Verification
 
-Unit, route-integration, currency, revision, and server-rendered component tests cover the new flow; run the repository's complete `npm run check` before merging. Browser interaction and actual-user validation remain separate work. In the current managed environment the required Sites browser-control tool is unavailable, so browser interaction/screenshots were not claimed. The existing browser smoke script has been adjusted for the new profile-to-focused-flow navigation and should be run in a suitable browser environment.
+`npm run check` passes with 103 tests across 15 files, type checking, lint, a production build, and the high-severity dependency audit. On November 9, 2026, the original Node application was also exercised in installed Chromium through Playwright against an isolated QA database, using synthetic accounts and measurements.
+
+Verified browser paths: public demo question branching, factual delivery notice and Markdown download, demo reset without API calls; account signup, baseline and answers, all eight cost inputs and USD 23.63 contribution calculation, CSV/Markdown download, saved work product and plan, reload restoration, feedback and event export. A one-day follow-up against a seven-day baseline correctly withholds a rate comparison when comparability is unchecked, and preserves the original baseline, costs, and plan after reload. The screens checked at 390px showed no horizontal overflow; no browser page runtime errors were observed.
+
+These checks establish behavior with synthetic data, not customer value, causal sales effects, actual customer retention, or provider integration. The separately hosted static preview exposes only the same fictional example; it has no account database. Its build was checked, while the browser exercises above ran against the full original Node application. Browser-control/preview-relay tools for the managed Sites environment were unavailable, so no separate hosted-preview browser run is claimed.
 
 The app still requires persistent single-instance Node hosting with its existing SQLite database. No production deployment, paid provider call, payment, advertisement, or customer-facing publication is part of this source change.
