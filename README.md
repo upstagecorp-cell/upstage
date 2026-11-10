@@ -1,5 +1,7 @@
 # NEXORA
 
+Latest product-site redesign: [STRIPE_STYLE_REDESIGN.md](STRIPE_STYLE_REDESIGN.md) documents the spectrum hero, full product/solutions/resources mega navigation, six interactive capability previews, new `/product`, `/solutions`, `/resources` pages, and shared public footer. Existing account and billing workflows remain connected to their actual routes.
+
 Current paid-launch preparation: [SEVEN_DAY_LAUNCH_PLAN.md](SEVEN_DAY_LAUNCH_PLAN.md) includes the launch verdict, $149/$299 plans, financial/tax sensitivity, actual code scope, and dated seven-day plan. Stripe subscriptions and account email integrations are implemented but require operator configuration and live verification; no production deployment or live payment was performed. Run `npm.cmd run launch:preflight` for a read-only configuration check.
 
 November 10, 2026: the product now includes the visual landing and interactive walkthrough, review-focused returning workspace, optional approved-wording references, and resumable first-check steps. See [VISUAL_EXPERIENCE_IMPLEMENTATION.md](VISUAL_EXPERIENCE_IMPLEMENTATION.md) for actual screenshots, source references, verification, and remaining integrations.
