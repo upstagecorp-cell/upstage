@@ -1,22 +1,27 @@
 # US launch readiness
 
-Updated: November 2, 2026.
+Updated: November 10, 2026.
+
+The current release candidate includes the visual walkthrough, resumable first check, review-focused workspace, USD $149/$299 monthly plan definitions, server-enforced generation allowances, Stripe-hosted Checkout/portal/webhook integration, and Resend-based verification/recovery integration. Billing and email require actual operator accounts and live validation. New paid purchases remain disabled without required configuration and launch attestations. See [SEVEN_DAY_LAUNCH_PLAN.md](SEVEN_DAY_LAUNCH_PLAN.md) and its operations runbook for the current scope, tax scenarios, and release conditions; the earlier visual report documents the preceding stage.
 
 The local app connects guided English business profiles, contextual assessments, marketing text generation, approval, weekly execution planning, actual-use records, measured charts, results, and reassessment. Public guides and a labeled fictional example are available before signup. This is not a production deployment or commercial launch approval.
+
+The anonymous /start flow now provides a first investigation direction before signup. Business answers remain in tab-scoped storage until explicit account save; account creation alone does not upload them. Existing profiles require a version-matched confirmation before applying a check. Review EXPERIENCE_REDESIGN.md for the updated journey.
 
 ## Required operator configuration
 
 - Node.js 24.14+ and protected persistent NEXORA_DB_PATH on one application instance.
 - HTTPS and canonical APP_ORIGIN; configure trusted reverse-proxy forwarding deliberately. Production session cookies are Secure.
 - Server-only OPENAI_API_KEY and accessible structured-output-capable OPENAI_MODEL. Review provider budget and usage limits. Fixture tests incur no live provider charge.
-- Choose account verification/recovery and support operations before public self-service registration. Email delivery is not connected.
-- Review US pricing, taxes, billing, refunds, terms/privacy policies, company identity, and support. KRW prices were not converted to USD offers.
+- Configure Resend and a verified sender, then test actual account verification and password recovery. Recovery uses expiring, single-use hashed tokens and revokes existing sessions.
+- Configure actual Stripe seller, monthly USD prices, Tax, dedicated portal, and signed webhooks. Validate payments, failures, renewals, cancellation, refunds, and account separation. Planned prices do not prove customer willingness to pay.
+- Fill the legal seller identity, address, support contact, review draft terms/privacy/refunds, and confirm US/Korean tax treatment for the actual entity and founder.
 - Protect database backups and rehearse restoration with the app stopped. Set retention/access policies for business records.
 - Configure monitoring and incident response; local provider fixtures do not prove live integration success.
 
 ## Unavailable integrations
 
-Finished image/video generation, URL scraping, auto-posting, ad-account spending, payments, and analytics imports are unavailable. Generated scripts are text. Download is never recorded as publishing or revenue.
+Finished image/video generation, URL scraping, auto-posting, ad-account spending, and analytics imports are unavailable. Payments and account email are implemented integrations pending external setup and validation, not live connected services. Automatic refunds, billing disputes, team seats, and multiple business workspaces are not implemented. Generated scripts are text. Download is never recorded as publishing or revenue.
 
 ## Data safety
 

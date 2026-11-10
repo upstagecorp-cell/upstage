@@ -73,7 +73,7 @@ async function expectEnglish(name) {
 }
 
 async function click(text) {
-  const found = await evaluate(`(() => {const element=[...document.querySelectorAll('button,a')].find(item=>item.innerText.trim()===${JSON.stringify(text)});if(!element)return false;element.click();return true})()`)
+  const found = await evaluate(`(() => {const element=[...document.querySelectorAll('button'),...document.querySelectorAll('a,summary')].find(item=>item.getClientRects().length&&(item.innerText.trim()===${JSON.stringify(text)}||item.getAttribute('aria-label')===${JSON.stringify(text)}||item.querySelector('.nx-choice-title')?.innerText===${JSON.stringify(text)}));if(!element)return false;element.click();return true})()`)
   if (!found) throw new Error(`Clickable control missing: ${text}`)
 }
 
@@ -88,13 +88,14 @@ async function fillSelector(selector, value) {
 }
 
 async function screenshot(name) {
+  await sleep(450)
   const { data } = await command('Page.captureScreenshot', { format: 'png', captureBeyondViewport: false })
   await writeFile(resolve(artifactDirectory, `${name}.png`), Buffer.from(data, 'base64'))
 }
 
 try {
   await until(async () => {
-    const response = await fetch(`${baseUrl}/api/session`)
+    const response = await fetch(`${baseUrl}/api/session`, {signal:AbortSignal.timeout(5000)})
     return response.ok
   }, 'The local NEXORA dev server is unavailable', 35_000)
   const pages = await until(async () => {
@@ -124,12 +125,12 @@ try {
   await command('Emulation.setLocaleOverride', { locale: 'ko-KR' })
   await command('Page.addScriptToEvaluateOnNewDocument', { source: `try { localStorage.setItem('nexora-ui-locale','ko-KR') } catch {}` })
 
-  await navigate('/', 'Understand your business challenges.')
+  await navigate('/', 'From big questions')
   await expectEnglish('Landing with Korean browser locale and saved Korean preference')
   await screenshot('landing-desktop')
-  await navigate('/guide', 'A clear path from evidence to action.')
+  await navigate('/guide', 'A clear path from')
   await expectEnglish('How it works')
-  await navigate('/pricing', 'US plans, pricing, and checkout have not been enabled.')
+  await navigate('/pricing', 'Paid subscriptions are not open for purchase yet')
   await expectEnglish('Pricing')
   await navigate('/login', 'Welcome back')
   await expectEnglish('Login')
@@ -147,6 +148,24 @@ try {
   await expectEnglish('Public searchable execution guides')
   await fillLabel('Search guides','unfindable-qa-query')
   await until(()=>evaluate("document.body.innerText.includes('No guides match')"),'Guide search did not filter')
+  await navigate('/start','What would you most like to figure out?')
+  await click('I need more customers')
+  await click('Continue')
+  await until(()=>evaluate("document.body.innerText.includes('What kind of business')"),'First check did not advance to business type')
+  await click('Professional / local services')
+  await click('Continue')
+  await until(()=>evaluate("document.body.innerText.includes('Where are you right now?')"),'First check did not advance to business stage')
+  await click('Already operating')
+  await fillLabel('In a sentence, what do you offer? (optional)','Brand design for independent businesses')
+  await screenshot('first-check-context-desktop')
+  await click('See my first direction')
+  await until(()=>evaluate("document.body.innerText.includes('Your first direction')"),'First direction was hidden behind signup')
+  await expectEnglish('Anonymous first direction from real choices')
+  await screenshot('first-direction-desktop')
+  const beforeSignup = await evaluate("fetch('/api/session').then(r=>r.json())")
+  if(beforeSignup.user!==null) throw new Error('The business check created an account before consent')
+  await command('Page.reload',{ignoreCache:true})
+  await until(()=>evaluate("document.body.innerText.includes('Your first direction')&&document.body.innerText.includes('Brand design for independent businesses')"),'Tab reload lost the first check')
   await navigate('/register','Create your account')
 
   const email = `browser-qa-${Date.now()}@example.invalid`
@@ -154,8 +173,17 @@ try {
   await fillSelector('input[type="email"]', email)
   await fillSelector('input[type="password"]', password)
   await click('Create account')
-  await until(() => evaluate(`location.pathname==='/workspace' && document.body.innerText.includes('Start with your business')`), 'Registration did not reach workspace')
+  await until(() => evaluate(`location.pathname==='/workspace' && document.body.innerText.includes('Your first check is ready to keep.')`), 'Registration did not preserve the first check')
+  const beforeConsent=await evaluate("fetch('/api/workspace').then(r=>r.json()).then(x=>x.workspace)")
+  if(beforeConsent.profile!==null||beforeConsent.assessments.length)throw new Error('Registration silently saved first-check business data')
+  await click('Save this check to my account')
+  await until(()=>evaluate("document.body.innerText.includes('A little more clarity.')&&!document.body.innerText.includes('Your first check is ready to keep.')"),'Confirmed check did not create the assessment and overview')
+  const afterConsent=await evaluate("fetch('/api/workspace').then(r=>r.json()).then(x=>x.workspace)")
+  if(afterConsent.assessments.length!==1||afterConsent.profile.offering!=='Brand design for independent businesses'||afterConsent.evidence.length)throw new Error('First check did not retain answers or invented metrics')
+  console.log('PASS Value before signup, explicit save, and answer continuity without invented metrics')
+  await screenshot('workspace-overview-desktop')
   await expectEnglish('New account workspace')
+  await navigate('/workspace#profile','Business Profile')
   await fillLabel('Business name (optional)', 'QA Design Studio')
   await fillLabel('Business type', 'services')
   await fillLabel('Industry details (optional)', 'Design services')
@@ -173,7 +201,8 @@ try {
   await click('Continue')
   await until(()=>evaluate("document.body.innerText.includes('Review and save')"),'Review step did not open')
   await click('Save Business Profile')
-  await until(() => evaluate(`location.hash==='#evidence' && document.body.innerText.includes('Business evidence')`), 'Profile did not persist and advance to evidence')
+  await until(() => evaluate(`location.hash==='#overview'`), 'Profile did not persist and return to the next action')
+  await navigate('/workspace#evidence','Business evidence')
   await expectEnglish('Saved profile and evidence form')
 
   const periodStart = '2026-01-01'
@@ -198,19 +227,20 @@ try {
   await fillLabel('Period end (inclusive)','2026-01-14')
   await click('Save evidence')
   await until(()=>evaluate("document.body.innerText.includes('130.50')"),'Second monetary measurement did not persist')
-  await click('Business Assessment')
-  await click('Run assessment')
+  await click('Business check')
+  await click('Reassess with selected evidence')
+  await click('The evidence behind this direction\nFacts, possible explanations, and questions still open.')
   await until(() => evaluate(`document.body.innerText.includes('visitor count is zero')`), 'Assessment did not handle zero denominator')
   await expectEnglish('Assessment with zero denominator and missing money data')
   await screenshot('assessment-desktop')
   await command('Page.reload', { ignoreCache: true })
-  await until(() => evaluate(`document.body.innerText.includes('visitor count is zero') && document.body.innerText.includes('QA Design Studio')`), 'Reload did not preserve profile, evidence, and assessment')
+  await until(() => evaluate(`document.body.textContent.includes('visitor count is zero') && document.body.innerText.includes('QA Design Studio')`), 'Reload did not preserve profile, evidence, and assessment')
   console.log('PASS persisted profile, evidence, and assessment after browser reload')
 
   for (const [path, hash, text] of [
     ['/onboarding', '#profile', 'Business Profile'],
-    ['/diagnosis', '#assessment', 'Assessment report'],
-    ['/diagnosis/result', '#assessment', 'Assessment report'],
+    ['/diagnosis', '#assessment', 'A practical way forward'],
+    ['/diagnosis/result', '#assessment', 'A practical way forward'],
     ['/action', '#assets', 'Content generation is not configured'],
     ['/history', '#history', 'History and exports'],
   ]) {
@@ -229,7 +259,7 @@ try {
   await screenshot('performance-desktop')
   await fillLabel('Performance metric','conversionRate')
   await until(()=>evaluate("document.body.innerText.includes('No compatible measurements')"),'Undefined conversion was plotted as an invented value')
-  await navigate('/workspace#assessment','Assessment report')
+  await navigate('/workspace#assessment','A practical way forward')
   const beforePlan = await evaluate("fetch('/api/workspace').then(r=>r.json()).then(x=>JSON.stringify({evidence:x.workspace.evidence,assessments:x.workspace.assessments,results:x.workspace.results}))")
   await click('Plan this action')
   await until(()=>evaluate("document.body.innerText.includes('Add a recommendation to this week')"),'Recommendation did not open weekly planning')
@@ -252,7 +282,7 @@ try {
   await until(()=>evaluate("location.pathname==='/goals' && document.body.innerText.includes('QA weekly baseline')"),'Guide did not return to original weekly plan')
   await expectEnglish('Guide round trip and persisted weekly completion')
   const savedPlan = await evaluate("fetch('/api/workspace').then(r=>r.json()).then(x=>x.workspace.weeklyPlans[0])")
-  await navigate('/workspace#assessment','Assessment report')
+  await navigate('/workspace#assessment','A practical way forward')
   await click('Reassess with selected evidence')
   await until(()=>evaluate("document.body.innerText.includes('Assessment saved. Earlier assessments are preserved.')"),'A subsequent assessment did not save')
   await navigate(`/goals?goal=${savedPlan.id}&assessment=${savedPlan.assessmentId}&action=${savedPlan.actionId}`,'QA weekly baseline')
@@ -286,15 +316,45 @@ try {
   await navigate('/explore?guide=cost-review','Practical guides for your next action')
   await expectEnglish('Mobile execution guides')
   await screenshot('guides-mobile')
-  await navigate('/workspace#assessment', 'Assessment report')
+  await navigate('/workspace#assessment', 'A practical way forward')
   await expectEnglish('Mobile assessment')
   await screenshot('assessment-mobile')
-  await navigate('/', 'Understand your business challenges.')
+  await click('Explore your workspace')
+  await click('Actions & outcomes')
+  await until(()=>evaluate("location.hash==='#results'&&document.body.innerText.includes('What happened after the work?')"),'Mobile navigation did not reach outcomes')
+  const beforeLocalCheck=await evaluate("fetch('/api/workspace').then(r=>r.json()).then(x=>JSON.stringify(x.workspace))")
+  await navigate('/start?focus=profitability','What kind of business')
+  await click('Cafe / bakery')
+  await click('Continue')
+  await until(()=>evaluate("document.body.innerText.includes('Where are you right now?')"),'Mobile check lost business selection')
+  await click('Already operating')
+  await click('See my first direction')
+  await until(()=>evaluate("document.body.innerText.includes('What is actually left after the costs of a sale?')"),'Mobile profitability direction did not render')
+  await click('Make this more specific with my numbers')
+  await fillLabel('Revenue','0')
+  await fillLabel('Operating costs','25.50')
+  await fillLabel('Reporting period start','2026-01-01')
+  await fillLabel('Reporting period end','2026-01-07')
+  await fillLabel('Where did these numbers come from?','Local QA sample ledger entered manually')
+  await click('Update my direction')
+  await until(()=>evaluate("document.body.innerText.includes('Your direction now includes these measurements.')&&document.body.innerText.includes('25.50')&&document.body.innerText.includes('Start with what each sale leaves behind.')"),'Optional first-check measurements did not affect the direction')
+  const afterLocalCheck=await evaluate("fetch('/api/workspace').then(r=>r.json()).then(x=>JSON.stringify(x.workspace))")
+  if(beforeLocalCheck!==afterLocalCheck)throw new Error('Unsaved first-check answers changed account records')
+  await expectEnglish('Mobile first check with real source, measured zero, and no silent account writes')
+  await screenshot('first-direction-mobile')
+  await command('Page.reload',{ignoreCache:true})
+  await until(()=>evaluate("document.body.innerText.includes('Start with what each sale leaves behind.')&&document.body.innerText.includes('25.50')"),'A concern link lost its saved first direction after reload')
+  await command('Emulation.setEmulatedMedia',{features:[{name:'prefers-color-scheme',value:'dark'},{name:'prefers-reduced-motion',value:'reduce'}]})
+  await until(()=>evaluate("document.documentElement.classList.contains('dark')"),'Dark color preference was not applied')
+  await expectEnglish('Dark theme and reduced-motion first check')
+  await screenshot('first-direction-mobile-dark')
+  await command('Emulation.setEmulatedMedia',{features:[{name:'prefers-color-scheme',value:'light'}]})
+  await navigate('/', 'From big questions')
   await expectEnglish('Mobile landing')
   await screenshot('landing-mobile')
   await navigate('/workspace', 'QA Design Studio')
   await click('Log out')
-  await until(() => evaluate(`document.body.innerText.includes('Your business workspace')`), 'Logout did not clear the active session UI')
+  await until(() => evaluate(`document.body.innerText.includes('Find your next move.')`), 'Logout did not clear the active session UI')
   await navigate('/login', 'Welcome back')
   await fillSelector('input[type="email"]', email)
   await fillSelector('input[type="password"]', password)

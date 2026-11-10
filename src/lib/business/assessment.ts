@@ -85,7 +85,7 @@ export function createAssessment(profile: BusinessProfile, input: Evidence[], pr
   if (!latest('adSpend')) missingInformation.push('Advertising spend is unknown. No ROAS or paid-channel efficiency claim can be made.')
   const needsBaselineData = missingInformation.length > 0
   missingInformation.push('Operational capacity, fulfillment quality, and bottlenecks have not been measured. No operational health score is available.')
-  if (needsBaselineData) addAction('collect_data','operations','Collect the missing baseline data','Use a consistent reporting period, source, population, and currency. Missing values are not treated as zero.','visitors',moneyPair && moneyPair[0].value < moneyPair[1].value ? 2 : 1)
+  if (needsBaselineData) addAction('collect_data','operations','Collect the missing baseline data','Use a consistent reporting period, source, population, and currency. Missing values are not treated as zero.',profile.goal==='profitability'?'cost':profile.goal==='retention'?'returningCustomers':profile.goal==='conversion'||profile.goal==='operations'?'purchases':'visitors',moneyPair && moneyPair[0].value < moneyPair[1].value ? 2 : 1)
   if (profile.goal === 'profitability' && !actions.some(a => a.kind === 'review_costs')) {
     addAction('review_costs','profitability','Review your pricing and complete cost breakdown','Your stated goal is profitability. Validate direct and fixed costs before deciding whether more marketing is the right intervention.','cost',2)
   }

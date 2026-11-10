@@ -23,7 +23,7 @@ export function ProfileWizard({ profile, mutate, busy, onSaved }: { profile: Bus
     if (result) onSaved()
   }
   return <Card title="Business Profile" description="Build a picture of your business one step at a time. Skip anything you do not know; no performance data is invented.">
-    <ol aria-label="Business Profile steps" className="mb-6 grid grid-cols-5 gap-2">{steps.map((label,index)=><li key={label}><button type="button" onClick={()=>setStep(index)} aria-current={step===index?'step':undefined} className={`h-full w-full rounded-xl p-2 text-left text-xs leading-relaxed ${step===index?'bg-violet-700 text-white':'bg-[var(--surface-muted)]'}`}><span className="block font-bold">{index+1}</span><span className="hidden sm:block">{label}</span></button></li>)}</ol>
+    <ol aria-label="Business Profile steps" className="mb-6 grid grid-cols-5 gap-2">{steps.map((label,index)=><li key={label}><button type="button" onClick={()=>setStep(index)} aria-current={step===index?'step':undefined} className={`h-full w-full rounded-xl p-2 text-left text-xs leading-relaxed ${step===index?'bg-emerald-700 text-white':'bg-[var(--surface-muted)]'}`}><span className="block font-bold">{index+1}</span><span className="hidden sm:block">{label}</span></button></li>)}</ol>
     <p className="mb-5 text-sm font-semibold">Step {step+1} of {steps.length}: {steps[step]}</p>
     <form onSubmit={submit} className="space-y-5">
       {step===0 && <>

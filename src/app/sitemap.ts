@@ -4,9 +4,15 @@ import { getConfiguredSiteUrl } from '@/lib/site-url'
 const routes = [
   '',
   '/guide',
+  '/start',
   '/demo',
   '/explore',
   '/pricing',
+  '/product',
+  '/solutions',
+  '/resources',
+  '/terms',
+  '/privacy',
 ]
 
 export default function sitemap(): MetadataRoute.Sitemap {

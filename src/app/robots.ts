@@ -12,6 +12,8 @@ const privateRoutes = [
   '/workspace',
   '/login',
   '/register',
+  '/account',
+  '/forgot-password',
   '/api',
 ]
 

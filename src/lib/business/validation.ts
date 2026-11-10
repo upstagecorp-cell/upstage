@@ -82,7 +82,8 @@ export function parseGenerationInput(value: unknown): GenerationInput {
   const referenceText = string(v.referenceText ?? '', 'reference text', 12000, true)
   const referenceSource = string(v.referenceSource ?? '', 'reference source', 2000, true)
   if (referenceText && !referenceSource) throw new InputError('Describe the source of the reference material.')
-  return { assessmentId: string(v.assessmentId, 'assessment ID', 200), actionId: string(v.actionId, 'action ID', 200), idempotencyKey, counts, referenceText: referenceText || undefined, referenceSource: referenceText ? referenceSource : undefined, replacesJobId: v.replacesJobId ? string(v.replacesJobId, 'previous job ID', 200) : undefined }
+  if (v.useApprovedContext !== undefined && typeof v.useApprovedContext !== 'boolean') throw new InputError('Choose whether to use approved wording.')
+  return { assessmentId: string(v.assessmentId, 'assessment ID', 200), actionId: string(v.actionId, 'action ID', 200), idempotencyKey, counts, referenceText: referenceText || undefined, referenceSource: referenceText ? referenceSource : undefined, replacesJobId: v.replacesJobId ? string(v.replacesJobId, 'previous job ID', 200) : undefined, useApprovedContext: v.useApprovedContext === true ? true : undefined }
 }
 export function validateGeneratedPackage(value: unknown, counts: AssetCounts, expectedLocale: AppLocale, hasReference = false): GeneratedPackage {
   const v = object(value)

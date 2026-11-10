@@ -115,6 +115,15 @@ export interface GenerationInput {
   referenceText?: string
   referenceSource?: string
   replacesJobId?: string
+  useApprovedContext?: boolean
+}
+export interface ApprovedWordingReference {
+  assetId: string
+  version: number
+  title: string
+  body: string
+  channel: string
+  approvedAt: string
 }
 export interface GeneratedAsset {
   kind: AssetKind
@@ -147,6 +156,7 @@ export interface ExecutionJob {
   referenceAnalysis: string | null
   referenceSource: string | null
   replacesJobId: string | null
+  approvedWordingReferences?: ApprovedWordingReference[]
 }
 export interface AssetExecution {
   id: string
@@ -197,6 +207,7 @@ export interface LegacyImport {
   data: Record<string, unknown>
 }
 export interface WorkspaceData {
+  billing?: import('@/lib/billing/plans').BillingSummary
   profile: BusinessProfile | null
   evidence: Evidence[]
   assessments: Assessment[]

@@ -11,17 +11,21 @@ interface ActionContext { assessmentId?: string|null; actionId?: string|null; pl
 export function ResultsPanel({ data, mutate, busy, openAssets, openAssessment, ...context }: { data: WorkspaceData; mutate: Mutation; busy: boolean; openAssets: () => void; openAssessment: () => void } & ActionContext) {
   const approved = data.assets.flatMap(asset => asset.versions.filter(version => version.reviewStatus === 'approved').map(version => ({ asset, version })))
   const manualAssessments = data.assessments.filter(assessment => assessment.recommendedActions.some(action => action.kind !== 'marketing_assets'))
+  const selectedKind=data.assessments.find(item=>item.id===context.assessmentId)?.recommendedActions.find(item=>item.id===context.actionId)?.kind
+  const [entry,setEntry]=useState<'action'|'use'|'measurement'>(()=>selectedKind==='marketing_assets'?'use':'action')
+  const record:Mutation=async(...args)=>{const result=await mutate(...args);if(result&&args[0]==='/api/executions')setEntry('measurement');return result}
   return <div className="space-y-6">
     {context.plan&&<Card title={`Weekly goal: ${context.plan.title}`}><p className="text-sm leading-relaxed">Evaluate with {labelFor(context.plan.evaluationMetric)}. The related action and available records are selected below. Goal completion, actual asset use, and measured outcomes are separate records.</p></Card>}
-    <Card title="Record completed business action" description="Record a recommended cost review, data collection, retention, or operations action after you complete it. Marketing assets are not required for these actions.">
-      {manualAssessments.length ? <BusinessActionForm key={`${manualAssessments.map(item => item.id).join(',')}:${context.assessmentId}:${context.actionId}`} data={data} mutate={mutate} busy={busy} context={context} /> : <><Empty>Run an assessment to receive business recommendations before recording a completed action.</Empty><button className={`${secondaryClass} mt-4`} onClick={openAssessment}>View Business Assessment</button></>}
-    </Card>
-    <Card title="Record approved asset use" description="Record use only after you actually used or posted an approved version. A copy or download is not an execution.">
-      {approved.length ? <ExecutionForm key={`${approved.map(item => `${item.asset.id}:${item.version.version}`).join(',')}:${context.assessmentId}:${context.actionId}:${context.plan?.id}`} data={data} mutate={mutate} busy={busy} context={context} /> : <><Empty>Approve an asset version before recording its use.</Empty><button className={`${secondaryClass} mt-4`} onClick={openAssets}>Review assets</button></>}
-    </Card>
-    <Card title="Results" description="Record measured outcomes with their source and reporting period. Activity records and business outcomes remain separate.">
+    <nav className="flex flex-wrap gap-2" aria-label="What to record">{([{id:'action',label:'A business action'},{id:'use',label:'Use of an approved draft'},{id:'measurement',label:'A measured outcome'}] as const).map(item=><button key={item.id} aria-current={entry===item.id?'page':undefined} className={`rounded-xl px-4 py-3 text-xs font-semibold ${entry===item.id?'bg-[#244d3e] text-white':'border border-[var(--border)] bg-[var(--surface)]'}`} onClick={()=>setEntry(item.id)}>{item.label}</button>)}</nav>
+    {entry==='action'&&<Card title="Record completed business action" description="Keep a record of a cost review, data collection, or another recommendation you completed.">
+      {manualAssessments.length ? <BusinessActionForm key={`${manualAssessments.map(item => item.id).join(',')}:${context.assessmentId}:${context.actionId}`} data={data} mutate={record} busy={busy} context={context} /> : <><Empty>Run an assessment to receive business recommendations before recording a completed action.</Empty><button className={`${secondaryClass} mt-4`} onClick={openAssessment}>View Business Assessment</button></>}
+    </Card>}
+    {entry==='use'&&<Card title="Record approved asset use" description="Choose the exact version you actually used or posted.">
+      {approved.length ? <ExecutionForm key={`${approved.map(item => `${item.asset.id}:${item.version.version}`).join(',')}:${context.assessmentId}:${context.actionId}:${context.plan?.id}`} data={data} mutate={record} busy={busy} context={context} /> : <><Empty>Approve an asset version before recording its use.</Empty><button className={`${secondaryClass} mt-4`} onClick={openAssets}>Review assets</button></>}
+    </Card>}
+    {entry==='measurement'&&<Card title="Results" description="Record the actual measurement, source, and reporting period.">
       {data.executions.length ? <ResultForm key={`${data.executions.map(item => item.id).join(',')}:${context.assessmentId}:${context.actionId}:${context.plan?.id}`} data={data} mutate={mutate} busy={busy} context={context} /> : <Empty>Record a completed business action or actual use of an approved asset first. You can also add general business measurements in Business Evidence.</Empty>}
-    </Card>
+    </Card>}
     {data.results.length > 0 && <Card title="Measured outcomes" description="Before-and-after changes describe what happened. They do not prove that an asset or NEXORA caused the change."><div className="space-y-5">{[...data.results].reverse().map(result => <ResultCard key={result.id} result={result} data={data} />)}</div><button className={`${buttonClass} mt-5`} onClick={openAssessment}>Reassess with saved results</button></Card>}
     <Card title="Completed actions and actual use">{data.executions.length ? <ul className="space-y-3">{[...data.executions].reverse().map(execution => <li key={execution.id} className="rounded-xl border border-[var(--border)] p-4 text-sm"><p className="font-semibold">{executionLabel(data, execution)}</p><p className="mt-1 text-xs opacity-65">{execution.channel} · {timestamp(execution.usedAt, 'en-US', data.profile?.timeZone)} ({data.profile?.timeZone ?? 'UTC'})</p>{execution.notes && <p className="mt-2 whitespace-pre-wrap leading-relaxed opacity-75">{execution.notes}</p>}</li>)}</ul> : <Empty>No completed action or actual use has been recorded.</Empty>}</Card>
   </div>
@@ -49,6 +53,7 @@ function BusinessActionForm({ data, mutate, busy, context }: { data: WorkspaceDa
   const [actionId, setActionId] = useState(initial.recommendedActions.find(action=>action.id===context.actionId && action.kind!=='marketing_assets')?.id ?? initial.recommendedActions.find(action => action.kind !== 'marketing_assets')!.id)
   const [channel, setChannel] = useState('Business operations')
   const [usedAt, setUsedAt] = useState(new Date().toISOString().slice(0, 23))
+  const [recordNow,setRecordNow]=useState(true)
   const [notes, setNotes] = useState('')
   const [confirmed, setConfirmed] = useState(false)
   const [error, setError] = useState('')
@@ -59,7 +64,7 @@ function BusinessActionForm({ data, mutate, busy, context }: { data: WorkspaceDa
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setError('')
-    const instant = new Date(`${usedAt}Z`)
+    const instant = recordNow?new Date():new Date(`${usedAt}Z`)
     const recordedAt = new Date()
     if (Number.isNaN(instant.getTime()) || instant > recordedAt) { setError('Choose a valid completion date and time in the past.'); return }
     if (instant.getTime() < new Date(selected.createdAt).getTime()) { setError('Completion must be on or after the selected assessment.'); return }
@@ -71,10 +76,10 @@ function BusinessActionForm({ data, mutate, busy, context }: { data: WorkspaceDa
     <Field label="Related assessment"><select className={fieldClass} value={assessmentId} onChange={e => { const next = assessments.find(item => item.id === e.target.value)!; setAssessmentId(next.id); setActionId(next.recommendedActions.find(item => item.kind !== 'marketing_assets')!.id); setConfirmed(false) }}>{assessments.map(item => <option key={item.id} value={item.id}>{timestamp(item.createdAt, 'en-US', data.profile?.timeZone)} · {labelFor(item.profileSnapshot.goal)}</option>)}</select></Field>
     <Field label="Completed recommended action"><select className={fieldClass} value={actionId} onChange={e => { setActionId(e.target.value); setConfirmed(false) }}>{actions.map(item => <option key={item.id} value={item.id}>{item.title}</option>)}</select></Field>
     {action && <p className="text-xs leading-relaxed opacity-65">{action.reason} Evaluate with: {labelFor(action.metric)}.</p>}
-    <div className="grid gap-4 sm:grid-cols-2"><Field label="Channel or business context"><input className={fieldClass} required maxLength={200} value={channel} onChange={e => setChannel(e.target.value)} placeholder="For example, bookkeeping or supplier review" /></Field><Field label="Completed at (UTC)" hint="Use YYYY-MM-DDTHH:MM:SS.sss in UTC. Your profile’s time zone is shown below."><UtcDateTimeInput min={selected.createdAt.slice(0, 23)} value={usedAt} onChange={setUsedAt} /></Field></div>
-    {usedAt && !Number.isNaN(new Date(`${usedAt}Z`).getTime()) && <p className="text-xs opacity-65">Your profile time: {timestamp(new Date(`${usedAt}Z`).toISOString(), 'en-US', data.profile?.timeZone)} ({data.profile?.timeZone ?? 'UTC'})</p>}
+    <Field label="Channel or business context"><input className={fieldClass} required maxLength={200} value={channel} onChange={e => setChannel(e.target.value)} placeholder="For example, bookkeeping or supplier review" /></Field>
+    <RecordTime recordNow={recordNow} setRecordNow={setRecordNow} value={usedAt} onChange={setUsedAt} min={selected.createdAt.slice(0,23)} timeZone={data.profile?.timeZone}/>
     <Field label="Completion notes (optional)"><textarea className={fieldClass} rows={3} maxLength={5000} value={notes} onChange={e => setNotes(e.target.value)} placeholder="Describe the work you completed and what you observed." /></Field>
-    <label className="flex items-start gap-3 text-sm leading-relaxed"><input className="mt-1 size-4 shrink-0 accent-violet-700" type="checkbox" required checked={confirmed} onChange={e => setConfirmed(e.target.checked)} /><span>I completed this recommended business action at the recorded time.</span></label>
+    <label className="flex items-start gap-3 text-sm leading-relaxed"><input className="mt-1 size-4 shrink-0 accent-emerald-700" type="checkbox" required checked={confirmed} onChange={e => setConfirmed(e.target.checked)} /><span>I completed this recommended business action at the recorded time.</span></label>
     <ErrorText error={error} /><button className={buttonClass} disabled={busy || !confirmed || !action}>{busy ? 'Saving…' : 'Record completed business action'}</button>
   </form>
 }
@@ -85,6 +90,7 @@ function ExecutionForm({ data, mutate, busy, context }: { data: WorkspaceData; m
   const [selection, setSelection] = useState(`${initial.asset.id}:${initial.version.version}`)
   const [channel, setChannel] = useState(initial.asset.channel)
   const [usedAt, setUsedAt] = useState(new Date().toISOString().slice(0, 23))
+  const [recordNow,setRecordNow]=useState(true)
   const [notes, setNotes] = useState('')
   const [confirmed, setConfirmed] = useState(false)
   const [error, setError] = useState('')
@@ -93,7 +99,7 @@ function ExecutionForm({ data, mutate, busy, context }: { data: WorkspaceData; m
     event.preventDefault()
     setError('')
     const [assetId, assetVersion] = selection.split(':')
-    const instant = new Date(`${usedAt}Z`)
+    const instant = recordNow?new Date():new Date(`${usedAt}Z`)
     if (Number.isNaN(instant.getTime()) || instant.getTime() > Date.now()) { setError('Choose a valid date and time in the past.'); return }
     const result = await mutate('/api/executions', 'POST', { assetId, assetVersion: Number(assetVersion), channel, usedAt: instant.toISOString(), notes }, 'Actual use recorded. No business result has been inferred.')
     if (result) { setNotes(''); setConfirmed(false) }
@@ -101,14 +107,17 @@ function ExecutionForm({ data, mutate, busy, context }: { data: WorkspaceData; m
 
   return <form className="space-y-4" onSubmit={submit}>
     <Field label="Approved asset and version"><select className={fieldClass} value={selection} onChange={e => { setSelection(e.target.value); setChannel(approved.find(item => `${item.asset.id}:${item.version.version}` === e.target.value)?.asset.channel ?? '') }}>{approved.map(item => <option key={`${item.asset.id}:${item.version.version}`} value={`${item.asset.id}:${item.version.version}`}>{item.version.title} · Version {item.version.version}</option>)}</select></Field>
-    <div className="grid gap-4 sm:grid-cols-2"><Field label="Channel actually used"><input className={fieldClass} required maxLength={200} value={channel} onChange={e => setChannel(e.target.value)} /></Field><Field label="Used at (UTC)" hint="Use YYYY-MM-DDTHH:MM:SS.sss in UTC. The saved record is displayed in your profile’s time zone."><UtcDateTimeInput value={usedAt} onChange={setUsedAt} /></Field></div>
-    {usedAt && !Number.isNaN(new Date(`${usedAt}Z`).getTime()) && <p className="text-xs opacity-65">Your profile time: {timestamp(new Date(`${usedAt}Z`).toISOString(), 'en-US', data.profile?.timeZone)} ({data.profile?.timeZone ?? 'UTC'})</p>}
+    <Field label="Channel actually used"><input className={fieldClass} required maxLength={200} value={channel} onChange={e => setChannel(e.target.value)} /></Field>
+    <RecordTime recordNow={recordNow} setRecordNow={setRecordNow} value={usedAt} onChange={setUsedAt} timeZone={data.profile?.timeZone}/>
     <Field label="Use notes (optional)"><textarea className={fieldClass} rows={2} maxLength={5000} value={notes} onChange={e => setNotes(e.target.value)} /></Field>
-    <label className="flex items-start gap-3 text-sm leading-relaxed"><input className="mt-1 size-4 shrink-0 accent-violet-700" type="checkbox" required checked={confirmed} onChange={e => setConfirmed(e.target.checked)} /><span>I actually used or posted this approved version at the recorded time.</span></label>
+    <label className="flex items-start gap-3 text-sm leading-relaxed"><input className="mt-1 size-4 shrink-0 accent-emerald-700" type="checkbox" required checked={confirmed} onChange={e => setConfirmed(e.target.checked)} /><span>I actually used or posted this approved version at the recorded time.</span></label>
     <ErrorText error={error} /><button className={buttonClass} disabled={busy || !confirmed}>{busy ? 'Saving…' : 'Record actual use'}</button>
   </form>
 }
 
+function RecordTime({recordNow,setRecordNow,value,onChange,min,timeZone}:{recordNow:boolean;setRecordNow:(value:boolean)=>void;value:string;onChange:(value:string)=>void;min?:string;timeZone?:string}) {
+  return <div className="rounded-xl bg-[var(--surface-muted)] p-4"><p className="text-xs font-semibold">When did this happen?</p><div className="mt-3 flex flex-wrap gap-2"><button type="button" className={`${recordNow?buttonClass:secondaryClass} !min-h-9 !px-3 !py-2 !text-xs`} aria-pressed={recordNow} onClick={()=>setRecordNow(true)}>Just now</button><button type="button" className={`${recordNow?secondaryClass:buttonClass} !min-h-9 !px-3 !py-2 !text-xs`} aria-pressed={!recordNow} onClick={()=>setRecordNow(false)}>Choose an earlier time</button></div>{recordNow?<p className="mt-3 text-[11px] text-[var(--muted)]">Uses the current time when you save. Displayed in {timeZone??'UTC'}.</p>:<div className="mt-4"><Field label="Recorded time (UTC)" hint="YYYY-MM-DDTHH:MM:SS.sss, in UTC. Your business time is shown below."><UtcDateTimeInput min={min} value={value} onChange={onChange}/></Field>{value&&!Number.isNaN(new Date(`${value}Z`).getTime())&&<p className="mt-3 text-xs text-[var(--muted)]">{timestamp(new Date(`${value}Z`).toISOString(),'en-US',timeZone)} ({timeZone??'UTC'})</p>}</div>}</div>
+}
 function ResultForm({ data, mutate, busy, context }: { data: WorkspaceData; mutate: Mutation; busy: boolean; context: ActionContext }) {
   const related = [...data.executions].reverse().find(execution=>{
     const asset = data.assets.find(item=>item.id===execution.assetId)

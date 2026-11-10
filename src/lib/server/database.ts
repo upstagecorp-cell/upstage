@@ -3,6 +3,7 @@ import { mkdirSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { randomUUID } from 'node:crypto'
 import type { ExecutionJob, UsageRecord, WorkspaceData } from '@/lib/business/types'
+import { billingSummary } from './billing'
 
 const databases = new Map<string, DatabaseSync>()
 
@@ -39,6 +40,17 @@ export function database(): DatabaseSync {
     CREATE TABLE IF NOT EXISTS rate_limits (
       key TEXT PRIMARY KEY, count INTEGER NOT NULL, resets_at INTEGER NOT NULL
     );
+    CREATE TABLE IF NOT EXISTS billing_customers (
+      owner_id TEXT PRIMARY KEY REFERENCES users(id), customer_id TEXT NOT NULL UNIQUE,
+      revision INTEGER NOT NULL DEFAULT 0, applied_revision INTEGER NOT NULL DEFAULT 0,
+      checkout_key TEXT, checkout_plan TEXT, checkout_expires INTEGER
+    );
+    CREATE TABLE IF NOT EXISTS billing_events (id TEXT PRIMARY KEY, processed_at TEXT NOT NULL);
+    CREATE TABLE IF NOT EXISTS account_tokens (
+      token_hash TEXT PRIMARY KEY, owner_id TEXT NOT NULL REFERENCES users(id), purpose TEXT NOT NULL,
+      expires_at INTEGER NOT NULL, created_at INTEGER NOT NULL
+    );
+    INSERT OR IGNORE INTO schema_migrations(version,applied_at) VALUES(2,strftime('%Y-%m-%dT%H:%M:%fZ','now'));
     INSERT OR IGNORE INTO schema_migrations(version,applied_at) VALUES(1,strftime('%Y-%m-%dT%H:%M:%fZ','now'));
   `)
   databases.set(path, db)
@@ -95,6 +107,7 @@ export function workspace(owner: string): WorkspaceData {
     legacyImport: getRecord(owner, 'legacy', 'current'),
     generationAvailable: generationConfigured(),
     weeklyPlans: listRecords(owner, 'weekly_plan'),
+    billing: billingSummary(owner),
   }
 }
 

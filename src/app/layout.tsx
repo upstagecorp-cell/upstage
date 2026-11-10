@@ -1,13 +1,16 @@
 import type { Metadata } from 'next'
 import './globals.css'
+import './experience.css'
+import './platform.css'
 import { ThemeProvider } from '@/components/layout/ThemeProvider'
 import { Navbar } from '@/components/layout/Navbar'
 import { BottomNav } from '@/components/layout/BottomNav'
+import { MarketingFooter } from '@/components/layout/MarketingFooter'
 import { LocaleProvider } from '@/lib/i18n/locale-provider'
 
 export const metadata: Metadata = {
-  title: { default: 'NEXORA — Business Assessment and Marketing Assets', template: '%s | NEXORA' },
-  description: 'Understand your business challenges, choose your next action, and create marketing assets based on the evidence you provide.',
+  title: { default: 'NEXORA — Your connected business workspace', template: '%s | NEXORA' },
+  description: 'Understand your business. Find a clear next action. Connect business context, reviewed marketing drafts, and measured outcomes in one workspace.',
   openGraph: {
     title: 'NEXORA — Understand your business. Act with a purpose.',
     description: 'Connect business assessment with recommended actions, marketing drafts, and measured results.',
@@ -22,14 +25,15 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en-US" suppressHydrationWarning>
-      <body className="min-h-screen bg-[#f7f7f5] dark:bg-[#191919] text-[#37352f] dark:text-[#f1f1ef] antialiased">
+    <html lang="en-US" data-scroll-behavior="smooth" suppressHydrationWarning>
+      <body className="min-h-screen antialiased">
         <ThemeProvider>
           <LocaleProvider>
             <Navbar />
-            <main className="pb-20 md:pb-0">
+            <main>
               {children}
             </main>
+            <MarketingFooter />
             <BottomNav />
           </LocaleProvider>
         </ThemeProvider>

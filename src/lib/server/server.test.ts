@@ -30,6 +30,8 @@ async function account(email = 'first@example.com') {
   const response = await register(request('/api/auth/register', { email, password }))
   expect(response.status).toBe(200)
   const user = (await response.json()).user as SessionUser
+  // Existing generation fixtures represent a paid account; production has no fixture grant API.
+  saveRecord(user.id, 'billing', 'current', { id: 'fixture-subscription', plan: 'focus', status: 'active', paid: true, periodStart: new Date(Date.now()-86_400_000).toISOString(), periodEnd: new Date(Date.now()+29*86_400_000).toISOString(), cancelAtPeriodEnd: false })
   return { user, cookie: response.headers.get('set-cookie')!.split(';')[0] }
 }
 function prepare(owner: string) {
@@ -44,6 +46,38 @@ function packageValue(): GeneratedPackage {
 function providerResponse(value: unknown = packageValue()) {
   return new Response(JSON.stringify({ status: 'completed', output: [{ type: 'message', content: [{ type: 'output_text', text: JSON.stringify(value) }] }], usage: { input_tokens: 25, output_tokens: 18 } }), { status: 200 })
 }
+
+describe('approved wording continuity across generation requests',()=>{
+  it('sends only the requesting account’s approved wording and preserves the exact reference snapshot',async()=>{
+    const first=await account('wording-owner@example.com')
+    const second=await account('wording-other@example.com')
+    const own=fixtureAsset(first.user.id),other=fixtureAsset(second.user.id)
+    own.versions[0]={...own.versions[0],reviewStatus:'approved',approvedAt:new Date().toISOString(),body:'Approved phrase owned by first account'}
+    own.versions.push({...own.versions[0],version:2,body:'Unapproved revision must stay out',reviewStatus:'draft',approvedAt:null})
+    own.currentVersion=2
+    other.versions[0]={...other.versions[0],reviewStatus:'approved',approvedAt:new Date().toISOString(),body:'Private phrase owned by second account'}
+    saveRecord(first.user.id,'asset',own.id,own);saveRecord(second.user.id,'asset',other.id,other)
+    const fetchMock=vi.fn().mockResolvedValue(providerResponse());vi.stubGlobal('fetch',fetchMock)
+    const action=workspace(first.user.id).assessments[0].recommendedActions.find(item=>item.kind==='marketing_assets')!
+    const result=await generate(first.user.id,{assessmentId:own.assessmentId,actionId:action.id,idempotencyKey:'approved-context-request',counts:{hooks:1,adCopy:0,scripts:0,ctas:0},useApprovedContext:true})
+    const sent=JSON.parse(JSON.parse(fetchMock.mock.calls[0][1].body).input)
+    expect(sent.approvedWordingReferences).toHaveLength(1)
+    expect(sent.approvedWordingReferences[0]).toMatchObject({assetId:own.id,version:1,body:'Approved phrase owned by first account'})
+    expect(JSON.stringify(sent)).not.toContain('Private phrase owned by second account')
+    expect(JSON.stringify(sent)).not.toContain('Unapproved revision must stay out')
+    expect(result.jobs[0].approvedWordingReferences).toEqual(sent.approvedWordingReferences)
+  })
+  it('omits prior wording when reuse is switched off',async()=>{
+    const {user}=await account('no-wording@example.com')
+    const own=fixtureAsset(user.id)
+    own.versions[0]={...own.versions[0],reviewStatus:'approved',approvedAt:new Date().toISOString(),body:'This reference was not requested'}
+    saveRecord(user.id,'asset',own.id,own)
+    const fetchMock=vi.fn().mockResolvedValue(providerResponse());vi.stubGlobal('fetch',fetchMock)
+    await generate(user.id,{assessmentId:own.assessmentId,actionId:own.actionId,idempotencyKey:'wording-optout-request',counts:{hooks:1,adCopy:0,scripts:0,ctas:0},useApprovedContext:false})
+    const sent=JSON.parse(JSON.parse(fetchMock.mock.calls[0][1].body).input)
+    expect(sent.approvedWordingReferences).toBeUndefined()
+  })
+})
 function fixtureAsset(owner: string): Asset {
   const input = prepare(owner)
   const asset: Asset = { ...packageValue().assets[0], id: 'private-asset', jobId: 'private-job', assessmentId: input.assessmentId, actionId: input.actionId, profileId: workspace(owner).profile!.id, language: 'en-US', versions: [{ version: 1, title: 'First title', body: 'First draft', createdAt: new Date().toISOString(), reviewStatus: 'draft', approvedAt: null }], currentVersion: 1 }
@@ -301,7 +335,7 @@ describe('revision approvals, actual use, result evidence, and durable migration
       closeDatabases()
       expect(workspace(user.id).profile!.name).toBe('Sample Studio')
       expect(workspace(user.id).assessments).toHaveLength(1)
-      expect(database().prepare('SELECT version FROM schema_migrations').all()).toHaveLength(1)
+      expect(database().prepare('SELECT version FROM schema_migrations').all()).toHaveLength(2)
     } finally {
       closeDatabases()
       for (const name of readdirSync(directory)) unlinkSync(join(directory, name))

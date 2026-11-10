@@ -4,13 +4,13 @@ import type { ReactNode } from 'react'
 import type { AppLocale, AssessmentArea, AssetKind, BusinessGoal, MetricName, WorkspaceData } from '@/lib/business/types'
 import { isDateKey } from '@/lib/date-time'
 
-export const fieldClass = 'w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-sm text-[var(--foreground)] outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-200 disabled:opacity-60'
-export const buttonClass = 'inline-flex items-center justify-center gap-2 rounded-xl bg-violet-700 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-violet-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-500 disabled:cursor-not-allowed disabled:opacity-50'
-export const secondaryClass = 'inline-flex items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-4 py-2.5 text-sm font-medium transition hover:border-violet-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-500 disabled:cursor-not-allowed disabled:opacity-50'
+export const fieldClass = 'nx-field'
+export const buttonClass = 'nx-button'
+export const secondaryClass = 'nx-button nx-button-secondary'
 export type Mutation = (path: string, method: 'POST' | 'PUT', body: unknown, success: string) => Promise<WorkspaceData | null>
 
 export function Card({ title, children, description, className = '' }: { title?: string; description?: string; children: ReactNode; className?: string }) {
-  return <section className={`rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 sm:p-7 ${className}`}>
+  return <section className={`nx-panel ${className}`}>
     {title && <h2 className="text-lg font-semibold tracking-tight">{title}</h2>}
     {description && <p className="mt-2 text-sm leading-relaxed text-[var(--foreground)]/65">{description}</p>}
     <div className={title || description ? 'mt-5' : ''}>{children}</div>

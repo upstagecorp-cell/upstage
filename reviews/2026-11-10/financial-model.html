@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>NEXORA · 매출과 대표 수령액 가정 계산기</title>
+  <style>
+    :root{--bg:#f5f6f0;--ink:#20372f;--muted:#526157;--line:#d9e1d6;--lime:#d5ef91;--green:#254b3d}
+    *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.7 system-ui,-apple-system,"Segoe UI",sans-serif}
+    main{max-width:1220px;margin:auto;padding:48px 24px 64px}h1{font-size:clamp(27px,4vw,44px);line-height:1.25;letter-spacing:-.04em;margin:14px 0 20px}h2{font-size:21px;letter-spacing:-.03em;margin:0 0 20px}h3{font-size:16px;margin:20px 0 12px}p{margin:10px 0}.eyebrow{font-size:12px;letter-spacing:.13em;font-weight:750;color:var(--muted)}
+    a{color:var(--green);text-underline-offset:3px}.intro{max-width:860px;color:var(--muted)}.callout{border-left:4px solid #789257;background:#e9efdf;padding:14px 18px;margin:24px 0;font-size:14px}.layout{display:grid;grid-template-columns:minmax(280px,360px) minmax(0,1fr);gap:24px;align-items:start}
+    .panel{padding:26px;border:1px solid var(--line);border-radius:22px;background:#fff;min-width:0}.fields{display:grid;grid-template-columns:1fr 1fr;gap:18px 14px}.field{display:block;font-size:13px;font-weight:650}.field input{display:block;width:100%;margin-top:6px;min-height:46px;padding:10px 12px;border:1px solid #b5c3b0;border-radius:9px;background:#fff;font:inherit;font-size:16px;color:var(--ink)}.field small{display:block;color:var(--muted);font-size:12px;font-weight:400;line-height:1.5;margin-top:5px}
+    :focus-visible{outline:3px solid #567b3f;outline-offset:3px}.buttons{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:22px}button{min-height:44px;border:1px solid #becdb7;border-radius:9px;background:#eef3e8;color:var(--ink);padding:9px 13px;font:inherit;font-size:13px;font-weight:650;cursor:pointer}button:hover{background:#e1ebd5}.primary{background:var(--green);color:#fff;border-color:var(--green)}.primary:hover{background:#31614e}.error{color:#a32626;font-weight:650;font-size:14px}.cards{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}.metric{padding:22px;border-radius:18px;background:var(--green);color:#fff}.metric.owner{background:var(--lime);color:var(--ink)}.metric .label{font-size:13px}.number{display:block;font-size:clamp(22px,3vw,31px);font-weight:750;line-height:1.3;margin:12px 0 8px;letter-spacing:-.04em}.metric small{font-size:12px}.status{font-size:13px;font-weight:700}.description{font-size:13px;color:var(--muted)}.data{width:100%;border-collapse:collapse;font-size:13px}.data td,.data th{text-align:left;border-bottom:1px solid var(--line);padding:10px 4px;vertical-align:top}.data td:last-child,.data th:last-child{text-align:right;font-variant-numeric:tabular-nums}.data caption{text-align:left;font-size:14px;font-weight:700;margin-bottom:12px}.total{font-weight:750;background:#eff4e8}.waterfall{display:grid;grid-template-columns:1fr;gap:10px;margin:20px 0 24px}.bar-label{display:flex;justify-content:space-between;gap:12px;font-size:12px}.bar-track{height:8px;background:#edf1e8;border-radius:10px;overflow:hidden;margin-top:4px}.bar{height:100%;background:#97ac79;border-radius:10px}.bar.owner-bar{background:#254b3d}.subpanel{margin-top:24px}.growth-controls{display:flex;align-items:end;gap:18px;flex-wrap:wrap}.growth-controls label{max-width:240px}.growth-chart{display:flex;gap:8px;align-items:end;height:190px;border-bottom:1px solid var(--line);padding-top:14px;margin:20px 0 10px}.month{flex:1;min-width:0;text-align:center;font-size:10px}.month-bar{background:#72955e;min-height:2px;border-radius:5px 5px 0 0}.month-label{display:block;white-space:nowrap;padding-top:5px}.table-scroll{overflow-x:auto}.growth-table{min-width:600px}summary{cursor:pointer;min-height:44px;padding:10px 0;font-weight:650;font-size:14px}.wide{grid-column:1/-1}.footer{font-size:13px;color:var(--muted);margin-top:32px}.summary{font-size:14px;padding:14px;background:#eff4e8;border-radius:10px;margin:18px 0}.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
+    @media(max-width:850px){.layout{grid-template-columns:1fr}.fields{grid-template-columns:repeat(3,minmax(0,1fr))}.wide{grid-column:auto}.panel{padding:20px}main{padding:28px 18px}}
+    @media(max-width:520px){.fields{grid-template-columns:1fr 1fr}.cards{grid-template-columns:1fr}.number{font-size:30px}.growth-chart{gap:4px}.month-label{font-size:9px}}
+  </style>
+</head>
+<body>
+<main>
+  <div class="eyebrow">NEXORA · 2026.11.10 · 가정 시뮬레이터</div>
+  <h1>연매출 10억 원과<br>대표 월 수령 3천만 원의 조건</h1>
+  <p class="intro">가격과 고객 수만으로 수익이 결정되지는 않습니다. 환불·제작·고객 확보·인건비를 반영하고, 회사에 남길 현금까지 뺀 금액을 비교합니다. 숫자를 바꾸면 정상 운영과 첫 12개월 성장이 함께 바뀝니다.</p>
+  <div class="callout">모든 초기 입력은 검토용 가정입니다. 현재 실적·시장 평균·확정 가격·실시간 환율이 아닙니다. 총 공제율은 회사와 대표의 세금·관련 공제를 단순화한 값이며 실제 급여·배당 세액을 계산하지 않습니다. 대표 급여를 비용에서 별도 차감하지 않아 보상을 중복 계산하지 않습니다.</div>
+  <noscript><p class="error">상호작용에는 JavaScript가 필요합니다. 기본 가정: 월 $299 × 204계정, 환율 1,400원, 환불 2%, 직접비 15%, 결제비 3.5%, 이탈 3%, CAC $400, 고정비 1,600만 원, 공제율 30%, 월 유보 300만 원. 연환산 매출 1,004,238,144원, 월 수령 가능액 30,922,944원입니다.</p></noscript>
+  <div class="layout">
+    <form id="model-form" class="panel" novalidate>
+      <h2>운영 조건</h2>
+      <div class="buttons">
+        <button type="button" data-preset="base">효율적 가정</button>
+        <button type="button" data-preset="cost">직접비 20%</button>
+        <button type="button" data-preset="churn">이탈 8%</button>
+        <button type="button" data-preset="growth">240계정·직접비 20%</button>
+      </div>
+      <div class="fields">
+        <label class="field">월 청구 단가 ($)<input name="price" type="number" min="0.01" max="100000" step="0.01" value="299" required></label>
+        <label class="field">유지 유료 계정 수<input name="customers" type="number" min="0" max="10000000" step="1" value="204" required></label>
+        <label class="field">환율 (원/$)<input name="fx" type="number" min="1" max="100000" step="1" value="1400" required></label>
+        <label class="field">환불 (%/매출)<input name="refund" type="number" min="0" max="100" step="0.1" value="2" required></label>
+        <label class="field">직접 제작비 (%)<input name="direct" type="number" min="0" max="200" step="0.1" value="15" required><small>AI·저장·외주 검수 등. 환불 전 청구액 기준.</small></label>
+        <label class="field">결제·환전비 (%)<input name="payment" type="number" min="0" max="100" step="0.1" value="3.5" required><small>특정 사업자 요율 인용이 아닌 총비용 가정.</small></label>
+        <label class="field">월 계정 이탈 (%)<input name="churn" type="number" min="0" max="100" step="0.1" value="3" required></label>
+        <label class="field">유료 계정 CAC ($)<input name="cac" type="number" min="0" max="1000000" step="1" value="400" required></label>
+        <label class="field wide">대표 외 고정비 (원/월)<input name="fixed" type="number" min="0" max="10000000000" step="10000" value="16000000" required><small>개발·지원·도구·관리 인력 등. 대표 보상은 목표 수령액에 포함.</small></label>
+        <label class="field">총 공제 가정 (%)<input name="tax" type="number" min="0" max="100" step="1" value="30" required></label>
+        <label class="field">회사 유보 (원/월)<input name="reserve" type="number" min="0" max="10000000000" step="10000" value="3000000" required></label>
+      </div>
+      <p id="input-error" class="error" role="alert" hidden></p>
+      <p class="description">정상 운영은 고객 수를 일정하게 유지하기 위한 대체 획득비를 반영합니다. 성장기 신규 고객 전부의 획득비는 아래의 첫해 계산에 따로 반영합니다.</p>
+      <button type="button" class="primary" id="download">가정과 정상 월 계산 CSV 저장</button>
+    </form>
+    <section class="panel" aria-labelledby="steady-title">
+      <h2 id="steady-title">같은 규모를 유지하는 정상 운영</h2>
+      <div class="cards" aria-live="polite" aria-atomic="true">
+        <div class="metric"><span class="label">환불 차감 후 연환산 매출</span><strong class="number" id="annual">1,004,238,144원</strong><span class="status" id="revenue-status">목표 10억 원</span><br><small>정상 월 × 12. 첫해 실제 매출과 다릅니다.</small></div>
+        <div class="metric owner"><span class="label">대표 월 수령 가능액</span><strong class="number" id="takehome">30,922,944원</strong><span class="status" id="owner-status">목표 3천만 원</span><br><small>공제·회사 유보 반영. 실제 지급 보장 아님.</small></div>
+      </div>
+      <p class="summary" id="customer-requirement"></p>
+      <table class="data"><caption>월 현금 배분 모형</caption><thead><tr><th scope="col">항목</th><th scope="col">월 금액</th></tr></thead><tbody id="cash-table"></tbody></table>
+      <div class="waterfall" id="allocation" aria-label="환불 전 청구액 대비 비용과 대표 수령 여력"></div>
+      <p class="description" id="retention"></p>
+      <details><summary>계산식과 해석</summary>
+        <p class="description">청구액 = 단가 × 고객 수 × 환율. 매출 = 청구액 − 환불. 대체 획득비 = 고객 수 × 월 이탈률 × CAC × 환율. 대표 보상·세금 전 재원 = 매출 − 직접 제작비 − 결제·환전비 − 대체 획득비 − 대표 외 고정비.</p>
+        <p class="description">총 공제 = 양수 재원 × 공제율. 수령 가능액 = 재원 − 총 공제 − 회사 유보액. 음수는 대표 지급 여력이 없고 추가 자금이 필요함을 뜻합니다. 회사 유보는 비용이 아니며 현금 보유 계획입니다.</p>
+        <p class="description">기존 누적 획득비·초기 구축비·부채 상환·매출채권·실제 과세·지분과 계약상 지급 제한은 반영하지 않았습니다. 손실이 있었던 회사가 이 계산만으로 전액 인출해도 된다는 뜻이 아닙니다.</p>
+      </details>
+    </section>
+  </div>
+  <section class="panel subpanel" aria-labelledby="growth-title">
+    <h2 id="growth-title">0계정에서 출발하는 첫 12개월</h2>
+    <div class="growth-controls"><label class="field">매월 신규 유료 계정 기대값<input id="new-accounts" type="number" min="0" max="1000000" step="0.01" value="20" required></label><button type="button" id="solve-revenue">첫해 누적 매출 10억 원에 필요한 수</button><button type="button" id="solve-accounts">12월 말 위 유지 계정 수에 필요한 수</button></div>
+    <p class="description">매월 초 기존 계정에 이탈을 적용하고 신규 계정을 더합니다. 모든 월말 활성 계정에 한 달 매출을 인식하는 단순화입니다. 획득비는 대체 고객뿐 아니라 신규 고객 전부에 발생합니다. 소수 계정은 기대값이며 실제 고객은 정수입니다.</p>
+    <p id="growth-error" class="error" role="alert" hidden></p>
+    <p class="summary" id="growth-summary" aria-live="polite"></p>
+    <div id="growth-chart" class="growth-chart" aria-hidden="true"></div>
+    <details><summary>월별 계정·매출·획득비·대표 보상 전 재원</summary><div class="table-scroll"><table class="data growth-table"><caption>처음 12개월의 계산 기대값</caption><thead><tr><th scope="col">월</th><th scope="col">월말 계정</th><th scope="col">환불 후 매출</th><th scope="col">신규 획득비</th><th scope="col">대표 보상·세금 전 재원</th></tr></thead><tbody id="growth-table"></tbody></table></div></details>
+    <p class="description">성장기 재원은 월별 손실을 상계한 단순 합계이며 실제 급여·배당 가능액이나 현금 잔액이 아닙니다. 총 공제·유보·초기 구축비·부채·선결제 의무를 추가로 고려해야 합니다. 첫해 매월 3천만 원 지급 가능성을 나타내는 그래프가 아닙니다.</p>
+  </section>
+  <p class="footer">관련 자료: <a href="README.md">검토 안내</a> · <a href="STRATEGY_REVIEW.md">사업 검토</a> · <a href="financial-scenarios.csv">비용 민감도 CSV</a>. 이 파일은 독립 실행 자료입니다. 입력을 외부로 전송하거나 자동 저장하지 않습니다.</p>
+</main>
+<script>
+  'use strict';
+  const form=document.getElementById('model-form');
+  const fields=['price','customers','fx','refund','direct','payment','churn','cac','fixed','tax','reserve'];
+  const defaults={price:299,customers:204,fx:1400,refund:2,direct:15,payment:3.5,churn:3,cac:400,fixed:16000000,tax:30,reserve:3000000};
+  const won=n=>Math.round(n).toLocaleString('ko-KR')+'원';
+  const count=n=>n.toLocaleString('ko-KR',{maximumFractionDigits:2});
+  const set=(id,value)=>document.getElementById(id).textContent=value;
+  function inputs(){
+    for(const name of fields){const input=form.elements.namedItem(name);if(!input.validity.valid||input.value.trim()===''||!Number.isFinite(input.valueAsNumber))throw new Error('모든 입력을 표시된 허용 범위 안의 숫자로 채워 주세요. 계정 수는 정수입니다.');}
+    return Object.fromEntries(fields.map(name=>[name,form.elements.namedItem(name).valueAsNumber]));
+  }
+  function calculate(x){
+    const gross=x.price*x.customers*x.fx,refund=gross*x.refund/100,revenue=gross-refund;
+    const direct=gross*x.direct/100,payment=gross*x.payment/100,replacement=x.customers*x.churn/100*x.cac*x.fx;
+    const pool=revenue-direct-payment-replacement-x.fixed,tax=Math.max(0,pool)*x.tax/100,takehome=pool-tax-x.reserve;
+    const result={gross,refund,revenue,direct,payment,replacement,pool,tax,takehome,annual:revenue*12};
+    if(Object.values(result).some(value=>!Number.isFinite(value)||Math.abs(value)>Number.MAX_SAFE_INTEGER))throw new Error('계산 금액이 안전하게 표시할 수 있는 범위를 넘습니다. 단가·계정 수·환율을 줄여 주세요.');
+    return result;
+  }
+  function appendRow(parent,label,value,total=false){const tr=document.createElement('tr');if(total)tr.className='total';for(const text of [label,value]){const td=document.createElement('td');td.textContent=text;tr.appendChild(td);}parent.appendChild(tr);}
+  function growth(x,newPaid){let n=0;return Array.from({length:12},(_,index)=>{n=n*(1-x.churn/100)+newPaid;const gross=n*x.price*x.fx,revenue=gross*(1-x.refund/100),acquisition=newPaid*x.cac*x.fx,pool=revenue-gross*(x.direct+x.payment)/100-acquisition-x.fixed;return {month:index+1,n,revenue,acquisition,pool};});}
+  function growthInputs(){const input=document.getElementById('new-accounts');if(!input.validity.valid||input.value.trim()===''||!Number.isFinite(input.valueAsNumber))throw new Error('매월 신규 계정 기대값을 0 이상 허용 범위 내 숫자로 입력해 주세요.');return input.valueAsNumber;}
+  function renderGrowth(x){
+    const error=document.getElementById('growth-error');
+    try{
+      const rows=growth(x,growthInputs()),sum=key=>rows.reduce((a,r)=>a+r[key],0);
+      set('growth-summary','12개월 누적 매출 '+won(sum('revenue'))+' · 12월 말 '+count(rows[11].n)+'계정 · 신규 획득 지출 '+won(sum('acquisition'))+' · 대표 보상·세금 전 연간 재원 '+won(sum('pool')));
+      const body=document.getElementById('growth-table');body.replaceChildren();
+      rows.forEach(r=>{const tr=document.createElement('tr');for(const value of [r.month+'월',count(r.n),won(r.revenue),won(r.acquisition),won(r.pool)]){const td=document.createElement('td');td.textContent=value;tr.appendChild(td);}body.appendChild(tr);});
+      const chart=document.getElementById('growth-chart');chart.replaceChildren();const max=Math.max(1,...rows.map(r=>r.revenue));
+      rows.forEach(r=>{const column=document.createElement('div');column.className='month';const bar=document.createElement('div');bar.className='month-bar';bar.style.height=Math.max(2,r.revenue/max*145)+'px';bar.title=r.month+'월: '+won(r.revenue);const label=document.createElement('span');label.className='month-label';label.textContent=r.month+'월';column.append(bar,label);chart.appendChild(column);});
+      error.hidden=true;
+    }catch(failure){error.textContent=failure.message;error.hidden=false;set('growth-summary','입력을 수정하면 계산을 갱신합니다.');document.getElementById('growth-table').replaceChildren();document.getElementById('growth-chart').replaceChildren();}
+  }
+  function render(){
+    const error=document.getElementById('input-error');
+    try{
+      const x=inputs(),r=calculate(x);error.hidden=true;
+      set('annual',won(r.annual));set('takehome',won(r.takehome));
+      set('revenue-status',r.annual>=1e9?'10억 원 목표 이상':'10억 원 목표까지 '+won(1e9-r.annual));
+      set('owner-status',r.takehome>=3e7?'3천만 원 목표 이상':'3천만 원 목표까지 '+won(3e7-r.takehome));
+      const perAnnual=x.price*x.fx*(1-x.refund/100)*12;
+      set('customer-requirement',perAnnual>0?'이 단가·환율·환불 가정에서 연매출 10억 원에 필요한 유지 계정은 '+count(Math.ceil(1e9/perAnnual))+'개입니다.':'환불 후 매출이 0이므로 이 조건에서 매출 목표에 도달할 수 없습니다.');
+      const lines=[['환불 전 청구액',r.gross],['환불',-r.refund],['환불 차감 후 매출',r.revenue],['직접 제작비',-r.direct],['결제·환전 비용',-r.payment],['해지 고객 대체 확보',-r.replacement],['대표 외 고정 운영비',-x.fixed],['대표 보상·세금 전 재원',r.pool],['총 공제 가정',-r.tax],['회사 유보 현금',-x.reserve],['대표 월 수령 가능액',r.takehome]];
+      const body=document.getElementById('cash-table');body.replaceChildren();lines.forEach(([label,value],i)=>appendRow(body,label,won(value),[2,7,10].includes(i)));
+      const allocation=document.getElementById('allocation');allocation.replaceChildren();
+      [['환불',r.refund],['직접 제작·검수',r.direct],['결제·환전',r.payment],['대체 고객 확보',r.replacement],['고정 운영비',x.fixed],['공제 가정',r.tax],['회사 유보',x.reserve],['대표 수령 여력',Math.max(0,r.takehome)]].forEach(([label,value],index)=>{
+        const section=document.createElement('div'),caption=document.createElement('div');caption.className='bar-label';for(const text of [label,won(value)]){const span=document.createElement('span');span.textContent=text;caption.appendChild(span);}const track=document.createElement('div');track.className='bar-track';const bar=document.createElement('div');bar.className='bar'+(index===7?' owner-bar':'');bar.style.width=Math.min(100,r.gross>0?value/r.gross*100:0)+'%';track.appendChild(bar);section.append(caption,track);allocation.appendChild(section);
+      });
+      set('retention','월 규모 유지에 신규 '+count(x.customers*x.churn/100)+'계정이 필요합니다. 같은 월 이탈률이 지속될 때 기존 코호트의 12개월 잔존율은 '+count((1-x.churn/100)**12*100)+'%입니다.');
+      renderGrowth(x);document.getElementById('download').disabled=false;
+    }catch(failure){error.textContent=failure.message;error.hidden=false;set('annual','입력 확인');set('takehome','입력 확인');set('revenue-status','');set('owner-status','');set('customer-requirement','잘못된 입력을 수정하면 결과를 다시 표시합니다.');set('retention','');set('growth-summary','운영 조건을 먼저 확인해 주세요.');for(const id of ['cash-table','allocation','growth-chart','growth-table'])document.getElementById(id).replaceChildren();document.getElementById('download').disabled=true;}
+  }
+  form.addEventListener('input',render);form.addEventListener('submit',event=>event.preventDefault());document.getElementById('new-accounts').addEventListener('input',render);
+  document.querySelectorAll('[data-preset]').forEach(button=>button.addEventListener('click',()=>{const preset=button.dataset.preset;const x={...defaults,...(preset==='cost'?{direct:20}:preset==='churn'?{churn:8}:preset==='growth'?{customers:240,direct:20}:{})};for(const name of fields)form.elements.namedItem(name).value=x[name];render();}));
+  function solve(kind){try{const x=inputs(),unit=growth(x,1);const divisor=kind==='revenue'?unit.reduce((sum,r)=>sum+r.revenue,0):unit[11].n;const target=kind==='revenue'?1e9:x.customers;if(divisor<=0)throw new Error('환불 후 매출이 0인 조건에서는 매출 목표를 풀 수 없습니다.');document.getElementById('new-accounts').value=(target/divisor).toFixed(2);render();}catch(failure){const error=document.getElementById('growth-error');error.textContent=failure.message;error.hidden=false;}}
+  document.getElementById('solve-revenue').addEventListener('click',()=>solve('revenue'));document.getElementById('solve-accounts').addEventListener('click',()=>solve('accounts'));
+  document.getElementById('download').addEventListener('click',()=>{try{const x=inputs(),r=calculate(x);const rows=[['type','key','value'],...Object.entries(x).map(([key,value])=>['assumption',key,value]),...Object.entries(r).map(([key,value])=>['result_krw',key,value])];const csv='\uFEFF'+rows.map(row=>row.join(',')).join('\r\n');const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));const link=document.createElement('a');link.href=url;link.download='nexora-model-assumptions.csv';document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);}catch{render();}});
+  render();
+</script>
+</body>
+</html>

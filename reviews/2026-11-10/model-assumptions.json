@@ -1,0 +1,136 @@
+{
+  "base": {
+    "scenario": "efficient_illustration",
+    "price_usd": 299,
+    "customers": 204,
+    "fx": 1400,
+    "refund_rate": 0.02,
+    "direct_rate": 0.15,
+    "payment_rate": 0.035,
+    "churn": 0.03,
+    "cac_usd": 400,
+    "fixed_krw": 16000000,
+    "tax_haircut": 0.3,
+    "reserve_krw": 3000000,
+    "gross_monthly_krw": 85394400,
+    "refunds_monthly_krw": 1707888.0,
+    "net_monthly_revenue_krw": 83686512.0,
+    "annualized_net_revenue_krw": 1004238144.0,
+    "direct_monthly_krw": 12809160.0,
+    "payment_monthly_krw": 2988804.0000000005,
+    "replacement_acquisition_monthly_krw": 3427200.0,
+    "owner_pool_before_tax_krw": 48461348.0,
+    "tax_sensitivity_krw": 14538404.4,
+    "owner_takehome_capacity_krw": 30922943.6
+  },
+  "scenarios": [
+    {
+      "scenario": "efficient_illustration",
+      "annualized_net_revenue_krw": 1004238144.0,
+      "owner_takehome_capacity_krw": 30922943.6
+    },
+    {
+      "scenario": "direct_cost_20pct",
+      "annualized_net_revenue_krw": 1004238144.0,
+      "owner_takehome_capacity_krw": 27934139.6
+    },
+    {
+      "scenario": "direct_cost_30pct",
+      "annualized_net_revenue_krw": 1004238144.0,
+      "owner_takehome_capacity_krw": 21956531.6
+    },
+    {
+      "scenario": "monthly_churn_8pct",
+      "annualized_net_revenue_krw": 1004238144.0,
+      "owner_takehome_capacity_krw": 26924543.6
+    },
+    {
+      "scenario": "cac_800usd",
+      "annualized_net_revenue_krw": 1004238144.0,
+      "owner_takehome_capacity_krw": 28523903.6
+    },
+    {
+      "scenario": "fx_1200",
+      "annualized_net_revenue_krw": 860775552.0,
+      "owner_takehome_capacity_krw": 24476808.8
+    },
+    {
+      "scenario": "tax_haircut_40pct",
+      "annualized_net_revenue_krw": 1004238144.0,
+      "owner_takehome_capacity_krw": 26076808.8
+    },
+    {
+      "scenario": "fixed_cost_25m",
+      "annualized_net_revenue_krw": 1004238144.0,
+      "owner_takehome_capacity_krw": 24622943.6
+    },
+    {
+      "scenario": "240_customers_direct20",
+      "annualized_net_revenue_krw": 1181456640.0,
+      "owner_takehome_capacity_krw": 35369576.0
+    },
+    {
+      "scenario": "240_customers_direct20_tax40",
+      "annualized_net_revenue_krw": 1181456640.0,
+      "owner_takehome_capacity_krw": 29888208.0
+    }
+  ],
+  "prices": [
+    {
+      "price_usd": 49,
+      "fx_assumption": 1400,
+      "refund_assumption": 0.02,
+      "customers_for_net_1b_annual": 1240,
+      "annualized_net_revenue_krw": 1000352640.0,
+      "replacement_customers_per_month_at_3pct": 37.199999999999996
+    },
+    {
+      "price_usd": 99,
+      "fx_assumption": 1400,
+      "refund_assumption": 0.02,
+      "customers_for_net_1b_annual": 614,
+      "annualized_net_revenue_krw": 1000780704.0,
+      "replacement_customers_per_month_at_3pct": 18.419999999999998
+    },
+    {
+      "price_usd": 199,
+      "fx_assumption": 1400,
+      "refund_assumption": 0.02,
+      "customers_for_net_1b_annual": 306,
+      "annualized_net_revenue_krw": 1002558816.0,
+      "replacement_customers_per_month_at_3pct": 9.18
+    },
+    {
+      "price_usd": 299,
+      "fx_assumption": 1400,
+      "refund_assumption": 0.02,
+      "customers_for_net_1b_annual": 204,
+      "annualized_net_revenue_krw": 1004238144.0,
+      "replacement_customers_per_month_at_3pct": 6.12
+    },
+    {
+      "price_usd": 499,
+      "fx_assumption": 1400,
+      "refund_assumption": 0.02,
+      "customers_for_net_1b_annual": 122,
+      "annualized_net_revenue_krw": 1002295392.0,
+      "replacement_customers_per_month_at_3pct": 3.6599999999999997
+    },
+    {
+      "price_usd": 999,
+      "fx_assumption": 1400,
+      "refund_assumption": 0.02,
+      "customers_for_net_1b_annual": 61,
+      "annualized_net_revenue_krw": 1003299696.0,
+      "replacement_customers_per_month_at_3pct": 1.8299999999999998
+    }
+  ],
+  "growth": {
+    "new_paid_each_month_for_first_year_net_1b": 34.80887221582053,
+    "month12_accounts": 355.2334044669037,
+    "first_year_acquisition_krw": 233915621.29031396,
+    "monthly_new_for_204_by_month12": 19.989702102154006,
+    "first_year_revenue_when_204_at_month12": 574270317.5849733,
+    "first_year_owner_pool_before_tax": 385308868.5056046
+  }
+}

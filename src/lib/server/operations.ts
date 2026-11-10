@@ -10,6 +10,8 @@ import { limit } from './auth'
 import { HttpError, invalid, objectInput, textInput, versionInput } from './errors'
 import { boundedConfig, generateFromProvider, ProviderError, type TokenUsage } from './provider'
 import { missingGenerationFields } from '@/lib/business/industry'
+import { approvedWordingForProfile } from '@/lib/business/approved-wording'
+import { requireGenerationAllowance } from './billing'
 
 function requiredRecord<T>(owner: string, kind: string, id: string): T {
   const value = getRecord<T>(owner, kind, id)
@@ -95,7 +97,9 @@ export async function generate(owner: string, raw: unknown): Promise<WorkspaceDa
     }
     const running = listRecords<ExecutionJob>(owner, 'job').find(item => item.status === 'running' && Date.now() - Date.parse(item.createdAt) <= 10 * 60_000)
     if (running) throw new HttpError(409, 'JOB_RUNNING', 'A package is already being generated. Wait for it to finish.')
+    requireGenerationAllowance(owner, Object.values(input.counts).reduce((sum, count) => sum + count, 0))
     const fresh: ExecutionJob = { id: randomUUID(), assessmentId: assessment.id, actionId: action.id, status: 'running', provider: 'openai', model: process.env.OPENAI_MODEL?.trim() || 'not-configured', idempotencyKey: input.idempotencyKey, createdAt: now(), completedAt: null, errorCode: null, referenceAnalysis: null, referenceSource: input.referenceSource || null, replacesJobId: input.replacesJobId || null }
+    if (input.useApprovedContext) fresh.approvedWordingReferences = approvedWordingForProfile(listRecords<Asset>(owner, 'asset'), assessment.profileId)
     database().prepare('INSERT INTO generation_keys(owner_id,key,payload_hash,job_id) VALUES(?,?,?,?)').run(owner, input.idempotencyKey, hash, fresh.id)
     saveRecord(owner, 'job', fresh.id, fresh)
     return fresh
@@ -110,7 +114,7 @@ export async function generate(owner: string, raw: unknown): Promise<WorkspaceDa
     limit(`generation:${owner}`, boundedConfig('NEXORA_GENERATIONS_PER_HOUR', 10, 1, 1000), 60 * 60_000)
     const assessment = requiredRecord<Assessment>(owner, 'assessment', job.assessmentId)
     const action = assessment.recommendedActions.find(item => item.id === job.actionId)!
-    const request = buildGenerationRequest(assessment.profileSnapshot, assessment, action, input)
+    const request = buildGenerationRequest(assessment.profileSnapshot, assessment, action, input, job.approvedWordingReferences ?? [])
     const response = await generateFromProvider(request)
     tokenUsage = response.usage
     let generated: GeneratedPackage

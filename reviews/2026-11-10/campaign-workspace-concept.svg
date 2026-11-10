@@ -1,0 +1,93 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="820" viewBox="0 0 1200 820" role="img" aria-labelledby="title description">
+  <title id="title">NEXORA campaign workspace design concept</title>
+  <desc id="description">An unimplemented design proposal with fictional product data. A campaign workspace groups confirmed facts, two message directions, a channel preview, review, and next steps. It shows no real customer results or live AI generation.</desc>
+  <rect width="1200" height="820" rx="20" fill="#f5f6f0"/>
+  <g font-family="Arial,Helvetica,sans-serif" fill="#20372f">
+    <rect x="0" y="0" width="1200" height="48" rx="20" fill="#e6eddc"/>
+    <rect x="0" y="24" width="1200" height="24" fill="#e6eddc"/>
+    <text x="24" y="30" font-size="13" font-weight="700" letter-spacing="1">DESIGN CONCEPT · FICTIONAL SAMPLE · PROPOSED EXPERIENCE, NOT IMPLEMENTED</text>
+    <rect x="0" y="48" width="190" height="772" fill="#ffffff"/>
+    <path d="M190 48V820" stroke="#d9e1d6"/>
+    <text x="24" y="100" font-size="27" font-weight="700">nexora.</text>
+    <rect x="18" y="142" width="154" height="44" rx="10" fill="#e8efd9"/>
+    <text x="34" y="170" font-size="15" font-weight="700">Campaigns</text>
+    <text x="34" y="218" font-size="15" fill="#526157">Approved library</text>
+    <text x="34" y="266" font-size="15" fill="#526157">Results</text>
+    <path d="M24 302H166" stroke="#d9e1d6"/>
+    <text x="34" y="336" font-size="14" fill="#526157">Business facts</text>
+    <text x="34" y="375" font-size="14" fill="#526157">Settings</text>
+    <text x="24" y="766" font-size="12" fill="#526157">Fictional business</text>
+    <text x="24" y="790" font-size="14" font-weight="700">Harbor Goods</text>
+    <text x="222" y="88" font-size="13" fill="#526157">Campaigns / Everyday tote / Message review</text>
+    <rect x="977" y="65" width="190" height="36" rx="9" fill="#ffffff" stroke="#d9e1d6"/>
+    <text x="992" y="89" font-size="12" fill="#526157">Draft · awaiting your review</text>
+    <text x="222" y="145" font-size="30" font-weight="700">Choose the message for your next campaign.</text>
+    <text x="222" y="176" font-size="15" fill="#526157">Compare two directions using the same confirmed product facts.</text>
+
+    <rect x="222" y="206" width="224" height="434" rx="17" fill="#ffffff" stroke="#d9e1d6"/>
+    <text x="242" y="241" font-size="15" font-weight="700">Confirmed facts</text>
+    <rect x="242" y="260" width="184" height="90" rx="10" fill="#eef2e8"/>
+    <path d="M298 289H370L361 334H307Z" fill="#c5b78d"/>
+    <path d="M317 290V281C317 263 350 263 350 281V290" fill="none" stroke="#8a7b58" stroke-width="5"/>
+    <text x="242" y="379" font-size="16" font-weight="700">Everyday canvas tote</text>
+    <text x="242" y="405" font-size="14" fill="#526157">Canvas · two handles</text>
+    <text x="242" y="430" font-size="14" fill="#526157">Neutral color · $38</text>
+    <text x="242" y="455" font-size="12" fill="#526157">Illustrative facts, not a real offer</text>
+    <path d="M242 477H426" stroke="#d9e1d6"/>
+    <text x="242" y="507" font-size="13" font-weight="700">From the last approval</text>
+    <text x="242" y="535" font-size="14" fill="#526157">Keep: short, calm sentences</text>
+    <text x="242" y="560" font-size="14" fill="#526157">Avoid: unverified eco claims</text>
+    <text x="242" y="610" font-size="13" text-decoration="underline">Review or change these facts</text>
+
+    <rect x="464" y="206" width="432" height="434" rx="17" fill="#ffffff" stroke="#d9e1d6"/>
+    <text x="486" y="241" font-size="15" font-weight="700">Message directions</text>
+    <rect x="484" y="260" width="190" height="123" rx="12" fill="#e8efd9" stroke="#537243" stroke-width="2"/>
+    <text x="498" y="286" font-size="12" font-weight="700">A · EVERYDAY USE</text>
+    <text x="498" y="319" font-size="19" font-weight="700">Carry the everyday.</text>
+    <text x="498" y="347" font-size="13" fill="#526157">A simple daily companion.</text>
+    <text x="498" y="370" font-size="12" font-weight="700">Selected for this draft</text>
+    <rect x="686" y="260" width="190" height="123" rx="12" fill="#ffffff" stroke="#d9e1d6"/>
+    <text x="700" y="286" font-size="12" font-weight="700">B · VERSATILE STYLE</text>
+    <text x="700" y="319" font-size="19" font-weight="700">One tote.</text>
+    <text x="700" y="344" font-size="19" font-weight="700">Many plans.</text>
+    <text x="700" y="370" font-size="13" fill="#526157">A different message to review.</text>
+    <text x="486" y="414" font-size="12" font-weight="700" fill="#526157">CHANNEL PREVIEW · SOCIAL POST</text>
+    <rect x="484" y="429" width="392" height="125" rx="11" fill="#f5f6f0"/>
+    <text x="502" y="456" font-size="13" font-weight="700">Harbor Goods · sample post</text>
+    <text x="502" y="487" font-size="20" font-weight="700">Carry the everyday.</text>
+    <text x="502" y="513" font-size="14" fill="#526157">Meet the Everyday Canvas Tote. Explore the details.</text>
+    <text x="502" y="539" font-size="12" fill="#526157">No image or sales result is generated in this concept.</text>
+    <rect x="484" y="573" width="164" height="44" rx="10" fill="#254b3d"/>
+    <text x="505" y="601" font-size="14" font-weight="700" fill="#ffffff">Review this version</text>
+    <rect x="660" y="573" width="216" height="44" rx="10" fill="#ffffff" stroke="#b5c3b0"/>
+    <text x="678" y="601" font-size="14">Edit selected wording</text>
+
+    <rect x="914" y="206" width="254" height="434" rx="17" fill="#254b3d"/>
+    <text x="934" y="241" font-size="15" font-weight="700" fill="#ffffff">Why these directions?</text>
+    <g fill="#edf3e5" font-size="14">
+      <text x="934" y="279">A focuses on everyday use.</text>
+      <text x="934" y="307">B focuses on versatile styling.</text>
+      <text x="934" y="354">Neither is a proven winner.</text>
+      <text x="934" y="382">Choose one, review its claims,</text>
+      <text x="934" y="410">then decide what to use.</text>
+    </g>
+    <path d="M934 439H1148" stroke="#ffffff" opacity=".3"/>
+    <text x="934" y="475" font-size="13" font-weight="700" fill="#d5ef91">NEXT AFTER APPROVAL</text>
+    <text x="934" y="507" font-size="14" fill="#edf3e5">Export the approved version.</text>
+    <text x="934" y="535" font-size="14" fill="#edf3e5">Confirm actual use separately.</text>
+    <text x="934" y="589" font-size="12" fill="#edf3e5">No automatic publishing.</text>
+    <text x="934" y="611" font-size="12" fill="#edf3e5">No performance claim.</text>
+
+    <rect x="222" y="662" width="946" height="90" rx="15" fill="#ffffff" stroke="#d9e1d6"/>
+    <path d="M299 694H1095" stroke="#d9e1d6" stroke-width="2"/>
+    <circle cx="299" cy="694" r="13" fill="#254b3d"/><text x="295" y="699" fill="#ffffff" font-size="13">✓</text>
+    <circle cx="564" cy="694" r="13" fill="#d5ef91" stroke="#254b3d"/><text x="560" y="699" font-size="13">2</text>
+    <circle cx="829" cy="694" r="13" fill="#ffffff" stroke="#9eae97"/><text x="825" y="699" font-size="13">3</text>
+    <circle cx="1095" cy="694" r="13" fill="#ffffff" stroke="#9eae97"/><text x="1091" y="699" font-size="13">4</text>
+    <text x="256" y="731" font-size="13">Confirm facts</text>
+    <text x="507" y="731" font-size="13" font-weight="700">Choose direction</text>
+    <text x="781" y="731" font-size="13">Review &amp; approve</text>
+    <text x="1056" y="731" font-size="13">Actual use</text>
+    <text x="222" y="790" font-size="13" fill="#526157">Review concept: focus on a finished task, show the output, reuse confirmed context, and preserve customer control.</text>
+  </g>
+</svg>

@@ -1,0 +1,433 @@
+{
+  "assumptions": {
+    "fx": 1400,
+    "focus_share": 0.5,
+    "refund_rate": 0.02,
+    "processing_rate": 0.042,
+    "processing_fixed_usd": 0.3,
+    "utilization": 0.4,
+    "attempt_multiplier": 1.15,
+    "cost_per_attempt_usd": 1.0,
+    "support_usd_per_account": 12.0,
+    "churn": 0.03,
+    "cac_usd": 400.0,
+    "fixed_krw": 12000000,
+    "federal_rate": 0.21,
+    "state_rate": 0.05,
+    "personal_effective_rate": 0.3,
+    "tax_mode": "kr_resident_dividend",
+    "retention_krw": 3000000,
+    "personal_extra_krw": 1000000.0
+  },
+  "revenue_target_only": {
+    "customers": 272,
+    "arpu_usd": 224.0,
+    "gross_monthly_krw": 85299200.0,
+    "refunds_krw": 1705984.0,
+    "net_monthly_revenue_krw": 83593216.0,
+    "annualized_net_revenue_krw": 1003118592.0,
+    "payment_krw": 3696806.4000000004,
+    "ai_krw": 5605376.0,
+    "support_krw": 4569600.0,
+    "replacement_cac_krw": 4569600.0,
+    "fixed_krw": 12000000,
+    "pre_corporation_tax_krw": 53151833.599999994,
+    "corporation_tax_krw": 13261382.483199999,
+    "company_after_tax_krw": 39890451.116799995,
+    "retained_krw": 3000000,
+    "distributable_krw": 36890451.116799995,
+    "personal_tax_reserve_krw": 13853965.158058666,
+    "personal_take_home_krw": 22036485.95874133
+  },
+  "scenarios": [
+    {
+      "scenario": "kr_resident_dividend_base",
+      "customers": 354,
+      "arpu_usd": 224.0,
+      "gross_monthly_krw": 111014400.0,
+      "refunds_krw": 2220288.0,
+      "net_monthly_revenue_krw": 108794112.0,
+      "annualized_net_revenue_krw": 1305529344.0,
+      "payment_krw": 4811284.800000001,
+      "ai_krw": 7295231.999999999,
+      "support_krw": 5947200.0,
+      "replacement_cac_krw": 5947200.0,
+      "fixed_krw": 12000000,
+      "pre_corporation_tax_krw": 72793195.2,
+      "corporation_tax_krw": 18161902.2024,
+      "company_after_tax_krw": 54631292.997600004,
+      "retained_krw": 3000000,
+      "distributable_krw": 51631292.997600004,
+      "personal_tax_reserve_krw": 20559157.364891194,
+      "personal_take_home_krw": 30072135.63270881
+    },
+    {
+      "scenario": "flat_30pct_no_extra",
+      "customers": 306,
+      "arpu_usd": 224.0,
+      "gross_monthly_krw": 95961600.0,
+      "refunds_krw": 1919232.0,
+      "net_monthly_revenue_krw": 94042368.0,
+      "annualized_net_revenue_krw": 1128508416.0,
+      "payment_krw": 4158907.2,
+      "ai_krw": 6306048.0,
+      "support_krw": 5140800.0,
+      "replacement_cac_krw": 5140800.0,
+      "fixed_krw": 12000000,
+      "pre_corporation_tax_krw": 61295812.8,
+      "corporation_tax_krw": 15293305.293599999,
+      "company_after_tax_krw": 46002507.5064,
+      "retained_krw": 3000000,
+      "distributable_krw": 43002507.5064,
+      "personal_tax_reserve_krw": 12900752.251919998,
+      "personal_take_home_krw": 30101755.254479997
+    },
+    {
+      "scenario": "flat_40pct",
+      "customers": 355,
+      "arpu_usd": 224.0,
+      "gross_monthly_krw": 111328000.0,
+      "refunds_krw": 2226560.0,
+      "net_monthly_revenue_krw": 109101440.0,
+      "annualized_net_revenue_krw": 1309217280.0,
+      "payment_krw": 4824876.0,
+      "ai_krw": 7315839.999999999,
+      "support_krw": 5964000.0,
+      "replacement_cac_krw": 5964000.0,
+      "fixed_krw": 12000000,
+      "pre_corporation_tax_krw": 73032724.0,
+      "corporation_tax_krw": 18221664.638,
+      "company_after_tax_krw": 54811059.362,
+      "retained_krw": 3000000,
+      "distributable_krw": 51811059.362,
+      "personal_tax_reserve_krw": 20724423.7448,
+      "personal_take_home_krw": 30086635.617200002
+    },
+    {
+      "scenario": "full_use",
+      "customers": 406,
+      "arpu_usd": 224.0,
+      "gross_monthly_krw": 127321600.0,
+      "refunds_krw": 2546432.0,
+      "net_monthly_revenue_krw": 124775168.0,
+      "annualized_net_revenue_krw": 1497302016.0,
+      "payment_krw": 5518027.2,
+      "ai_krw": 20917120.0,
+      "support_krw": 6820800.0,
+      "replacement_cac_krw": 6820800.0,
+      "fixed_krw": 12000000,
+      "pre_corporation_tax_krw": 72698420.8,
+      "corporation_tax_krw": 18138255.9896,
+      "company_after_tax_krw": 54560164.810399994,
+      "retained_krw": 3000000,
+      "distributable_krw": 51560164.810399994,
+      "personal_tax_reserve_krw": 20526296.142404795,
+      "personal_take_home_krw": 30033868.6679952
+    },
+    {
+      "scenario": "churn_8pct",
+      "customers": 401,
+      "arpu_usd": 224.0,
+      "gross_monthly_krw": 125753600.0,
+      "refunds_krw": 2515072.0,
+      "net_monthly_revenue_krw": 123238528.0,
+      "annualized_net_revenue_krw": 1478862336.0,
+      "payment_krw": 5450071.2,
+      "ai_krw": 8263807.999999999,
+      "support_krw": 6736800.0,
+      "replacement_cac_krw": 17964800.0,
+      "fixed_krw": 12000000,
+      "pre_corporation_tax_krw": 72823048.8,
+      "corporation_tax_krw": 18169350.6756,
+      "company_after_tax_krw": 54653698.1244,
+      "retained_krw": 3000000,
+      "distributable_krw": 51653698.1244,
+      "personal_tax_reserve_krw": 20569508.533472806,
+      "personal_take_home_krw": 30084189.59092719
+    },
+    {
+      "scenario": "fx_1200",
+      "customers": 413,
+      "arpu_usd": 224.0,
+      "gross_monthly_krw": 111014400.0,
+      "refunds_krw": 2220288.0,
+      "net_monthly_revenue_krw": 108794112.0,
+      "annualized_net_revenue_krw": 1305529344.0,
+      "payment_krw": 4811284.800000001,
+      "ai_krw": 7295232.000000001,
+      "support_krw": 5947200.0,
+      "replacement_cac_krw": 5947199.999999999,
+      "fixed_krw": 12000000,
+      "pre_corporation_tax_krw": 72793195.2,
+      "corporation_tax_krw": 18161902.2024,
+      "company_after_tax_krw": 54631292.997600004,
+      "retained_krw": 3000000,
+      "distributable_krw": 51631292.997600004,
+      "personal_tax_reserve_krw": 20559157.364891194,
+      "personal_take_home_krw": 30072135.63270881
+    },
+    {
+      "scenario": "support_30_usd",
+      "customers": 395,
+      "arpu_usd": 224.0,
+      "gross_monthly_krw": 123872000.0,
+      "refunds_krw": 2477440.0,
+      "net_monthly_revenue_krw": 121394560.0,
+      "annualized_net_revenue_krw": 1456734720.0,
+      "payment_krw": 5368524.0,
+      "ai_krw": 8140159.999999999,
+      "support_krw": 16590000.0,
+      "replacement_cac_krw": 6636000.0,
+      "fixed_krw": 12000000,
+      "pre_corporation_tax_krw": 72659876.0,
+      "corporation_tax_krw": 18128639.062,
+      "company_after_tax_krw": 54531236.938,
+      "retained_krw": 3000000,
+      "distributable_krw": 51531236.938,
+      "personal_tax_reserve_krw": 20512931.465356,
+      "personal_take_home_krw": 30018305.472644
+    },
+    {
+      "scenario": "growth_80pct",
+      "customers": 290,
+      "arpu_usd": 269.0,
+      "gross_monthly_krw": 109214000.0,
+      "refunds_krw": 2184280.0,
+      "net_monthly_revenue_krw": 107029720.0,
+      "annualized_net_revenue_krw": 1284356640.0,
+      "payment_krw": 4708788.0,
+      "ai_krw": 7769216.000000002,
+      "support_krw": 4872000.0,
+      "replacement_cac_krw": 4871999.999999999,
+      "fixed_krw": 12000000,
+      "pre_corporation_tax_krw": 72807716.0,
+      "corporation_tax_krw": 18165525.142,
+      "company_after_tax_krw": 54642190.857999995,
+      "retained_krw": 3000000,
+      "distributable_krw": 51642190.857999995,
+      "personal_tax_reserve_krw": 20564192.176395997,
+      "personal_take_home_krw": 30077998.681603998
+    },
+    {
+      "scenario": "all_focus",
+      "customers": 560,
+      "arpu_usd": 149.0,
+      "gross_monthly_krw": 116816000.0,
+      "refunds_krw": 2336320.0,
+      "net_monthly_revenue_krw": 114479680.0,
+      "annualized_net_revenue_krw": 1373756160.0,
+      "payment_krw": 5141472.0,
+      "ai_krw": 5770239.999999999,
+      "support_krw": 9408000.0,
+      "replacement_cac_krw": 9408000.0,
+      "fixed_krw": 12000000,
+      "pre_corporation_tax_krw": 72751968.0,
+      "corporation_tax_krw": 18151616.016,
+      "company_after_tax_krw": 54600351.984,
+      "retained_krw": 3000000,
+      "distributable_krw": 51600351.984,
+      "personal_tax_reserve_krw": 20544862.616608,
+      "personal_take_home_krw": 30055489.367391996
+    },
+    {
+      "scenario": "all_growth",
+      "customers": 259,
+      "arpu_usd": 299.0,
+      "gross_monthly_krw": 108417400.0,
+      "refunds_krw": 2168348.0,
+      "net_monthly_revenue_krw": 106249052.0,
+      "annualized_net_revenue_krw": 1274988624.0,
+      "payment_krw": 4662310.800000001,
+      "ai_krw": 8006207.999999999,
+      "support_krw": 4351200.0,
+      "replacement_cac_krw": 4351200.0,
+      "fixed_krw": 12000000,
+      "pre_corporation_tax_krw": 72878133.2,
+      "corporation_tax_krw": 18183094.233400002,
+      "company_after_tax_krw": 54695038.9666,
+      "retained_krw": 3000000,
+      "distributable_krw": 51695038.9666,
+      "personal_tax_reserve_krw": 20588608.002569202,
+      "personal_take_home_krw": 30106430.9640308
+    },
+    {
+      "scenario": "combined_stress",
+      "customers": 636,
+      "arpu_usd": 224.0,
+      "gross_monthly_krw": 170956800.0,
+      "refunds_krw": 3419136.0,
+      "net_monthly_revenue_krw": 167537664.0,
+      "annualized_net_revenue_krw": 2010451968.0,
+      "payment_krw": 7409145.600000001,
+      "ai_krw": 28085760.0,
+      "support_krw": 22896000.0,
+      "replacement_cac_krw": 24422400.0,
+      "fixed_krw": 12000000,
+      "pre_corporation_tax_krw": 72724358.4,
+      "corporation_tax_krw": 18144727.4208,
+      "company_after_tax_krw": 54579630.979200006,
+      "retained_krw": 3000000,
+      "distributable_krw": 51579630.979200006,
+      "personal_tax_reserve_krw": 20535289.5123904,
+      "personal_take_home_krw": 30044341.466809604
+    }
+  ],
+  "first_year_to_base_target": {
+    "new_customers_per_month": 34.68801247138486,
+    "first_year_net_revenue_krw": 746562710.7223096,
+    "first_year_acquisition_krw": 233103443.80770624,
+    "months": [
+      {
+        "month": 1,
+        "new_customers": 34.68801247138486,
+        "ending_customers": 34.68801247138486,
+        "net_revenue_krw": 10660597.496805767
+      },
+      {
+        "month": 2,
+        "new_customers": 34.68801247138486,
+        "ending_customers": 68.33538456862817,
+        "net_revenue_krw": 21001377.068707358
+      },
+      {
+        "month": 3,
+        "new_customers": 34.68801247138486,
+        "ending_customers": 100.97333550295417,
+        "net_revenue_krw": 31031933.253451902
+      },
+      {
+        "month": 4,
+        "new_customers": 34.68801247138486,
+        "ending_customers": 132.6321479092504,
+        "net_revenue_krw": 40761572.752654105
+      },
+      {
+        "month": 5,
+        "new_customers": 34.68801247138486,
+        "ending_customers": 163.34119594335775,
+        "net_revenue_krw": 50199323.066880256
+      },
+      {
+        "month": 6,
+        "new_customers": 34.68801247138486,
+        "ending_customers": 193.12897253644186,
+        "net_revenue_krw": 59353940.871679604
+      },
+      {
+        "month": 7,
+        "new_customers": 34.68801247138486,
+        "ending_customers": 222.02311583173346,
+        "net_revenue_krw": 68233920.14233498
+      },
+      {
+        "month": 8,
+        "new_customers": 34.68801247138486,
+        "ending_customers": 250.05043482816632,
+        "net_revenue_krw": 76847500.0348707
+      },
+      {
+        "month": 9,
+        "new_customers": 34.68801247138486,
+        "ending_customers": 277.23693425470617,
+        "net_revenue_krw": 85202672.53063034
+      },
+      {
+        "month": 10,
+        "new_customers": 34.68801247138486,
+        "ending_customers": 303.6078386984498,
+        "net_revenue_krw": 93307189.85151719
+      },
+      {
+        "month": 11,
+        "new_customers": 34.68801247138486,
+        "ending_customers": 329.1876160088812,
+        "net_revenue_krw": 101168571.65277745
+      },
+      {
+        "month": 12,
+        "new_customers": 34.68801247138486,
+        "ending_customers": 353.9999999999996,
+        "net_revenue_krw": 108794111.99999988
+      }
+    ]
+  },
+  "first_year_revenue_target": {
+    "new_customers_per_month": 46.46362853808186,
+    "first_year_net_revenue_krw": 999999999.9999999,
+    "first_year_acquisition_krw": 312235583.7759101,
+    "months": [
+      {
+        "month": 1,
+        "new_customers": 46.46362853808186,
+        "ending_customers": 46.46362853808186,
+        "net_revenue_krw": 14279574.031351622
+      },
+      {
+        "month": 2,
+        "new_customers": 46.46362853808186,
+        "ending_customers": 91.53334822002127,
+        "net_revenue_krw": 28130760.8417627
+      },
+      {
+        "month": 3,
+        "new_customers": 46.46362853808186,
+        "ending_customers": 135.25097631150248,
+        "net_revenue_krw": 41566412.047861435
+      },
+      {
+        "month": 4,
+        "new_customers": 46.46362853808186,
+        "ending_customers": 177.65707556023926,
+        "net_revenue_krw": 54598993.71777721
+      },
+      {
+        "month": 5,
+        "new_customers": 46.46362853808186,
+        "ending_customers": 218.79099183151396,
+        "net_revenue_krw": 67240597.93759552
+      },
+      {
+        "month": 6,
+        "new_customers": 46.46362853808186,
+        "ending_customers": 258.6908906146504,
+        "net_revenue_krw": 79502954.03081927
+      },
+      {
+        "month": 7,
+        "new_customers": 46.46362853808186,
+        "ending_customers": 297.3937924342928,
+        "net_revenue_krw": 91397439.44124633
+      },
+      {
+        "month": 8,
+        "new_customers": 46.46362853808186,
+        "ending_customers": 334.93560719934584,
+        "net_revenue_krw": 102935090.28936057
+      },
+      {
+        "month": 9,
+        "new_customers": 46.46362853808186,
+        "ending_customers": 371.35116752144734,
+        "net_revenue_krw": 114126611.61203137
+      },
+      {
+        "month": 10,
+        "new_customers": 46.46362853808186,
+        "ending_customers": 406.6742610338858,
+        "net_revenue_krw": 124982387.29502206
+      },
+      {
+        "month": 11,
+        "new_customers": 46.46362853808186,
+        "ending_customers": 440.93766174095106,
+        "net_revenue_krw": 135512489.707523
+      },
+      {
+        "month": 12,
+        "new_customers": 46.46362853808186,
+        "ending_customers": 474.1731604268044,
+        "net_revenue_krw": 145726689.04764894
+      }
+    ]
+  }
+}
