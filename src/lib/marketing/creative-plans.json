@@ -1,0 +1,29 @@
+{
+  "status": "preview",
+  "currency": "USD",
+  "maxVideoSeconds": 30,
+  "plans": [
+    {
+      "id": "focus",
+      "name": "Focus",
+      "monthlyUsd": 79,
+      "campaigns": 8,
+      "images": 80,
+      "videos": 16,
+      "motionSeconds": 60,
+      "headline": "A month of fresh creative.",
+      "description": "For one business creating and testing new ads every week."
+    },
+    {
+      "id": "growth",
+      "name": "Growth",
+      "monthlyUsd": 149,
+      "campaigns": 16,
+      "images": 160,
+      "videos": 32,
+      "motionSeconds": 120,
+      "headline": "More creative. More to test.",
+      "description": "Twice the creative allowance for more offers, hooks, and audiences."
+    }
+  ]
+}

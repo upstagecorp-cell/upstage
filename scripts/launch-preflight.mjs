@@ -1,9 +1,11 @@
 // Read-only operator preflight. Never prints values or makes a provider/payment call.
-import { existsSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { resolve, isAbsolute } from 'node:path'
 for (const path of ['.env.local','.env']) if(existsSync(resolve(path))) process.loadEnvFile(resolve(path))
 const checks=[]
 const check=(label,ok)=>checks.push({label,ok:Boolean(ok)})
+const creativeCatalog=JSON.parse(readFileSync(new URL('../src/lib/marketing/creative-plans.json',import.meta.url),'utf8'))
+check('Creative offer delivery and versioned billing released',creativeCatalog.status!=='preview')
 const [major,minor]=process.versions.node.split('.').map(Number)
 check('Node.js 24.14 or newer',major>24||(major===24&&minor>=14))
 for(const name of ['OPENAI_API_KEY','OPENAI_MODEL','STRIPE_SECRET_KEY','STRIPE_WEBHOOK_SECRET','STRIPE_PRICE_FOCUS','STRIPE_PRICE_GROWTH','STRIPE_PORTAL_CONFIGURATION','RESEND_API_KEY','NEXORA_EMAIL_FROM','NEXORA_LEGAL_NAME','NEXORA_LEGAL_ADDRESS','NEXT_PUBLIC_SUPPORT_EMAIL']) check(`${name} configured`,process.env[name]?.trim())

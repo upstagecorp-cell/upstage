@@ -1,0 +1,21 @@
+{
+  "status": "passed",
+  "routes": [
+    "/",
+    "/pricing",
+    "/product",
+    "/guide",
+    "/terms",
+    "/workspace#billing"
+  ],
+  "widths": [
+    320,
+    390,
+    768,
+    1024,
+    1440
+  ],
+  "checkoutStatus": 503,
+  "modelParityScenarios": 9,
+  "errors": []
+}

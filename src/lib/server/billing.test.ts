@@ -7,6 +7,9 @@ import { authenticate, sessionCookie } from './auth'
 import { completeAccountToken, requestAccountEmail } from './account-email'
 import { assess, generate, updateProfile } from './operations'
 import { createProfileDefaults } from '@/lib/business/validation'
+import * as creativeOffer from '@/lib/marketing/creative-plans'
+// Exercise the retained text billing contract below; preview closure has its own regression case.
+beforeEach(()=>{vi.spyOn(creativeOffer,'creativeOfferIsPreview').mockReturnValue(false)})
 beforeEach(()=>{closeDatabases();vi.stubEnv('NEXORA_DB_PATH',':memory:');vi.stubEnv('STRIPE_SECRET_KEY','sk_test_fixture');vi.stubEnv('STRIPE_WEBHOOK_SECRET','whsec_fixture');vi.stubEnv('STRIPE_PRICE_FOCUS','price_focus');vi.stubEnv('STRIPE_PRICE_GROWTH','price_growth');vi.stubEnv('NEXORA_PAID_LAUNCH_ENABLED','false')})
 afterEach(()=>{closeDatabases();vi.unstubAllEnvs();vi.unstubAllGlobals();vi.restoreAllMocks()})
 async function owner(email='billing@example.com'){return authenticate({email,password:'fixture-password-12345'},true)}
@@ -16,6 +19,15 @@ function paid(id:string,extra:Record<string,unknown>={}){saveRecord(id,'billing'
 function job(id:string,status='succeeded',createdAt=new Date().toISOString()){return {id,status,createdAt}}
 function subscription(extra:Record<string,unknown>={}){return {id:'sub_fixture',created:100,status:'active',cancel_at_period_end:false,latest_invoice:{id:'in_paid',status:'paid'},items:{data:[{quantity:1,current_period_start:Math.floor(Date.now()/1000)-100,current_period_end:Math.floor(Date.now()/1000)+3600,price:{id:'price_focus',currency:'usd',unit_amount:14900,tax_behavior:'exclusive',recurring:{interval:'month',interval_count:1}}}]},...extra}}
 describe('paid entitlements and Stripe event trust',()=>{
+  it('closes new checkout for the creative preview even with all launch configuration enabled',async()=>{
+    openConfiguration();vi.stubEnv('NODE_ENV','production');vi.stubEnv('STRIPE_SECRET_KEY','sk_live_fixture')
+    vi.mocked(creativeOffer.creativeOfferIsPreview).mockReturnValue(true)
+    const user=await owner();ready(user.id)
+    const fetchMock=vi.fn();vi.stubGlobal('fetch',fetchMock)
+    expect(paidCheckoutAvailable()).toBe(false)
+    await expect(createCheckout(user,{plan:'focus'})).rejects.toMatchObject({code:'BILLING_UNAVAILABLE'})
+    expect(fetchMock).not.toHaveBeenCalled()
+  })
   it('refreshes an unconnected free account without requiring a Stripe key',async()=>{
     const user=await owner();vi.stubEnv('STRIPE_SECRET_KEY','')
     await expect(syncBilling(user.id)).resolves.toBeUndefined();expect(billingSummary(user.id).plan).toBe('free')

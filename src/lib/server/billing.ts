@@ -4,6 +4,7 @@ import { missingGenerationFields } from '@/lib/business/industry'
 import { PAID_PLANS, isPaidPlan, type PaidPlanId, type BillingSummary } from '@/lib/billing/plans'
 import { database, generationConfigured, getRecord, listRecords, saveRecord, transaction } from './database'
 import { HttpError, objectInput } from './errors'
+import { creativeOfferIsPreview } from '@/lib/marketing/creative-plans'
 
 interface SubscriptionState {
   id: string; plan: PaidPlanId | null; status: string; paid: boolean
@@ -12,6 +13,7 @@ interface SubscriptionState {
 interface CustomerRow { owner_id: string; customer_id: string; revision: number; applied_revision: number; checkout_key: string | null; checkout_plan: string | null; checkout_expires: number | null }
 function priceId(plan: PaidPlanId) { return process.env[plan === 'focus' ? 'STRIPE_PRICE_FOCUS' : 'STRIPE_PRICE_GROWTH']?.trim() || '' }
 export function paidCheckoutAvailable(): boolean {
+  if (creativeOfferIsPreview()) return false
   if (process.env.NODE_ENV === 'production' && !/^(sk|rk)_live_/.test(process.env.STRIPE_SECRET_KEY?.trim() || '')) return false
   return process.env.NEXORA_PAID_LAUNCH_ENABLED === 'true' && process.env.NEXORA_LEGAL_APPROVED === 'true' && process.env.NEXORA_LIVE_TESTS_APPROVED === 'true' && generationConfigured() &&
     Boolean(process.env.STRIPE_SECRET_KEY?.trim() && process.env.STRIPE_WEBHOOK_SECRET?.trim() && priceId('focus') && priceId('growth') &&

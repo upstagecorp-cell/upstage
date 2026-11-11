@@ -1,5 +1,6 @@
 # NEXORA
 
+> 2026-11-11: Public pricing now previews the upcoming Focus $79 / Growth $149 image-and-video plans. Media delivery is still in development; new checkout is closed on the server even when legacy launch settings are present. Existing text subscriptions retain their confirmed allowances. See [the current pricing and founder-income plan](AD_CREATIVE_PRICING_PLAN.md).
 Latest product-site redesign: [STRIPE_STYLE_REDESIGN.md](STRIPE_STYLE_REDESIGN.md) documents the spectrum hero, full product/solutions/resources mega navigation, six interactive capability previews, new `/product`, `/solutions`, `/resources` pages, and shared public footer. Existing account and billing workflows remain connected to their actual routes.
 
 Current paid-launch preparation: [SEVEN_DAY_LAUNCH_PLAN.md](SEVEN_DAY_LAUNCH_PLAN.md) includes the launch verdict, $149/$299 plans, financial/tax sensitivity, actual code scope, and dated seven-day plan. Stripe subscriptions and account email integrations are implemented but require operator configuration and live verification; no production deployment or live payment was performed. Run `npm.cmd run launch:preflight` for a read-only configuration check.
