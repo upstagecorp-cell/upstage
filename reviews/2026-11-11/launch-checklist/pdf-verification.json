@@ -1,0 +1,17 @@
+{
+  "pdf": "NEXORA_LAUNCH_CHECKLIST_2026-11-11.pdf",
+  "pages": 12,
+  "size_bytes": 379146,
+  "sha256": "e0c90f1b312ce1a10df7bae225ad53b8bbdbc4f980f682caf2adbd197530ed1e",
+  "links": 6,
+  "fonts": [
+    "/AAAAAA+MalgunGothicBold",
+    "/BAAAAA+MalgunGothic",
+    "/CAAAAA+Consolas"
+  ],
+  "embedded_fonts": true,
+  "tagged": true,
+  "page_overflows": 0,
+  "characters": 12644,
+  "financial_claims_corrected": true
+}

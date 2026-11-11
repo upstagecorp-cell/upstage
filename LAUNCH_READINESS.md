@@ -1,5 +1,7 @@
 # US launch readiness
 
+Current execution plan (2026-11-11): [Launch checklist PDF](NEXORA_LAUNCH_CHECKLIST_2026-11-11.pdf). Customer feedback, price acceptance, and retention learning will happen after launch. Prelaunch work covers promised media delivery, accounts, billing, storage, deployment, and minimum operational checks. The November 10 text-plan details below are historical; the current creative offer is in [AD_CREATIVE_PRICING_PLAN.md](AD_CREATIVE_PRICING_PLAN.md).
+
 Updated: November 10, 2026.
 
 The current release candidate includes the visual walkthrough, resumable first check, review-focused workspace, USD $149/$299 monthly plan definitions, server-enforced generation allowances, Stripe-hosted Checkout/portal/webhook integration, and Resend-based verification/recovery integration. Billing and email require actual operator accounts and live validation. New paid purchases remain disabled without required configuration and launch attestations. See [SEVEN_DAY_LAUNCH_PLAN.md](SEVEN_DAY_LAUNCH_PLAN.md) and its operations runbook for the current scope, tax scenarios, and release conditions; the earlier visual report documents the preceding stage.
