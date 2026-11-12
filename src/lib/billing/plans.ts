@@ -5,6 +5,20 @@ export const PAID_PLANS = {
 } as const
 export type PaidPlanId = keyof typeof PAID_PLANS
 export function isPaidPlan(value: unknown): value is PaidPlanId { return value === 'focus' || value === 'growth' }
+export interface CreativeBillingSummary {
+  plan: PaidPlanId
+  status: string
+  paid: boolean
+  monthlyScenes: number
+  monthlyUsd: number
+  periodStart: string
+  periodEnd: string
+  cancelAtPeriodEnd: boolean
+  canChange: boolean
+  canCancel: boolean
+  pending: { scenes: number; monthlyUsd: number; effectiveAt: string } | null
+  oneTimeScenes: number
+}
 export interface BillingSummary {
   plan: PaidPlanId | 'free'
   status: string
@@ -16,4 +30,6 @@ export interface BillingSummary {
   checkoutAvailable: boolean
   portalAvailable: boolean
   emailVerified: boolean
+  creative?: CreativeBillingSummary | null
+  creativeCheckoutAvailable?: boolean
 }

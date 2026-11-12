@@ -1,0 +1,64 @@
+{
+  "checks": [
+    {
+      "name": "public-liveness",
+      "passed": true
+    },
+    {
+      "name": "protected-readiness",
+      "passed": true
+    },
+    {
+      "name": "register-qa-only",
+      "passed": true
+    },
+    {
+      "name": "photo-logo-upload-and-private-preview",
+      "passed": true
+    },
+    {
+      "name": "free-account-export-stays-locked",
+      "passed": true
+    },
+    {
+      "name": "actual-file-1:1",
+      "passed": true
+    },
+    {
+      "name": "actual-file-4:5",
+      "passed": true
+    },
+    {
+      "name": "actual-file-9:16",
+      "passed": true
+    },
+    {
+      "name": "three-ratios-use-one-design",
+      "passed": true
+    },
+    {
+      "name": "cross-account-download-denied",
+      "passed": true
+    },
+    {
+      "name": "studio-width-320",
+      "passed": true
+    },
+    {
+      "name": "studio-width-390",
+      "passed": true
+    },
+    {
+      "name": "studio-width-1280",
+      "passed": true
+    },
+    {
+      "name": "no-runtime-exceptions",
+      "passed": true
+    }
+  ],
+  "errors": [],
+  "paidFixtureOnly": true,
+  "livePayments": 0,
+  "paidProviderCalls": 0
+}

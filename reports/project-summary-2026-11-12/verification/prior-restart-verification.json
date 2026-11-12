@@ -1,0 +1,14 @@
+{
+  "appRestartRetainedSession": true,
+  "privateFileStatus": 200,
+  "width": 1080,
+  "height": 1920,
+  "successfulJobs": 3,
+  "usage": {
+    "limit": 40,
+    "used": 1,
+    "reserved": 0,
+    "remaining": 39,
+    "periodEnd": "2026-12-12T05:38:48.193Z"
+  }
+}

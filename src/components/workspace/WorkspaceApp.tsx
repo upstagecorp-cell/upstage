@@ -9,6 +9,7 @@ import { readFirstCheck, clearFirstCheck } from '@/lib/first-check-session'
 import { BrandMark } from '@/components/brand/BrandMark'
 import { ProfileEditor, EvidenceEditor } from './ProfileAndEvidence'
 import { AssessmentPanel } from './AssessmentPanel'
+import { ImageStudio } from './ImageStudio'
 import { AssetsPanel } from './AssetsPanel'
 import { ResultsPanel } from './ResultsPanel'
 import { HistoryPanel } from './HistoryPanel'
@@ -24,6 +25,7 @@ const sections=[
   {id:'assessment',label:'Business check',icon:Compass,group:'main'},
   {id:'goals',label:'Weekly plan',icon:CalendarDays,group:'main'},
   {id:'assets',label:'Draft studio',icon:FileText,group:'main'},
+  {id:'media',label:'Images & files',icon:FileText,group:'main'},
   {id:'evidence',label:'Your numbers',icon:Plus,group:'learn'},
   {id:'results',label:'Actions & outcomes',icon:Waypoints,group:'learn'},
   {id:'performance',label:'Performance',icon:ChartNoAxesCombined,group:'learn'},
@@ -104,7 +106,8 @@ export function WorkspaceApp({initialSection='overview'}:{initialSection?:Sectio
       <div className="mb-5 space-y-3" aria-live="polite"><ErrorText error={error}/>{notice&&<p role="status" className="flex items-start gap-2 rounded-xl bg-[var(--accent-soft)] p-4 text-xs leading-6"><CheckCircle2 size={16} className="mt-1 shrink-0"/>{notice}</p>}{busy&&<p role="status" className="text-xs text-[var(--muted)]">Saving your work…</p>}</div>
       {draft&&section!=='billing'&&<CheckHandoff check={draft} profile={data.profile} mutate={mutate} busy={busy} onDismiss={dismissDraft} onSaved={id=>{dismissDraft();setSelectedAssessmentId(id);setSelectedActionId(null);setSelectedGoalId(null);navigate('overview',{assessmentId:id,actionId:null,goalId:null})}}/>}
       <div aria-busy={busy}>
-        {(section==='overview'||(!data.profile&&!['profile','history','billing'].includes(section)))&&overview}
+        {(section==='overview'||(!data.profile&&!['profile','history','billing','media'].includes(section)))&&overview}
+        {section==='media'&&<ImageStudio/>}
         {section==='billing'&&<BillingPanel data={data} onUpdated={setData}/>}
         {section==='profile'&&<><div className="mb-7"><p className="nx-eyebrow">Your business, in your words</p><h1 className="nx-heading mt-4">Fill in the picture.</h1><p className="nx-copy mt-4 !text-sm">Add detail when it helps. You can leave the unknowns for later.</p></div><ProfileEditor key={data.profile?.version??'new'} profile={data.profile} mutate={mutate} busy={busy} onSaved={()=>navigate('overview')}/></>}
         {data.profile&&section==='evidence'&&<><SectionIntro title="A little evidence. More clarity." text="Start with one number you know. Keep the source and reporting period with it."/><EvidenceEditor profile={data.profile} evidence={data.evidence} mutate={mutate} busy={busy}/><button className="nx-button mt-6" onClick={()=>navigate('assessment')}>Use my numbers in a business check <ArrowRight size={16}/></button></>}

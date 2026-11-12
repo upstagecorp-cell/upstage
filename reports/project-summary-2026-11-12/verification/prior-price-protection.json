@@ -1,0 +1,21 @@
+{
+  "checked": 14,
+  "changed": [],
+  "unchanged": true,
+  "hashes": {
+    "src/lib/marketing/creative-plans.json": "8e9f9908236f2430a20a164762023ba33c39908772fb75838ea8b3f6ee38ea51",
+    "src/lib/marketing/creative-plans.ts": "f428ee50a2a0d9cc8d3f9a3943e9cdefd0cd7d1a49530d6f917c073316b437b9",
+    "src/lib/billing/plans.ts": "1c0a0c697eeb2938fe99183a3965be5a33b6e18982c8a8a66ed7f2ccbeb8341b",
+    "src/app/pricing/page.tsx": "7dac928b96a66b250aec8af4fa8e2bd0ec3635f661d94812befc827956c7c9e0",
+    "src/components/marketing/PricingPlans.tsx": "40bcc09656aea4d5ff7b50b8790c2912f5fdbfd8728c86f118d7a9fd8547c249",
+    "src/components/marketing/CreativeOfferPlanner.tsx": "3714643ee6c2340af5a9c068c901e960e342f0c8c506578ec0910d9b2ba0486e",
+    "src/components/marketing/CreativeOverview.tsx": "04c7e7d97b4d92a85261fa55348d12ebe2f7b01bad226a7fda1657139de42187",
+    "src/components/workspace/CreativeSubscriptionControls.tsx": "34dbb47fe095913fa705d8778def38e5fdac184631721a78257e9f06eccac423",
+    "src/components/workspace/BillingPanel.tsx": "13d4bc567bbe963b418ba101ccf4c35954168491fa3930f8bc367d94f865e0b9",
+    "src/lib/server/billing.ts": "9c3a65fa5a557d55100649eb22753c4d79e176ab24bdbf90c45bec4d655a2365",
+    "src/lib/server/billing-shared.ts": "cf5445d94e0d06c2b265eed5bcd561ef97b0873cc1e12b4ffa28186909271410",
+    "src/lib/server/creative-billing.ts": "f5af8d04a7a16d55f99e54d3a15051b027ed7ea1b8cfe67d33897f5c4015af39",
+    ".env.example": "664b3501340a7ae556535c24fe7b64b95f9c0ff5dd5d922b8f0ef9575d93a721",
+    "__terms_block__": "e1b8963e0ac9ad3eefc39c917a7ac31d4adbdd3840a7ecd1a434881ffc9cb531"
+  }
+}

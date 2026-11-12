@@ -1,5 +1,9 @@
 # NEXORA
 
+> 2026-11-12: [Launch checklist actions](LAUNCH_ACTIONS_2026-11-12.md): private photo/logo files, saved/approved image designs, real PNG/JPG exports, an image worker, online backups and isolated restore, and health checks. Prices, allowances, renewal contracts, and launch switches are unchanged. [Local operations](MEDIA_OPERATIONS.md).
+
+> 2026-11-12: [Current creative offer and implementation status](CREATIVE_OFFER_IMPLEMENTATION.md): planned $19 one-time First campaign, $79/$149 monthly campaign kits, and optional $15/$59 AI motion packs. Focus/Growth and selected monthly extras auto-renew until canceled. Account quantity changes apply from the next billing date; one-time extras remain separate. The pricing page includes a working estimate with no payment. Media delivery and new creative checkout remain in development. Earlier launch notes below are historical. Personal financial calculations are stored separately outside this project.
+
 > 2026-11-11: Public pricing now previews the upcoming Focus $79 / Growth $149 image-and-video plans. Media delivery is still in development; new checkout is closed on the server even when legacy launch settings are present. Existing text subscriptions retain their confirmed allowances. See [the current pricing and founder-income plan](AD_CREATIVE_PRICING_PLAN.md).
 Latest product-site redesign: [STRIPE_STYLE_REDESIGN.md](STRIPE_STYLE_REDESIGN.md) documents the spectrum hero, full product/solutions/resources mega navigation, six interactive capability previews, new `/product`, `/solutions`, `/resources` pages, and shared public footer. Existing account and billing workflows remain connected to their actual routes.
 

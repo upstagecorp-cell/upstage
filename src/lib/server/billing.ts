@@ -1,16 +1,19 @@
 import Stripe from 'stripe'
 import type { SessionUser, ExecutionJob, Assessment, BusinessProfile } from '@/lib/business/types'
 import { missingGenerationFields } from '@/lib/business/industry'
-import { PAID_PLANS, isPaidPlan, type PaidPlanId, type BillingSummary } from '@/lib/billing/plans'
+import { PAID_PLANS, isPaidPlan, type PaidPlanId, type BillingSummary, type CreativeBillingSummary } from '@/lib/billing/plans'
 import { database, generationConfigured, getRecord, listRecords, saveRecord, transaction } from './database'
 import { HttpError, objectInput } from './errors'
-import { creativeOfferIsPreview } from '@/lib/marketing/creative-plans'
+import { creativeOfferIsPreview, CREATIVE_PLANS } from '@/lib/marketing/creative-plans'
+import { billingOrigin as origin, customerFor, stripeClient } from './billing-shared'
+import { creativeCheckoutAvailable, readCreativeSubscription, reconcileCreativeCheckout, recordCreativeRefund } from './creative-billing'
+export { stripeClient } from './billing-shared'
 
 interface SubscriptionState {
   id: string; plan: PaidPlanId | null; status: string; paid: boolean
   periodStart: string | null; periodEnd: string | null; cancelAtPeriodEnd: boolean
+  creative?: CreativeBillingSummary | null
 }
-interface CustomerRow { owner_id: string; customer_id: string; revision: number; applied_revision: number; checkout_key: string | null; checkout_plan: string | null; checkout_expires: number | null }
 function priceId(plan: PaidPlanId) { return process.env[plan === 'focus' ? 'STRIPE_PRICE_FOCUS' : 'STRIPE_PRICE_GROWTH']?.trim() || '' }
 export function paidCheckoutAvailable(): boolean {
   if (creativeOfferIsPreview()) return false
@@ -20,25 +23,18 @@ export function paidCheckoutAvailable(): boolean {
       process.env.STRIPE_PORTAL_CONFIGURATION?.trim() && process.env.NEXORA_LEGAL_NAME?.trim() && process.env.NEXORA_LEGAL_ADDRESS?.trim() &&
       process.env.NEXT_PUBLIC_SUPPORT_EMAIL?.trim() && process.env.APP_ORIGIN?.startsWith('https://') && process.env.RESEND_API_KEY?.trim() && process.env.NEXORA_EMAIL_FROM?.trim())
 }
-export function stripeClient() {
-  const key = process.env.STRIPE_SECRET_KEY?.trim()
-  if (!key) throw new HttpError(503, 'BILLING_UNAVAILABLE', 'Subscriptions are not open yet. You have not been charged.')
-  return new Stripe(key, { maxNetworkRetries: 0, timeout: 20_000 })
-}
-function customerFor(owner: string): CustomerRow | undefined {
-  return database().prepare('SELECT * FROM billing_customers WHERE owner_id=?').get(owner) as CustomerRow | undefined
-}
 export function billingSummary(owner: string): BillingSummary {
   const saved = getRecord<SubscriptionState>(owner, 'billing', 'current')
   const active = saved?.plan && saved.status === 'active' && saved.paid && saved.periodStart && saved.periodEnd &&
     Date.parse(saved.periodStart) <= Date.now() && Date.parse(saved.periodEnd) > Date.now()
   const plan = active ? saved.plan! : 'free'
-  const allowance = plan === 'free' ? null : PAID_PLANS[plan]
+  const creative = saved?.creative ?? null
+  const allowance = plan === 'free' ? null : creative ? { packages: CREATIVE_PLANS.find(item => item.id === plan)!.campaigns, assetsPerPackage: 12 } : PAID_PLANS[plan]
   const used = active ? listRecords<ExecutionJob>(owner, 'job').filter(job =>
     job.status !== 'failed' && Date.parse(job.createdAt) >= Date.parse(saved.periodStart!) && Date.parse(job.createdAt) < Date.parse(saved.periodEnd!)).length : 0
   return { plan, status: saved?.status || 'free', packagesUsed: used, packagesLimit: allowance?.packages ?? 0,
     assetsPerPackage: allowance?.assetsPerPackage ?? 0, periodEnd: saved?.periodEnd ?? null,
-    cancelAtPeriodEnd: saved?.cancelAtPeriodEnd ?? false, checkoutAvailable: paidCheckoutAvailable(), portalAvailable: Boolean(customerFor(owner) && process.env.STRIPE_SECRET_KEY?.trim() && process.env.STRIPE_PORTAL_CONFIGURATION?.trim()), emailVerified: Boolean(getRecord(owner, 'email_verified', 'current')) }
+    cancelAtPeriodEnd: saved?.cancelAtPeriodEnd ?? false, checkoutAvailable: paidCheckoutAvailable(), portalAvailable: Boolean(customerFor(owner) && process.env.STRIPE_SECRET_KEY?.trim() && process.env.STRIPE_PORTAL_CONFIGURATION?.trim()), emailVerified: Boolean(getRecord(owner, 'email_verified', 'current')), creative, creativeCheckoutAvailable: creativeCheckoutAvailable() }
 }
 /** Called inside the same write transaction that reserves the generation job. */
 export function requireGenerationAllowance(owner: string, assets: number): void {
@@ -53,13 +49,6 @@ export function requireGenerationAllowance(owner: string, assets: number): void 
   const configured = Number(process.env.NEXORA_DAILY_GENERATION_LIMIT)
   const ceiling = Number.isInteger(configured) && configured >= 1 && configured <= 10000 ? configured : 500
   if (daily.n >= ceiling) throw new HttpError(429, 'GENERATION_SERVICE_LIMIT', 'Generation is temporarily paused while the service checks its daily usage budget. Your saved work remains available. Please try again later or contact support.')
-}
-function origin() {
-  const value = process.env.APP_ORIGIN
-  if (!value) throw new HttpError(503, 'BILLING_UNAVAILABLE', 'Billing is not configured yet.')
-  const url = new URL(value)
-  if (url.protocol !== 'https:' || url.pathname !== '/') throw new HttpError(503, 'BILLING_UNAVAILABLE', 'Billing is not configured yet.')
-  return url.origin
 }
 function idOf(value: string | { id: string } | null): string | null { return typeof value === 'string' ? value : value?.id ?? null }
 function catalogPlan(price: Stripe.Price): PaidPlanId | null {
@@ -83,11 +72,13 @@ export async function syncBilling(owner: string, providedStripe?: Stripe): Promi
   const item = subscription?.items.data[0]
   const invoice = subscription?.latest_invoice
   const start = item?.current_period_start, end = item?.current_period_end
+  const creative = subscription ? await readCreativeSubscription(owner, subscription, stripe) : null
+  const creativeTagged = Boolean(subscription?.metadata?.nexora_catalog)
   const state: SubscriptionState = {
-    id: subscription?.id ?? '', plan: item && subscription!.items.data.length === 1 && item.quantity === 1 ? catalogPlan(item.price) : null,
+    id: subscription?.id ?? '', plan: creativeTagged ? creative?.plan ?? null : item && subscription!.items.data.length === 1 && item.quantity === 1 ? catalogPlan(item.price) : null,
     status: subscription?.status ?? 'free', paid: Boolean(invoice && typeof invoice !== 'string' && invoice.status === 'paid'),
-    periodStart: start ? new Date(start * 1000).toISOString() : null,
-    periodEnd: end ? new Date(end * 1000).toISOString() : null, cancelAtPeriodEnd: subscription?.cancel_at_period_end ?? false,
+    periodStart: creative?.periodStart ?? (start ? new Date(start * 1000).toISOString() : null),
+    periodEnd: creative?.periodEnd ?? (end ? new Date(end * 1000).toISOString() : null), cancelAtPeriodEnd: subscription?.cancel_at_period_end ?? false, creative,
   }
   transaction(() => {
     if (customerFor(owner)!.applied_revision > revision) return
@@ -153,12 +144,16 @@ export async function handleBillingWebhook(body: string, signature: string): Pro
   try { event = stripe.webhooks.constructEvent(body, signature, secret, 300) }
   catch { throw new HttpError(400, 'INVALID_SIGNATURE', 'Invalid webhook signature.') }
   if (database().prepare('SELECT 1 FROM billing_events WHERE id=?').get(event.id)) return
-  const relevant = event.type.startsWith('customer.subscription.') || event.type.startsWith('invoice.') || event.type === 'checkout.session.completed'
+  const relevant = event.type.startsWith('customer.subscription.') || event.type.startsWith('invoice.') || event.type === 'checkout.session.completed' || event.type === 'checkout.session.async_payment_succeeded' || event.type === 'charge.refunded'
   if (relevant) {
     const object = event.data.object as unknown as { customer: string | { id: string } | null }
     const customer = idOf(object.customer)
     const row = customer ? database().prepare('SELECT owner_id FROM billing_customers WHERE customer_id=?').get(customer) as { owner_id: string } | undefined : undefined
-    if (row) await syncBilling(row.owner_id, stripe)
+    if (row) {
+      if (event.type === 'checkout.session.completed' || event.type === 'checkout.session.async_payment_succeeded') await reconcileCreativeCheckout(row.owner_id, (event.data.object as Stripe.Checkout.Session).id, stripe)
+      if (event.type === 'charge.refunded') recordCreativeRefund(row.owner_id, event.data.object as Stripe.Charge)
+      await syncBilling(row.owner_id, stripe)
+    }
   }
   database().prepare('INSERT OR IGNORE INTO billing_events(id,processed_at) VALUES(?,?)').run(event.id, new Date().toISOString())
 }

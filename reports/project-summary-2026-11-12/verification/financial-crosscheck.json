@@ -1,0 +1,78 @@
+{
+  "scope": "Read-only source consistency and arithmetic checks; not validation of real demand, costs, tax, or legal dividend capacity.",
+  "passed": true,
+  "checks": [
+    {
+      "name": "catalog_focus",
+      "passed": true,
+      "detail": {
+        "id": "focus",
+        "monthlyUsd": 79,
+        "campaigns": 4,
+        "images": 40,
+        "videos": 12,
+        "motionSeconds": 0
+      }
+    },
+    {
+      "name": "catalog_growth",
+      "passed": true,
+      "detail": {
+        "id": "growth",
+        "monthlyUsd": 149,
+        "campaigns": 8,
+        "images": 80,
+        "videos": 24,
+        "motionSeconds": 0
+      }
+    },
+    {
+      "name": "v2_v3_minimum",
+      "passed": true,
+      "detail": {
+        "customers": 2540,
+        "annualized_net_revenue_krw": 4767315840.0,
+        "personal_take_home_krw": 20005556.15226666
+      }
+    },
+    {
+      "name": "v2_v3_operating_target",
+      "passed": true,
+      "detail": {
+        "customers": 2600,
+        "annualized_net_revenue_krw": 4879929600.0,
+        "personal_take_home_krw": 20583175.23066666
+      }
+    },
+    {
+      "name": "36_month_csv_json_agree",
+      "passed": true,
+      "detail": {
+        "months": 36,
+        "maximum_absolute_difference": 0.0
+      }
+    },
+    {
+      "name": "steady_profit_waterfall",
+      "passed": true,
+      "detail": {
+        "operating_profit_krw": 76256793.33333331
+      }
+    },
+    {
+      "name": "personal_waterfall",
+      "passed": true,
+      "detail": {
+        "personal_take_home_krw": 20583175.23066666
+      }
+    },
+    {
+      "name": "growth_take_home_distinct_from_steady",
+      "passed": true,
+      "detail": {
+        "steady_monthly_capacity_krw": 20583175.23066666,
+        "growth_36_month_total_take_home_krw": 0.0
+      }
+    }
+  ]
+}

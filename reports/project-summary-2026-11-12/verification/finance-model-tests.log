@@ -1,0 +1,22 @@
+Verification record reconstructed from the previously observed tool result.
+The command was not rerun to create this file.
+
+Command: python -B -m unittest test_customer_offer.py
+Working directory: C:\Users\Jongone\Desktop\NEXORA_PRIVATE_2026-11-12\customer-offer-v3
+Observed exit code: 0
+Observed wall time (tool): 0.1153848 seconds
+
+The execution tool supplied a combined output field, without separate stdout/stderr fields.
+Exact text of that observed combined output, with line endings normalized:
+
+........
+----------------------------------------------------------------------
+Ran 8 tests in 0.002s
+
+OK
+
+Observed checks (from the existing test source): public catalog quantities and prices;
+minimum customer boundary without assumed upsells; revenue target versus owner target;
+corporate/personal cash waterfall reconciliation; one-off contribution definition;
+company-paid candidate costs and absence of bundled motion; funded cash continuity and
+seed-capital/profit separation; unattainable loss scenario handling.

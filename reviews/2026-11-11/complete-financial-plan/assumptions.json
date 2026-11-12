@@ -1,0 +1,101 @@
+{
+  "as_of": "2026-11-11",
+  "entity_assumption": "Delaware C-corp / Korean-resident shareholder; planning assumption, not an entity election",
+  "recommended_offer": "premium_rebalanced",
+  "fx_krw_per_usd": 1400,
+  "focus_share": 0.5,
+  "utilization": 1.0,
+  "image_output_usd": 0.24,
+  "image_input_review_budget_usd": 0.01,
+  "motion_second_usd": 0.40,
+  "company_paid_candidates": 2.0,
+  "render_voice_budget_per_video_usd": 0.50,
+  "processing_rate_budget": 0.05,
+  "processing_fixed_usd": 0.30,
+  "sales_tax_collection_illustration": 0.08,
+  "refund_rate": 0.02,
+  "monthly_churn": 0.03,
+  "cac_usd": 400,
+  "federal_rate": 0.21,
+  "delaware_rate": 0.087,
+  "delaware_income_share": 1.0,
+  "corporate_total_reserve_floor": 0.35,
+  "personal_tax_mode": "reserve_45",
+  "personal_tax_reserve_floor": 0.45,
+  "us_dividend_withholding": 0.15,
+  "personal_extra_monthly_krw": 1000000,
+  "owner_other_income_annual_krw": 0,
+  "owner_deductions_annual_krw": 0,
+  "dividend_fx_remittance_rate": 0.005,
+  "dividend_wire_usd": 20,
+  "reinvestment_share_of_positive_after_tax_cash": 0.20,
+  "minimum_runway_months": 3,
+  "target_runway_months": 6,
+  "payout_runway_months": 6,
+  "supplier_prepayment_days": 15,
+  "settlement_days": 7,
+  "other_monthly_capex_krw": 0,
+  "monthly_debt_principal_krw": 0,
+  "atlas_setup_usd": 500,
+  "registered_agent_annual_usd_after_year_one": 100,
+  "annual_report_usd": 50,
+  "authorized_shares_assumption": 10000000,
+  "issued_shares_assumption": 8000000,
+  "par_value_usd_assumption": 0.00001,
+  "other_company_assets_krw_assumption": 5000000,
+  "corporate_tax_cash_reserve_months": 3,
+  "founder_target_monthly_krw": 20000000,
+  "annual_revenue_target_krw": 1000000000,
+  "fixed_costs_krw": {
+    "development_product_contractors": 6000000,
+    "hosting_monitoring_backups": 1200000,
+    "us_korea_accounting_filing_budget": 1000000,
+    "legal_insurance_administration": 800000,
+    "software_tools": 500000,
+    "operating_contingency": 2500000
+  },
+  "offers": {
+    "old_advertised": {
+      "label": "기존 공개안·고급 API 전량 사용",
+      "plans": [
+        {"id":"focus","name":"Focus","monthlyUsd":79,"images":80,"videos":16,"motionSeconds":60,"campaigns":8,"copyBudgetUsd":5,"storageBudgetUsd":5,"supportBudgetUsd":12},
+        {"id":"growth","name":"Growth","monthlyUsd":149,"images":160,"videos":32,"motionSeconds":120,"campaigns":16,"copyBudgetUsd":10,"storageBudgetUsd":10,"supportBudgetUsd":18}
+      ]
+    },
+    "premium_same_quantity": {
+      "label": "기존 제공량 유지·가격 $199/$399",
+      "plans": [
+        {"id":"focus","name":"Focus","monthlyUsd":199,"images":80,"videos":16,"motionSeconds":60,"campaigns":8,"copyBudgetUsd":5,"storageBudgetUsd":5,"supportBudgetUsd":12},
+        {"id":"growth","name":"Growth","monthlyUsd":399,"images":160,"videos":32,"motionSeconds":120,"campaigns":16,"copyBudgetUsd":10,"storageBudgetUsd":10,"supportBudgetUsd":18}
+      ]
+    },
+    "premium_rebalanced": {
+      "label": "품질 우선 재구성·가격 $149/$299",
+      "plans": [
+        {"id":"focus","name":"Focus","monthlyUsd":149,"images":40,"videos":12,"motionSeconds":30,"campaigns":8,"copyBudgetUsd":5,"storageBudgetUsd":5,"supportBudgetUsd":12},
+        {"id":"growth","name":"Growth","monthlyUsd":299,"images":100,"videos":24,"motionSeconds":90,"campaigns":16,"copyBudgetUsd":10,"storageBudgetUsd":10,"supportBudgetUsd":18}
+      ]
+    }
+  },
+  "sources": [
+    {"title":"Google image API pricing","url":"https://ai.google.dev/gemini-api/docs/pricing?hl=en","fact":"Gemini 3 Pro Image 4K output $0.24; input and review allowance is a separate budget, not an official fixed charge."},
+    {"title":"Runway video API pricing","url":"https://docs.dev.runwayml.com/guides/pricing/","fact":"Veo 3.1 with audio: 40 credits/second, $0.01/credit, hence $0.40/second."},
+    {"title":"Stripe Atlas pricing","url":"https://stripe.com/atlas","fact":"$500 setup including first-year agent; $100/year agent renewal after year one."},
+    {"title":"Delaware franchise tax calculation","url":"https://corp.delaware.gov/frtaxcalc/","fact":"Authorized-share and assumed-par-value methods; single-class assumed structure is used in this model."},
+    {"title":"Delaware annual report","url":"https://corp.delaware.gov/paytaxes/","fact":"$50 non-exempt domestic corporation annual report fee."},
+    {"title":"Delaware corporate income tax","url":"https://revenue.delaware.gov/frequently-asked-questions/corporate-income-tax-faqs/","fact":"8.7% on allocated/apportioned taxable income; 100% attribution is a conservative scenario, not a finding of nexus."},
+    {"title":"US federal corporation tax","url":"https://www.irs.gov/instructions/i1120","fact":"21% federal rate; model taxable profit is an accounting-profit proxy."},
+    {"title":"Korea Income Tax Act article 55","url":"https://law.go.kr/lsLinkCommonInfo.do?chrClsCd=010202&lsJoLnkSeq=1034035335","fact":"Korean national progressive schedule; other income and individual credits are assumed zero."},
+    {"title":"US Korea income tax treaty","url":"https://www.irs.gov/pub/irs-trty/korea.pdf","fact":"Qualified individual dividend withholding illustration 15%; credit eligibility remains an assumption."}
+  ],
+  "important_scope": [
+    "Quoted provider rates are factual inputs; candidate counts, review/render/support/fixed-cost budgets are planning assumptions, not measured invoices or a claim of universal best quality.",
+    "35% corporate and 45% personal floors are cash reserve policies, not statutory tax rates. Additional reserve is held rather than falsely labelled tax already owed.",
+    "C-corp is the calculation assumption. LLC, Korean corporate residence/PE, other states, deductions, owner salary and actual filing positions require a different calculation if applicable.",
+    "8% sales-tax collection is an illustration. All collected tax is excluded from revenue and distributable cash; it increases the assumed payment processing fee. It is not a legal blended tax rate.",
+    "Extra company-paid candidates are included within a design/selected-scene entitlement; do not charge the same successful regeneration twice in quotas or costs.",
+    "The 6-month liquidity target is a company cash balance, not a recurring expense. Reinvestment retention is a separate equity-cash bucket, not an expense deducted twice.",
+    "Zero capex/debt and zero opening customer base are explicit scenarios, not statements about the user's existing company.",
+    "No paid API call, incorporation, bank transaction, tax filing, deployment, or live charge is performed by this calculator."
+  ]
+}

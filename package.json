@@ -12,7 +12,10 @@
     "test": "vitest --configLoader native",
     "test:run": "vitest run --configLoader native",
     "audit:high": "npm audit --audit-level=high",
-    "check": "npm run lint && npm run typecheck && npm run test:run && npm run build && npm run audit:high"
+    "check": "npm run lint && npm run typecheck && npm run test:run && npm run build && npm run audit:high",
+    "media:worker": "node scripts/image-worker.mjs",
+    "ops:backup": "node scripts/backup-local.mjs",
+    "ops:verify-backup": "node scripts/verify-backup.mjs"
   },
   "engines": {
     "node": ">=24.14.0"
@@ -26,7 +29,8 @@
     "react-dom": "19.2.4",
     "recharts": "^3.8.1",
     "stripe": "^23.1.0",
-    "zustand": "^5.0.12"
+    "zustand": "^5.0.12",
+    "sharp": "0.35.5"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

@@ -1,29 +1,48 @@
 {
   "status": "preview",
+  "version": "creative-v3-2026-11-12",
+  "renewal": "automatic_until_canceled",
+  "quantityChanges": "next_billing_period",
+  "motionBilling": ["monthly", "one_time"],
+  "releaseReadiness": { "mediaDelivery": false, "versionedBilling": false },
   "currency": "USD",
   "maxVideoSeconds": 30,
+  "entryOffer": {
+    "id": "first-campaign",
+    "name": "First campaign",
+    "oneTimeUsd": 19,
+    "campaigns": 1,
+    "images": 4,
+    "videos": 2,
+    "expiryDays": 30
+  },
+  "motionSceneSeconds": 8,
+  "motionPacks": [
+    { "id": "motion-scene", "name": "One AI scene", "scenes": 1, "oneTimeUsd": 15, "monthlyUsd": 15 },
+    { "id": "motion-five", "name": "Five AI scenes", "scenes": 5, "oneTimeUsd": 59, "monthlyUsd": 59 }
+  ],
   "plans": [
     {
       "id": "focus",
       "name": "Focus",
       "monthlyUsd": 79,
-      "campaigns": 8,
-      "images": 80,
-      "videos": 16,
-      "motionSeconds": 60,
-      "headline": "A month of fresh creative.",
-      "description": "For one business creating and testing new ads every week."
+      "campaigns": 4,
+      "images": 40,
+      "videos": 12,
+      "motionSeconds": 0,
+      "headline": "One campaign each week.",
+      "description": "Four offers or message directions, with matching images and photo-based videos."
     },
     {
       "id": "growth",
       "name": "Growth",
       "monthlyUsd": 149,
-      "campaigns": 16,
-      "images": 160,
-      "videos": 32,
-      "motionSeconds": 120,
-      "headline": "More creative. More to test.",
-      "description": "Twice the creative allowance for more offers, hooks, and audiences."
+      "campaigns": 8,
+      "images": 80,
+      "videos": 24,
+      "motionSeconds": 0,
+      "headline": "Two directions each week.",
+      "description": "Eight campaigns for comparing offers, hooks, and audiences across the month."
     }
   ]
 }

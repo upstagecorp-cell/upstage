@@ -1,0 +1,413 @@
+{
+  "passed": true,
+  "pdf": "NEXORA_PROJECT_REPORT_2026-11-12.pdf",
+  "pages": 50,
+  "bytes": 1330704,
+  "sha256": "b56fce96b7715e7b73006cd2a04665cb9e47609b86ee39e9535e16e826fff309",
+  "korean_characters": 23447,
+  "outline_entries": 75,
+  "layout_collisions": 0,
+  "pages_checked": [
+    {
+      "page": 1,
+      "characters": 504,
+      "korean_characters": 228,
+      "title_present": true,
+      "width_pt": 594.95996,
+      "height_pt": 841.91998
+    },
+    {
+      "page": 2,
+      "characters": 1104,
+      "korean_characters": 566,
+      "title_present": true,
+      "width_pt": 594.95996,
+      "height_pt": 841.91998
+    },
+    {
+      "page": 3,
+      "characters": 1076,
+      "korean_characters": 485,
+      "title_present": true,
+      "width_pt": 594.95996,
+      "height_pt": 841.91998
+    },
+    {
+      "page": 4,
+      "characters": 1024,
+      "korean_characters": 555,
+      "title_present": true,
+      "width_pt": 594.95996,
+      "height_pt": 841.91998
+    },
+    {
+      "page": 5,
+      "characters": 1106,
+      "korean_characters": 597,
+      "title_present": true,
+      "width_pt": 594.95996,
+      "height_pt": 841.91998
+    },
+    {
+      "page": 6,
+      "characters": 1051,
+      "korean_characters": 534,
+      "title_present": true,
+      "width_pt": 594.95996,
+      "height_pt": 841.91998
+    },
+    {
+      "page": 7,
+      "characters": 1116,
+      "korean_characters": 596,
+      "title_present": true,
+      "width_pt": 594.95996,
+      "height_pt": 841.91998
+    },
+    {
+      "page": 8,
+      "characters": 1237,
+      "korean_characters": 569,
+      "title_present": true,
+      "width_pt": 594.95996,
+      "height_pt": 841.91998
+    },
+    {
+      "page": 9,
+      "characters": 1005,
+      "korean_characters": 517,
+      "title_present": true,
+      "width_pt": 594.95996,
+      "height_pt": 841.91998
+    },
+    {
+      "page": 10,
+      "characters": 1051,
+      "korean_characters": 506,
+      "title_present": true,
+      "width_pt": 594.95996,
+      "height_pt": 841.91998
+    },
+    {
+      "page": 11,
+      "characters": 989,
+      "korean_characters": 533,
+      "title_present": true,
+      "width_pt": 594.95996,
+      "height_pt": 841.91998
+    },
+    {
+      "page": 12,
+      "characters": 1137,
+      "korean_characters": 559,
+      "title_present": true,
+      "width_pt": 594.95996,
+      "height_pt": 841.91998
+    },
+    {
+      "page": 13,
+      "characters": 1072,
+      "korean_characters": 564,
+      "title_present": true,
+      "width_pt": 594.95996,
+      "height_pt": 841.91998
+    },
+    {
+      "page": 14,
+      "characters": 1009,
+      "korean_characters": 513,
+      "title_present": true,
+      "width_pt": 594.95996,
+      "height_pt": 841.91998
+    },
+    {
+      "page": 15,
+      "characters": 1037,
+      "korean_characters": 416,
+      "title_present": true,
+      "width_pt": 594.95996,
+      "height_pt": 841.91998
+    },
+    {
+      "page": 16,
+      "characters": 1214,
+      "korean_characters": 465,
+      "title_present": true,
+      "width_pt": 594.95996,
+      "height_pt": 841.91998
+    },
+    {
+      "page": 17,
+      "characters": 984,
+      "korean_characters": 526,
+      "title_present": true,
+      "width_pt": 594.95996,
+      "height_pt": 841.91998
+    },
+    {
+      "page": 18,
+      "characters": 1147,
+      "korean_characters": 463,
+      "title_present": true,
+      "width_pt": 594.95996,
+      "height_pt": 841.91998
+    },
+    {
+      "page": 19,
+      "characters": 1231,
+      "korean_characters": 486,
+      "title_present": true,
+      "width_pt": 594.95996,
+      "height_pt": 841.91998
+    },
+    {
+      "page": 20,
+      "characters": 899,
+      "korean_characters": 350,
+      "title_present": true,
+      "width_pt": 594.95996,
+      "height_pt": 841.91998
+    },
+    {
+      "page": 21,
+      "characters": 1132,
+      "korean_characters": 384,
+      "title_present": true,
+      "width_pt": 594.95996,
+      "height_pt": 841.91998
+    },
+    {
+      "page": 22,
+      "characters": 1089,
+      "korean_characters": 446,
+      "title_present": true,
+      "width_pt": 594.95996,
+      "height_pt": 841.91998
+    },
+    {
+      "page": 23,
+      "characters": 1213,
+      "korean_characters": 610,
+      "title_present": true,
+      "width_pt": 594.95996,
+      "height_pt": 841.91998
+    },
+    {
+      "page": 24,
+      "characters": 1367,
+      "korean_characters": 349,
+      "title_present": true,
+      "width_pt": 594.95996,
+      "height_pt": 841.91998
+    },
+    {
+      "page": 25,
+      "characters": 1205,
+      "korean_characters": 461,
+      "title_present": true,
+      "width_pt": 594.95996,
+      "height_pt": 841.91998
+    },
+    {
+      "page": 26,
+      "characters": 1122,
+      "korean_characters": 479,
+      "title_present": true,
+      "width_pt": 594.95996,
+      "height_pt": 841.91998
+    },
+    {
+      "page": 27,
+      "characters": 1143,
+      "korean_characters": 550,
+      "title_present": true,
+      "width_pt": 594.95996,
+      "height_pt": 841.91998
+    },
+    {
+      "page": 28,
+      "characters": 1228,
+      "korean_characters": 551,
+      "title_present": true,
+      "width_pt": 594.95996,
+      "height_pt": 841.91998
+    },
+    {
+      "page": 29,
+      "characters": 1026,
+      "korean_characters": 465,
+      "title_present": true,
+      "width_pt": 594.95996,
+      "height_pt": 841.91998
+    },
+    {
+      "page": 30,
+      "characters": 1014,
+      "korean_characters": 361,
+      "title_present": true,
+      "width_pt": 594.95996,
+      "height_pt": 841.91998
+    },
+    {
+      "page": 31,
+      "characters": 1031,
+      "korean_characters": 472,
+      "title_present": true,
+      "width_pt": 594.95996,
+      "height_pt": 841.91998
+    },
+    {
+      "page": 32,
+      "characters": 937,
+      "korean_characters": 395,
+      "title_present": true,
+      "width_pt": 594.95996,
+      "height_pt": 841.91998
+    },
+    {
+      "page": 33,
+      "characters": 870,
+      "korean_characters": 407,
+      "title_present": true,
+      "width_pt": 594.95996,
+      "height_pt": 841.91998
+    },
+    {
+      "page": 34,
+      "characters": 1113,
+      "korean_characters": 508,
+      "title_present": true,
+      "width_pt": 594.95996,
+      "height_pt": 841.91998
+    },
+    {
+      "page": 35,
+      "characters": 1307,
+      "korean_characters": 249,
+      "title_present": true,
+      "width_pt": 594.95996,
+      "height_pt": 841.91998
+    },
+    {
+      "page": 36,
+      "characters": 1324,
+      "korean_characters": 245,
+      "title_present": true,
+      "width_pt": 594.95996,
+      "height_pt": 841.91998
+    },
+    {
+      "page": 37,
+      "characters": 937,
+      "korean_characters": 530,
+      "title_present": true,
+      "width_pt": 594.95996,
+      "height_pt": 841.91998
+    },
+    {
+      "page": 38,
+      "characters": 1043,
+      "korean_characters": 557,
+      "title_present": true,
+      "width_pt": 594.95996,
+      "height_pt": 841.91998
+    },
+    {
+      "page": 39,
+      "characters": 954,
+      "korean_characters": 527,
+      "title_present": true,
+      "width_pt": 594.95996,
+      "height_pt": 841.91998
+    },
+    {
+      "page": 40,
+      "characters": 1365,
+      "korean_characters": 472,
+      "title_present": true,
+      "width_pt": 594.95996,
+      "height_pt": 841.91998
+    },
+    {
+      "page": 41,
+      "characters": 1305,
+      "korean_characters": 504,
+      "title_present": true,
+      "width_pt": 594.95996,
+      "height_pt": 841.91998
+    },
+    {
+      "page": 42,
+      "characters": 1342,
+      "korean_characters": 654,
+      "title_present": true,
+      "width_pt": 594.95996,
+      "height_pt": 841.91998
+    },
+    {
+      "page": 43,
+      "characters": 1313,
+      "korean_characters": 605,
+      "title_present": true,
+      "width_pt": 594.95996,
+      "height_pt": 841.91998
+    },
+    {
+      "page": 44,
+      "characters": 1164,
+      "korean_characters": 357,
+      "title_present": true,
+      "width_pt": 594.95996,
+      "height_pt": 841.91998
+    },
+    {
+      "page": 45,
+      "characters": 1135,
+      "korean_characters": 362,
+      "title_present": true,
+      "width_pt": 594.95996,
+      "height_pt": 841.91998
+    },
+    {
+      "page": 46,
+      "characters": 1096,
+      "korean_characters": 361,
+      "title_present": true,
+      "width_pt": 594.95996,
+      "height_pt": 841.91998
+    },
+    {
+      "page": 47,
+      "characters": 1036,
+      "korean_characters": 321,
+      "title_present": true,
+      "width_pt": 594.95996,
+      "height_pt": 841.91998
+    },
+    {
+      "page": 48,
+      "characters": 1179,
+      "korean_characters": 399,
+      "title_present": true,
+      "width_pt": 594.95996,
+      "height_pt": 841.91998
+    },
+    {
+      "page": 49,
+      "characters": 1309,
+      "korean_characters": 418,
+      "title_present": true,
+      "width_pt": 594.95996,
+      "height_pt": 841.91998
+    },
+    {
+      "page": 50,
+      "characters": 1118,
+      "korean_characters": 420,
+      "title_present": true,
+      "width_pt": 594.95996,
+      "height_pt": 841.91998
+    }
+  ],
+  "failures": []
+}

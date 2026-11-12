@@ -1,0 +1,252 @@
+[
+  {
+    "page": 1,
+    "title": "NEXORA 프로젝트 종합 정리 보고서",
+    "sources": ""
+  },
+  {
+    "page": 2,
+    "title": "목차",
+    "sources": ""
+  },
+  {
+    "page": 3,
+    "title": "현재 프로젝트의 위치와 정리 범위",
+    "sources": "package.json; git log/status; src/ 전체; verification/*.log; source-manifest.json"
+  },
+  {
+    "page": 4,
+    "title": "프로젝트가 추구하는 방향",
+    "sources": "README.md; src/components/marketing/LandingExperience.tsx; src/lib/marketing/catalog.ts; CREATIVE_OFFER_IMPLEMENTATION.md"
+  },
+  {
+    "page": 5,
+    "title": "대상 고객과 초기 상품의 초점",
+    "sources": "reviews/2026-11-10/STRATEGY_REVIEW.md; SEVEN_DAY_LAUNCH_PLAN.md; src/lib/marketing/catalog.ts; CREATIVE_OFFER_IMPLEMENTATION.md"
+  },
+  {
+    "page": 6,
+    "title": "고객이 얻을 수 있는 결과",
+    "sources": "README.md; CREATIVE_OFFER_IMPLEMENTATION.md; MEDIA_OPERATIONS.md; src/components/workspace/ImageStudio.tsx; src/lib/server/image-studio.ts"
+  },
+  {
+    "page": 7,
+    "title": "고객 여정과 일주일 활용 예시",
+    "sources": "README.md; src/lib/first-check-session.ts; src/components/workspace/WorkspaceApp.tsx; MEDIA_OPERATIONS.md"
+  },
+  {
+    "page": 8,
+    "title": "지금까지의 변화와 결정 이력",
+    "sources": "PROJECT_STATUS.md; RESTORATION_REPORT.md; EXPERIENCE_REDESIGN.md; VISUAL_EXPERIENCE_IMPLEMENTATION.md; STRIPE_STYLE_REDESIGN.md; git log"
+  },
+  {
+    "page": 9,
+    "title": "전체 기능과 현재 상태",
+    "sources": "현재 src/ 코드; README.md; CREATIVE_OFFER_IMPLEMENTATION.md; MEDIA_OPERATIONS.md"
+  },
+  {
+    "page": 10,
+    "title": "첫 체크와 사업 프로필",
+    "sources": "README.md; src/lib/business/first-check.ts; src/lib/business/industry.ts; src/lib/first-check-session.ts; src/lib/server/first-check.ts; src/lib/server/operations.ts"
+  },
+  {
+    "page": 11,
+    "title": "근거와 진단이 동작하는 방식",
+    "sources": "README.md; RESTORATION_REPORT.md; src/lib/business/assessment.ts; src/lib/business/validation.ts; src/lib/server/operations.ts"
+  },
+  {
+    "page": 12,
+    "title": "텍스트 생성과 공급자 연결",
+    "sources": "src/lib/server/provider.ts; src/lib/server/operations.ts; src/lib/server/billing.ts; src/lib/business/approved-wording.ts; .env.example"
+  },
+  {
+    "page": 13,
+    "title": "수정·정확한 승인·내보내기",
+    "sources": "src/app/api/assets/[id]/route.ts; src/app/api/assets/[id]/approve/route.ts; src/app/api/assets/[id]/download/route.ts; VISUAL_EXPERIENCE_IMPLEMENTATION.md; MEDIA_OPERATIONS.md"
+  },
+  {
+    "page": 14,
+    "title": "주간 실행·결과·성과를 연결하는 법",
+    "sources": "README.md; src/lib/server/plans.ts; src/lib/business/planning.ts; src/lib/business/performance.ts; src/lib/server/operations.ts; RESTORATION_REPORT.md"
+  },
+  {
+    "page": 15,
+    "title": "사진 기반 정적 이미지 제작",
+    "sources": "MEDIA_OPERATIONS.md; src/components/workspace/ImageStudio.tsx; src/lib/server/image-studio.ts; src/lib/server/media-files.ts; .qa/launch-actions-2026-11-12/browser-results.json"
+  },
+  {
+    "page": 16,
+    "title": "워커·백업·복구·상태 점검",
+    "sources": "MEDIA_OPERATIONS.md; scripts/image-worker.mjs; scripts/backup-local.mjs; scripts/verify-backup.mjs; src/app/api/internal/readiness/route.ts"
+  },
+  {
+    "page": 17,
+    "title": "준비 중인 영상·AI와 품질 방향",
+    "sources": "CREATIVE_OFFER_IMPLEMENTATION.md; AD_CREATIVE_PRICING_PLAN.md; API_QUALITY_TAX_CASHFLOW_AUDIT.md; MEDIA_OPERATIONS.md"
+  },
+  {
+    "page": 18,
+    "title": "현재 상품·견적과 기존 계약",
+    "sources": "src/lib/marketing/creative-plans.json; src/lib/marketing/creative-plans.ts; src/lib/billing/plans.ts; CREATIVE_OFFER_IMPLEMENTATION.md"
+  },
+  {
+    "page": 19,
+    "title": "자동 갱신·수량 변경·해지·환불",
+    "sources": "src/lib/server/creative-billing.ts; src/lib/server/billing.ts; src/lib/server/billing-shared.ts; src/components/workspace/CreativeSubscriptionControls.tsx; CREATIVE_OFFER_IMPLEMENTATION.md"
+  },
+  {
+    "page": 20,
+    "title": "사이트·디자인·탐색 경험",
+    "sources": "STRIPE_STYLE_REDESIGN.md; VISUAL_EXPERIENCE_IMPLEMENTATION.md; src/components/layout/; src/components/marketing/; .qa/recurring-billing-v3/browser-results.json"
+  },
+  {
+    "page": 21,
+    "title": "기술 구조와 데이터 흐름",
+    "sources": "package.json; package-lock.json; next.config.ts; src/lib/server/; .github/workflows/ci.yml; MEDIA_OPERATIONS.md"
+  },
+  {
+    "page": 22,
+    "title": "계정·데이터·보안 경계",
+    "sources": "src/lib/server/auth.ts; src/lib/server/http.ts; src/lib/server/database.ts; src/lib/server/media-http.ts; src/lib/server/media-files.ts; next.config.ts"
+  },
+  {
+    "page": 23,
+    "title": "메일·약관·개인정보 안내",
+    "sources": "src/lib/server/account-email.ts; src/components/marketing/LegalNotice.tsx; src/app/api/account/; reviews/2026-11-10/launch/OPERATIONS_RUNBOOK.md"
+  },
+  {
+    "page": 24,
+    "title": "실행 환경과 운영 연결",
+    "sources": ".env.example; MEDIA_OPERATIONS.md; scripts/launch-preflight.mjs; src/lib/server/creative-billing.ts; verification/preflight.log"
+  },
+  {
+    "page": 25,
+    "title": "이번 검증과 기존 검증 기록",
+    "sources": "verification/lint.log; typecheck.log; tests.log; build.log; preflight.log; finance-model-tests.log; financial-crosscheck.json; 기존 QA browser-results.json 2종"
+  },
+  {
+    "page": 26,
+    "title": "문서 간 차이와 최신 정정",
+    "sources": "README.md; PROJECT_REVIEW_2026-11-12.md; API_QUALITY_TAX_CASHFLOW_AUDIT.md; CREATIVE_OFFER_IMPLEMENTATION.md; MEDIA_OPERATIONS.md; 외부 customer-offer-v2/v3"
+  },
+  {
+    "page": 27,
+    "title": "유료 출시 전에 충족할 조건",
+    "sources": "CREATIVE_OFFER_IMPLEMENTATION.md; MEDIA_OPERATIONS.md; LAUNCH_READINESS.md; reviews/2026-11-10/launch/OPERATIONS_RUNBOOK.md; verification/preflight.log"
+  },
+  {
+    "page": 28,
+    "title": "재무 자료의 버전과 철회된 결론",
+    "sources": "AD_CREATIVE_PRICING_PLAN.md; API_QUALITY_TAX_CASHFLOW_AUDIT.md; customer-offer-v2/CUSTOMER_OFFER_V2.md; customer-offer-v3/RECURRING_BILLING_V3.md; creative-plans.json"
+  },
+  {
+    "page": 29,
+    "title": "최신 모형의 입력과 세금·유보 정의",
+    "sources": "customer-offer-v3/assumptions.json; financial-model.json; calculate.py"
+  },
+  {
+    "page": 30,
+    "title": "고객 한 명의 제작원가와 기여액",
+    "sources": "customer-offer-v3/assumptions.json; financial-model.json; calculate.py"
+  },
+  {
+    "page": 31,
+    "title": "정상상태의 고객 수와 사업 목표",
+    "sources": "customer-offer-v3/assumptions.json; financial-model.json; calculate.py"
+  },
+  {
+    "page": 32,
+    "title": "회사 현금에서 대표 수령까지의 흐름",
+    "sources": "customer-offer-v3/assumptions.json; financial-model.json; calculate.py"
+  },
+  {
+    "page": 33,
+    "title": "현금 확보와 12·24개월 성장의 차이",
+    "sources": "customer-offer-v3/assumptions.json; financial-model.json; calculate.py"
+  },
+  {
+    "page": 34,
+    "title": "민감도와 아직 검증되지 않은 사업 변수",
+    "sources": "customer-offer-v3/scenarios.csv; financial-model.json; assumptions.json; 상품/측정 문서"
+  },
+  {
+    "page": 35,
+    "title": "36개월 현금흐름 원장 · 1–18개월",
+    "sources": "customer-offer-v3/cashflow-36-months-funded.csv; financial-model.json / funded_growth.months; calculate.py"
+  },
+  {
+    "page": 36,
+    "title": "36개월 현금흐름 원장 · 19–36개월",
+    "sources": "customer-offer-v3/cashflow-36-months-funded.csv; financial-model.json / funded_growth.months; calculate.py"
+  },
+  {
+    "page": 37,
+    "title": "다음 구현 순서와 인수 기준",
+    "sources": "SEVEN_DAY_LAUNCH_PLAN.md; CREATIVE_OFFER_IMPLEMENTATION.md; MEDIA_OPERATIONS.md; 현재 코드와 검증 로그"
+  },
+  {
+    "page": 38,
+    "title": "출시 후 고객 결과를 검증하는 기준",
+    "sources": "reviews/2026-11-10/STRATEGY_REVIEW.md; reviews/2026-11-10/UX_REVIEW.md; LAUNCH_READINESS.md; CREATIVE_OFFER_IMPLEMENTATION.md"
+  },
+  {
+    "page": 39,
+    "title": "남아 있는 의사결정과 위험",
+    "sources": "현재 작업 트리; API_QUALITY_TAX_CASHFLOW_AUDIT.md; CREATIVE_OFFER_IMPLEMENTATION.md; MEDIA_OPERATIONS.md; 외부 V3 재무 자료"
+  },
+  {
+    "page": 40,
+    "title": "데이터 구조와 기록 간 관계",
+    "sources": "src/lib/business/types.ts; src/lib/server/database.ts; src/lib/server/creative-billing.ts; src/lib/server/image-studio.ts; src/lib/server/media-files.ts"
+  },
+  {
+    "page": 41,
+    "title": "폴더 책임과 보존 범위",
+    "sources": "현재 디렉터리; PROJECT_REVIEW_2026-11-12.md; .gitignore; source-manifest.json"
+  },
+  {
+    "page": 42,
+    "title": "출시 체크리스트 37항목 · 1/2",
+    "sources": "LAUNCH_ACTIONS_2026-11-12.md; .qa/launch-actions-2026-11-12/checklist-status.csv; restart-verification.json; protected-verification.json"
+  },
+  {
+    "page": 43,
+    "title": "출시 체크리스트 37항목 · 2/2",
+    "sources": "LAUNCH_ACTIONS_2026-11-12.md; .qa/launch-actions-2026-11-12/checklist-status.csv; restart-verification.json; protected-verification.json"
+  },
+  {
+    "page": 44,
+    "title": "전체 API 목록 · 1/3",
+    "sources": "src/app/api/**/route.ts; src/lib/server/auth.ts; http.ts; billing.ts; image-studio.ts"
+  },
+  {
+    "page": 45,
+    "title": "전체 API 목록 · 2/3",
+    "sources": "src/app/api/**/route.ts; src/lib/server/auth.ts; http.ts; billing.ts; image-studio.ts"
+  },
+  {
+    "page": 46,
+    "title": "전체 API 목록 · 3/3",
+    "sources": "src/app/api/**/route.ts; src/lib/server/auth.ts; http.ts; billing.ts; image-studio.ts"
+  },
+  {
+    "page": 47,
+    "title": "전체 화면 경로 · 25개 파일",
+    "sources": "src/app/**/page.tsx; src/components/workspace/WorkspaceApp.tsx"
+  },
+  {
+    "page": 48,
+    "title": "근거 문서와 과거 기록 안내",
+    "sources": "위 각 파일; source-manifest.json"
+  },
+  {
+    "page": 49,
+    "title": "외부 재무 자료와 기준 버전",
+    "sources": "외부 customer-offer-v2 및 customer-offer-v3; src/lib/marketing/creative-plans.json; source-manifest.json"
+  },
+  {
+    "page": 50,
+    "title": "보고서 산출물과 재검토 방법",
+    "sources": "동봉한 보고서 파일·검증 결과·source-manifest.json"
+  }
+]

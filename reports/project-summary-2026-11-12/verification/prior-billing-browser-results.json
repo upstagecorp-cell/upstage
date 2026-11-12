@@ -1,0 +1,77 @@
+{
+  "results": [
+    {
+      "check": "pricing-width-320",
+      "passed": true
+    },
+    {
+      "check": "pricing-width-390",
+      "passed": true
+    },
+    {
+      "check": "pricing-width-768",
+      "passed": true
+    },
+    {
+      "check": "pricing-width-1280",
+      "passed": true
+    },
+    {
+      "check": "monthly-base-and-scenes-auto-renew",
+      "passed": true
+    },
+    {
+      "check": "four-scenes-cheapest-pack",
+      "passed": true
+    },
+    {
+      "check": "one-time-extra-does-not-change-renewal",
+      "passed": true
+    },
+    {
+      "check": "one-time-no-auto-renewal",
+      "passed": true
+    },
+    {
+      "check": "no-forced-motion",
+      "passed": true
+    },
+    {
+      "check": "purchase-buttons-disabled",
+      "passed": true
+    },
+    {
+      "check": "homepage-catalog-and-no-old-scene-allowance",
+      "passed": true
+    },
+    {
+      "check": "terms-same-offer",
+      "passed": true
+    },
+    {
+      "check": "account-monthly-configuration",
+      "passed": true
+    },
+    {
+      "check": "account-preview-checkout-closed",
+      "passed": true
+    },
+    {
+      "check": "account-width-320",
+      "passed": true
+    },
+    {
+      "check": "account-width-390",
+      "passed": true
+    },
+    {
+      "check": "account-width-1280",
+      "passed": true
+    },
+    {
+      "check": "no-runtime-exceptions",
+      "passed": true,
+      "errors": []
+    }
+  ]
+}

@@ -1,0 +1,465 @@
+{
+  "pages": [
+    {
+      "page": 1,
+      "title": "NEXORA 프로젝트 종합 정리 보고서",
+      "overflowY": false,
+      "overflowX": false,
+      "bodyHeight": 964,
+      "contentHeight": 964,
+      "pageHeight": 1123
+    },
+    {
+      "page": 2,
+      "title": "목차",
+      "overflowY": false,
+      "overflowX": false,
+      "bodyHeight": 964,
+      "contentHeight": 964,
+      "pageHeight": 1123
+    },
+    {
+      "page": 3,
+      "title": "현재 프로젝트의 위치와 정리 범위",
+      "overflowY": false,
+      "overflowX": false,
+      "bodyHeight": 964,
+      "contentHeight": 964,
+      "pageHeight": 1123
+    },
+    {
+      "page": 4,
+      "title": "프로젝트가 추구하는 방향",
+      "overflowY": false,
+      "overflowX": false,
+      "bodyHeight": 964,
+      "contentHeight": 964,
+      "pageHeight": 1123
+    },
+    {
+      "page": 5,
+      "title": "대상 고객과 초기 상품의 초점",
+      "overflowY": false,
+      "overflowX": false,
+      "bodyHeight": 964,
+      "contentHeight": 964,
+      "pageHeight": 1123
+    },
+    {
+      "page": 6,
+      "title": "고객이 얻을 수 있는 결과",
+      "overflowY": false,
+      "overflowX": false,
+      "bodyHeight": 964,
+      "contentHeight": 964,
+      "pageHeight": 1123
+    },
+    {
+      "page": 7,
+      "title": "고객 여정과 일주일 활용 예시",
+      "overflowY": false,
+      "overflowX": false,
+      "bodyHeight": 964,
+      "contentHeight": 964,
+      "pageHeight": 1123
+    },
+    {
+      "page": 8,
+      "title": "지금까지의 변화와 결정 이력",
+      "overflowY": false,
+      "overflowX": false,
+      "bodyHeight": 964,
+      "contentHeight": 964,
+      "pageHeight": 1123
+    },
+    {
+      "page": 9,
+      "title": "전체 기능과 현재 상태",
+      "overflowY": false,
+      "overflowX": false,
+      "bodyHeight": 964,
+      "contentHeight": 964,
+      "pageHeight": 1123
+    },
+    {
+      "page": 10,
+      "title": "첫 체크와 사업 프로필",
+      "overflowY": false,
+      "overflowX": false,
+      "bodyHeight": 964,
+      "contentHeight": 964,
+      "pageHeight": 1123
+    },
+    {
+      "page": 11,
+      "title": "근거와 진단이 동작하는 방식",
+      "overflowY": false,
+      "overflowX": false,
+      "bodyHeight": 964,
+      "contentHeight": 964,
+      "pageHeight": 1123
+    },
+    {
+      "page": 12,
+      "title": "텍스트 생성과 공급자 연결",
+      "overflowY": false,
+      "overflowX": false,
+      "bodyHeight": 964,
+      "contentHeight": 964,
+      "pageHeight": 1123
+    },
+    {
+      "page": 13,
+      "title": "수정·정확한 승인·내보내기",
+      "overflowY": false,
+      "overflowX": false,
+      "bodyHeight": 964,
+      "contentHeight": 964,
+      "pageHeight": 1123
+    },
+    {
+      "page": 14,
+      "title": "주간 실행·결과·성과를 연결하는 법",
+      "overflowY": false,
+      "overflowX": false,
+      "bodyHeight": 964,
+      "contentHeight": 964,
+      "pageHeight": 1123
+    },
+    {
+      "page": 15,
+      "title": "사진 기반 정적 이미지 제작",
+      "overflowY": false,
+      "overflowX": false,
+      "bodyHeight": 964,
+      "contentHeight": 964,
+      "pageHeight": 1123
+    },
+    {
+      "page": 16,
+      "title": "워커·백업·복구·상태 점검",
+      "overflowY": false,
+      "overflowX": false,
+      "bodyHeight": 964,
+      "contentHeight": 964,
+      "pageHeight": 1123
+    },
+    {
+      "page": 17,
+      "title": "준비 중인 영상·AI와 품질 방향",
+      "overflowY": false,
+      "overflowX": false,
+      "bodyHeight": 964,
+      "contentHeight": 964,
+      "pageHeight": 1123
+    },
+    {
+      "page": 18,
+      "title": "현재 상품·견적과 기존 계약",
+      "overflowY": false,
+      "overflowX": false,
+      "bodyHeight": 964,
+      "contentHeight": 964,
+      "pageHeight": 1123
+    },
+    {
+      "page": 19,
+      "title": "자동 갱신·수량 변경·해지·환불",
+      "overflowY": false,
+      "overflowX": false,
+      "bodyHeight": 964,
+      "contentHeight": 964,
+      "pageHeight": 1123
+    },
+    {
+      "page": 20,
+      "title": "사이트·디자인·탐색 경험",
+      "overflowY": false,
+      "overflowX": false,
+      "bodyHeight": 964,
+      "contentHeight": 964,
+      "pageHeight": 1123
+    },
+    {
+      "page": 21,
+      "title": "기술 구조와 데이터 흐름",
+      "overflowY": false,
+      "overflowX": false,
+      "bodyHeight": 964,
+      "contentHeight": 964,
+      "pageHeight": 1123
+    },
+    {
+      "page": 22,
+      "title": "계정·데이터·보안 경계",
+      "overflowY": false,
+      "overflowX": false,
+      "bodyHeight": 964,
+      "contentHeight": 964,
+      "pageHeight": 1123
+    },
+    {
+      "page": 23,
+      "title": "메일·약관·개인정보 안내",
+      "overflowY": false,
+      "overflowX": false,
+      "bodyHeight": 964,
+      "contentHeight": 964,
+      "pageHeight": 1123
+    },
+    {
+      "page": 24,
+      "title": "실행 환경과 운영 연결",
+      "overflowY": false,
+      "overflowX": false,
+      "bodyHeight": 964,
+      "contentHeight": 964,
+      "pageHeight": 1123
+    },
+    {
+      "page": 25,
+      "title": "이번 검증과 기존 검증 기록",
+      "overflowY": false,
+      "overflowX": false,
+      "bodyHeight": 964,
+      "contentHeight": 964,
+      "pageHeight": 1123
+    },
+    {
+      "page": 26,
+      "title": "문서 간 차이와 최신 정정",
+      "overflowY": false,
+      "overflowX": false,
+      "bodyHeight": 964,
+      "contentHeight": 964,
+      "pageHeight": 1123
+    },
+    {
+      "page": 27,
+      "title": "유료 출시 전에 충족할 조건",
+      "overflowY": false,
+      "overflowX": false,
+      "bodyHeight": 964,
+      "contentHeight": 964,
+      "pageHeight": 1123
+    },
+    {
+      "page": 28,
+      "title": "재무 자료의 버전과 철회된 결론",
+      "overflowY": false,
+      "overflowX": false,
+      "bodyHeight": 964,
+      "contentHeight": 964,
+      "pageHeight": 1123
+    },
+    {
+      "page": 29,
+      "title": "최신 모형의 입력과 세금·유보 정의",
+      "overflowY": false,
+      "overflowX": false,
+      "bodyHeight": 964,
+      "contentHeight": 964,
+      "pageHeight": 1123
+    },
+    {
+      "page": 30,
+      "title": "고객 한 명의 제작원가와 기여액",
+      "overflowY": false,
+      "overflowX": false,
+      "bodyHeight": 964,
+      "contentHeight": 964,
+      "pageHeight": 1123
+    },
+    {
+      "page": 31,
+      "title": "정상상태의 고객 수와 사업 목표",
+      "overflowY": false,
+      "overflowX": false,
+      "bodyHeight": 964,
+      "contentHeight": 964,
+      "pageHeight": 1123
+    },
+    {
+      "page": 32,
+      "title": "회사 현금에서 대표 수령까지의 흐름",
+      "overflowY": false,
+      "overflowX": false,
+      "bodyHeight": 964,
+      "contentHeight": 964,
+      "pageHeight": 1123
+    },
+    {
+      "page": 33,
+      "title": "현금 확보와 12·24개월 성장의 차이",
+      "overflowY": false,
+      "overflowX": false,
+      "bodyHeight": 964,
+      "contentHeight": 964,
+      "pageHeight": 1123
+    },
+    {
+      "page": 34,
+      "title": "민감도와 아직 검증되지 않은 사업 변수",
+      "overflowY": false,
+      "overflowX": false,
+      "bodyHeight": 964,
+      "contentHeight": 964,
+      "pageHeight": 1123
+    },
+    {
+      "page": 35,
+      "title": "36개월 현금흐름 원장 · 1–18개월",
+      "overflowY": false,
+      "overflowX": false,
+      "bodyHeight": 964,
+      "contentHeight": 964,
+      "pageHeight": 1123
+    },
+    {
+      "page": 36,
+      "title": "36개월 현금흐름 원장 · 19–36개월",
+      "overflowY": false,
+      "overflowX": false,
+      "bodyHeight": 964,
+      "contentHeight": 964,
+      "pageHeight": 1123
+    },
+    {
+      "page": 37,
+      "title": "다음 구현 순서와 인수 기준",
+      "overflowY": false,
+      "overflowX": false,
+      "bodyHeight": 964,
+      "contentHeight": 964,
+      "pageHeight": 1123
+    },
+    {
+      "page": 38,
+      "title": "출시 후 고객 결과를 검증하는 기준",
+      "overflowY": false,
+      "overflowX": false,
+      "bodyHeight": 964,
+      "contentHeight": 964,
+      "pageHeight": 1123
+    },
+    {
+      "page": 39,
+      "title": "남아 있는 의사결정과 위험",
+      "overflowY": false,
+      "overflowX": false,
+      "bodyHeight": 964,
+      "contentHeight": 964,
+      "pageHeight": 1123
+    },
+    {
+      "page": 40,
+      "title": "데이터 구조와 기록 간 관계",
+      "overflowY": false,
+      "overflowX": false,
+      "bodyHeight": 964,
+      "contentHeight": 964,
+      "pageHeight": 1123
+    },
+    {
+      "page": 41,
+      "title": "폴더 책임과 보존 범위",
+      "overflowY": false,
+      "overflowX": false,
+      "bodyHeight": 964,
+      "contentHeight": 964,
+      "pageHeight": 1123
+    },
+    {
+      "page": 42,
+      "title": "출시 체크리스트 37항목 · 1/2",
+      "overflowY": false,
+      "overflowX": false,
+      "bodyHeight": 964,
+      "contentHeight": 964,
+      "pageHeight": 1123
+    },
+    {
+      "page": 43,
+      "title": "출시 체크리스트 37항목 · 2/2",
+      "overflowY": false,
+      "overflowX": false,
+      "bodyHeight": 964,
+      "contentHeight": 964,
+      "pageHeight": 1123
+    },
+    {
+      "page": 44,
+      "title": "전체 API 목록 · 1/3",
+      "overflowY": false,
+      "overflowX": false,
+      "bodyHeight": 964,
+      "contentHeight": 964,
+      "pageHeight": 1123
+    },
+    {
+      "page": 45,
+      "title": "전체 API 목록 · 2/3",
+      "overflowY": false,
+      "overflowX": false,
+      "bodyHeight": 964,
+      "contentHeight": 964,
+      "pageHeight": 1123
+    },
+    {
+      "page": 46,
+      "title": "전체 API 목록 · 3/3",
+      "overflowY": false,
+      "overflowX": false,
+      "bodyHeight": 964,
+      "contentHeight": 964,
+      "pageHeight": 1123
+    },
+    {
+      "page": 47,
+      "title": "전체 화면 경로 · 25개 파일",
+      "overflowY": false,
+      "overflowX": false,
+      "bodyHeight": 964,
+      "contentHeight": 964,
+      "pageHeight": 1123
+    },
+    {
+      "page": 48,
+      "title": "근거 문서와 과거 기록 안내",
+      "overflowY": false,
+      "overflowX": false,
+      "bodyHeight": 964,
+      "contentHeight": 964,
+      "pageHeight": 1123
+    },
+    {
+      "page": 49,
+      "title": "외부 재무 자료와 기준 버전",
+      "overflowY": false,
+      "overflowX": false,
+      "bodyHeight": 964,
+      "contentHeight": 964,
+      "pageHeight": 1123
+    },
+    {
+      "page": 50,
+      "title": "보고서 산출물과 재검토 방법",
+      "overflowY": false,
+      "overflowX": false,
+      "bodyHeight": 964,
+      "contentHeight": 964,
+      "pageHeight": 1123
+    }
+  ],
+  "collisions": [],
+  "images": [
+    {
+      "src": "assets/image-export-qa.png",
+      "loaded": true
+    },
+    {
+      "src": "assets/pricing-qa.png",
+      "loaded": true
+    }
+  ]
+}
