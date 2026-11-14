@@ -1,0 +1,79 @@
+{
+  "routes": [
+    {
+      "path": "/account/reset"
+    },
+    {
+      "path": "/account/verify"
+    },
+    {
+      "path": "/action"
+    },
+    {
+      "path": "/dashboard"
+    },
+    {
+      "path": "/demo"
+    },
+    {
+      "path": "/diagnosis"
+    },
+    {
+      "path": "/diagnosis/result"
+    },
+    {
+      "path": "/explore"
+    },
+    {
+      "path": "/forgot-password"
+    },
+    {
+      "path": "/goals"
+    },
+    {
+      "path": "/guide"
+    },
+    {
+      "path": "/history"
+    },
+    {
+      "path": "/login"
+    },
+    {
+      "path": "/metrics"
+    },
+    {
+      "path": "/onboarding"
+    },
+    {
+      "path": "/"
+    },
+    {
+      "path": "/pricing"
+    },
+    {
+      "path": "/privacy"
+    },
+    {
+      "path": "/product"
+    },
+    {
+      "path": "/register"
+    },
+    {
+      "path": "/resources"
+    },
+    {
+      "path": "/solutions"
+    },
+    {
+      "path": "/start"
+    },
+    {
+      "path": "/terms"
+    },
+    {
+      "path": "/workspace"
+    }
+  ]
+}

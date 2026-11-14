@@ -18,6 +18,8 @@ export function CreativeSubscriptionControls({ data, onUpdated }: { data: Worksp
   const request = useRef<{ fingerprint: string; id: string } | null>(null)
   const selected = quoteCreativeOffer(current?.plan ?? plan, scenes, 'monthly')
   const extra = quoteCreativeOffer(current?.plan ?? plan, topUp, 'one_time')
+  const quantityIncrease = Boolean(current && (selected.purchasedScenes > (current.pending?.scenes ?? current.monthlyScenes) || selected.renewalUsd > (current.pending?.monthlyUsd ?? current.monthlyUsd)))
+  const increaseClosed = quantityIncrease && !data.billing?.creativeCheckoutAvailable
   const options = [...new Set([...choices, scenes])].sort((a, b) => a - b)
   function key(kind: string) {
     const fingerprint = `${kind}:${kind === 'quantity' ? scenes : ''}`
@@ -62,7 +64,8 @@ export function CreativeSubscriptionControls({ data, onUpdated }: { data: Worksp
 
     <p className="mt-4 text-sm leading-7"><strong>{current ? 'From next renewal' : 'Automatic monthly renewal'}: ${selected.renewalUsd}/month before tax.</strong>{!current && <><br/>First payment: ${selected.totalUsd} before tax.</>}<br/>{selected.purchasedScenes} scenes per billing month ({selected.purchasedSeconds}s). {selected.purchasedScenes > scenes ? 'The cheaper five-scene bundle includes the extra scene shown here.' : ''}</p>
     {current ? <>
-      <button className="nx-button mt-5" disabled={busy || !current.canChange || selected.purchasedScenes === (current.pending?.scenes ?? current.monthlyScenes)} onClick={() => void change('quantity')}>Apply ${selected.renewalUsd}/month from next renewal</button>
+      <button className="nx-button mt-5" disabled={busy || !current.canChange || increaseClosed || selected.purchasedScenes === (current.pending?.scenes ?? current.monthlyScenes)} onClick={() => void change('quantity')}>Apply ${selected.renewalUsd}/month from next renewal</button>
+      {!data.billing?.creativeCheckoutAvailable && <p className="mt-3 text-xs leading-6 text-[var(--muted)]">New creative purchases and monthly scene increases are closed. You can still reduce your scheduled extras, set them to zero, or cancel renewal; existing paid access stays available.</p>}
       <p className="mt-3 text-xs leading-6 text-[var(--muted)]">No immediate proration or charge. Your current period stays as paid. Setting extras to zero keeps the base monthly subscription active.</p>
       <hr className="my-6 border-[var(--border)]"/>
       <h3 className="text-lg font-semibold">Need more this month?</h3>

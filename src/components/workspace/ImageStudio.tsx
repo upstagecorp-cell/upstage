@@ -3,6 +3,7 @@
 import Image from 'next/image'
 import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react'
 import type { ImageProject, studioWorkspace } from '@/lib/server/image-studio'
+import { nextMediaExportIntent, type MediaExportIntent } from '@/lib/media-export-intent'
 import { ApiError, ErrorText, Field, friendlyError, requestJson } from './shared'
 
 type Studio = ReturnType<typeof studioWorkspace>
@@ -11,7 +12,7 @@ export function ImageStudio() {
   const [studio, setStudio] = useState<Studio | null>(null), [draft, setDraft] = useState(empty)
   const [selected, setSelected] = useState(''), [busy, setBusy] = useState(false), [error, setError] = useState(''), [notice, setNotice] = useState('')
   const [reviewed, setReviewed] = useState(false), [ratio, setRatio] = useState('1:1'), [format, setFormat] = useState('png')
-  const intent = useRef<{ signature: string; id: string } | null>(null)
+  const intent = useRef<MediaExportIntent | null>(null)
   const load = useCallback(async () => {
     const result = await requestJson<{ studio: Studio }>('/api/media/workspace'); setStudio(result.studio)
     setDraft(value => ({ ...value, photoId: value.photoId || result.studio.files.find(file => file.role === 'photo')?.id || '' }))
@@ -57,9 +58,11 @@ export function ImageStudio() {
         setNotice(`Version ${version!.version} approved. A later edit will need its own approval.`)
       } else {
         const signature = `${selected}:${version!.version}:${ratio}:${format}`
-        if (intent.current?.signature !== signature) intent.current = { signature, id: crypto.randomUUID() }
-        await requestJson(`/api/media/projects/${selected}/export`, { method: 'POST', body: JSON.stringify({ version: version!.version, ratio, format, requestId: intent.current!.id }) })
-        setNotice('Export queued. Its status and download will appear below. Different sizes of this design do not use another image allowance.')
+        const submitted = nextMediaExportIntent(intent.current, signature, studio?.jobs ?? [], () => crypto.randomUUID())
+        intent.current = submitted
+        const result = await requestJson<{ job: Studio['jobs'][number] }>(`/api/media/projects/${selected}/export`, { method: 'POST', body: JSON.stringify({ version: version!.version, ratio, format, requestId: submitted.id }) })
+        if (intent.current === submitted) submitted.jobId = result.job.id
+        setNotice(result.job.status === 'failed' ? 'This export previously failed. Refresh to confirm its stored status, then click Export again to retry.' : 'Export request saved. Its status and download will appear below. Different sizes of this design do not use another image allowance.')
       }
       await load()
     } catch (failure) { setError(friendlyError(failure)) } finally { setBusy(false) }

@@ -1,17 +1,25 @@
 'use client'
 
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import { useEffect, useRef, useState, type FormEvent } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { Suspense, useEffect, useRef, useState, type FormEvent } from 'react'
 import { ArrowRight, Check, Compass, Eye, EyeOff } from 'lucide-react'
 import type { SessionUser } from '@/lib/business/types'
 import { buttonClass, ErrorText, Field, fieldClass, friendlyError, requestJson } from './shared'
 import { readFirstCheck } from '@/lib/first-check-session'
 import { CHECK_FOCUSES } from '@/lib/business/first-check'
 import { SignalCanvas } from '@/components/marketing/ProductVisuals'
+import { authDestinationFromSearch, authHref } from '@/lib/auth-destination'
 
 export function AuthForm({ mode }: { mode: 'login' | 'register' }) {
+  return <Suspense fallback={<div className="nx-page" role="status">Opening your account…</div>}><AuthFormContent mode={mode}/></Suspense>
+}
+
+function AuthFormContent({ mode }: { mode: 'login' | 'register' }) {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const search = searchParams.toString()
+  const destination = authDestinationFromSearch(search)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [busy, setBusy] = useState(false)
@@ -30,7 +38,7 @@ export function AuthForm({ mode }: { mode: 'login' | 'register' }) {
     setError('')
     try {
       await requestJson<{ user: SessionUser }>(`/api/auth/${mode}`, { method: 'POST', body: JSON.stringify({ email, password, locale: 'en-US' }) })
-      router.replace(new URLSearchParams(window.location.search).get('next')==='billing'?'/workspace#billing':'/workspace')
+      router.replace(destination)
       router.refresh()
     } catch (failure) { setError(friendlyError(failure)) }
     finally { lock.current = false; setBusy(false) }
@@ -47,7 +55,7 @@ export function AuthForm({ mode }: { mode: 'login' | 'register' }) {
         <ErrorText error={error} />
         <button className={`${buttonClass} w-full`} disabled={busy}>{busy ? 'Please wait…' : register ? 'Create account' : 'Log in'}<ArrowRight size={16} aria-hidden="true" /></button>
       </form>
-    <p className="mt-6 text-xs leading-6 text-[var(--muted)]">{register ? 'Already have an account?' : 'New to NEXORA?'}{' '}<Link className="font-semibold text-[var(--foreground)] underline underline-offset-4" href={register ? '/login' : '/register'}>{register ? 'Log in' : 'Create an account'}</Link></p>
+    <p className="mt-6 text-xs leading-6 text-[var(--muted)]">{register ? 'Already have an account?' : 'New to NEXORA?'}{' '}<Link className="font-semibold text-[var(--foreground)] underline underline-offset-4" href={authHref(register ? '/login' : '/register', destination, search)}>{register ? 'Log in' : 'Create an account'}</Link></p>
     {!register&&<p className="mt-4 text-xs"><Link className="underline underline-offset-4" href="/forgot-password">Forgot your password?</Link></p>}
     {register&&<p className="mt-4 text-[11px] leading-6 text-[var(--muted)]">By creating an account, you agree to the <Link href="/terms" className="underline">terms</Link>. Review how we handle your data in the <Link href="/privacy" className="underline">privacy notice</Link>.</p>}
     <p className="mt-4 text-[11px] leading-6 text-[var(--muted)]"><Link href="/start" className="underline underline-offset-4">{savedFocus?'Review my first direction':'Explore a business check before signing up'}</Link></p></div>

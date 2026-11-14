@@ -132,6 +132,20 @@ function scheduleOwned(owner: string, subscription: string, schedule: Stripe.Sub
     getRecord<{ id: string; subscription: string }>(owner, 'creative_schedule', 'current')?.id === schedule.id &&
     getRecord<{ subscription: string }>(owner, 'creative_schedule', 'current')?.subscription === subscription
 }
+function scheduledRenewal(schedule: Stripe.SubscriptionSchedule, decoded: NonNullable<ReturnType<typeof decodeItems>>) {
+  const phase = schedule.phases.find(phase => phase.start_date === decoded.base.current_period_end)
+  if (!phase) return null
+  let scenes = 0, monthlyUsd = 0, bases = 0
+  for (const item of phase.items) {
+    const sku = (Object.keys(envNames) as Sku[]).find(key => !key.endsWith(':one_time') && priceId(key) && priceId(key) === idOf(item.price))
+    if (!sku || !Number.isSafeInteger(item.quantity) || item.quantity! < 1) throw review()
+    if (isPaidPlan(sku)) { if (sku !== decoded.plan || item.quantity !== 1) throw review(); bases++ }
+    else scenes += MOTION_PACKS.find(pack => sku.startsWith(pack.id + ':'))!.scenes * item.quantity!
+    monthlyUsd += skuAmount(sku) * item.quantity!
+  }
+  if (bases !== 1 || scenes > 50) throw review()
+  return { scenes, monthlyUsd, effectiveAt: new Date(phase.start_date * 1000).toISOString() }
+}
 export async function readCreativeSubscription(owner: string, subscription: Stripe.Subscription, stripe: Stripe): Promise<CreativeBillingSummary | null> {
   const decoded = decodeItems(subscription, owner)
   if (!decoded) return null
@@ -142,19 +156,8 @@ export async function readCreativeSubscription(owner: string, subscription: Stri
     const schedule = typeof subscription.schedule === 'string' ? await stripe.subscriptionSchedules.retrieve(subscription.schedule) : subscription.schedule
     managed = scheduleOwned(owner, subscription.id, schedule)
     if (managed && schedule.status === 'active') {
-      const phase = schedule.phases.find(phase => phase.start_date === decoded.base.current_period_end)
-      if (phase) {
-        let scenes = 0, monthlyUsd = 0, bases = 0
-        for (const item of phase.items) {
-          const sku = (Object.keys(envNames) as Sku[]).find(key => !key.endsWith(':one_time') && priceId(key) && priceId(key) === idOf(item.price))
-          if (!sku || !Number.isSafeInteger(item.quantity) || item.quantity! < 1) throw review()
-          if (isPaidPlan(sku)) { if (sku !== decoded.plan || item.quantity !== 1) throw review(); bases++ }
-          else scenes += MOTION_PACKS.find(pack => sku.startsWith(pack.id + ':'))!.scenes * item.quantity!
-          monthlyUsd += skuAmount(sku) * item.quantity!
-        }
-        if (bases !== 1 || scenes > 50) throw review()
-        if (scenes !== decoded.scenes || monthlyUsd !== decoded.monthlyUsd) pending = { scenes, monthlyUsd, effectiveAt: new Date(phase.start_date * 1000).toISOString() }
-      }
+      const renewal = scheduledRenewal(schedule, decoded)
+      if (renewal && (renewal.scenes !== decoded.scenes || renewal.monthlyUsd !== decoded.monthlyUsd)) pending = renewal
     }
   }
   const oneTimeScenes = listRecords<TopUp>(owner, 'creative_topup').filter(item => !item.refunded && Date.parse(item.expiresAt) > Date.now()).reduce((sum, item) => sum + Math.max(0, item.scenes - item.consumed), 0)
@@ -195,12 +198,19 @@ export async function changeMonthlyScenes(owner: string, raw: unknown) {
     if (subscription.status !== 'active' || subscription.cancel_at_period_end || !invoice || typeof invoice === 'string' || invoice.status !== 'paid') throw new HttpError(409, 'SUBSCRIPTION_NOT_CHANGEABLE', 'Restore an active paid subscription before changing next month’s quantity.')
     if (decoded.base.current_period_end * 1000 - Date.now() < 60_000) throw new HttpError(409, 'BILLING_PERIOD_CHANGING', 'Your renewal is processing. Refresh after it completes.')
     if (subscription.discounts?.length) throw review()
-    const next = await validatedItems(stripe, decoded.plan, selection.requestedScenes, 'monthly', true)
-    let schedule: Stripe.SubscriptionSchedule
+    let schedule: Stripe.SubscriptionSchedule | undefined
+    let renewal = { scenes: decoded.scenes, monthlyUsd: decoded.monthlyUsd }
     if (subscription.schedule) {
       schedule = typeof subscription.schedule === 'string' ? await stripe.subscriptionSchedules.retrieve(subscription.schedule) : subscription.schedule
       if (!scheduleOwned(owner, subscription.id, schedule)) throw review()
-    } else {
+      if (schedule.status !== 'active' || !schedule.current_phase) throw review()
+      renewal = scheduledRenewal(schedule, decoded) ?? renewal
+    }
+    // Existing access, reductions, and cancellation remain available while new purchases are closed.
+    // Compare with the scheduled renewal, not today's quantity: replacing a pending increase can be a reduction.
+    if (selection.purchasedScenes > renewal.scenes || selection.renewalUsd > renewal.monthlyUsd) requirePurchaseAvailable()
+    const next = await validatedItems(stripe, decoded.plan, selection.requestedScenes, 'monthly', true)
+    if (!schedule) {
       schedule = await stripe.subscriptionSchedules.create({ from_subscription: subscription.id }, { idempotencyKey: `nexora-schedule-create-${owner}-${command.key}` })
       saveRecord(owner, 'creative_schedule', 'current', { id: schedule.id, subscription: subscription.id })
     }

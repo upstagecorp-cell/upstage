@@ -89,6 +89,63 @@ describe('recurring creative subscription lifecycle', () => {
     expect(next.phases?.[1].items).toEqual([{ price: 'p_focus', quantity: 1 }]); expect(next.end_behavior).toBe('release')
     expect(sub.cancel_at_period_end).toBe(false)
   })
+  it.each(['NEXORA_PAID_LAUNCH_ENABLED', 'NEXORA_LEGAL_APPROVED', 'NEXORA_LIVE_TESTS_APPROVED', 'STRIPE_PRICE_MOTION_SCENE_MONTHLY', 'catalog preview'])('blocks increased scene billing when %s closes purchases, before creating or updating a schedule', async guard => {
+    const user = await account(true)
+    if (guard === 'catalog preview') vi.mocked(catalog.creativeOfferIsPreview).mockReturnValue(true)
+    else vi.stubEnv(guard, guard.startsWith('STRIPE_') ? '' : 'false')
+    await expect(changeMonthlyScenes(user.id, { scenes: 1, requestId: requestA })).rejects.toMatchObject({ code: 'BILLING_UNAVAILABLE' })
+    expect(stripe.prices.retrieve).not.toHaveBeenCalled()
+    expect(stripe.subscriptionSchedules.create).not.toHaveBeenCalled()
+    expect(stripe.subscriptionSchedules.update).not.toHaveBeenCalled()
+    expect(stripe.subscriptions.update).not.toHaveBeenCalled()
+  })
+  it('allows reductions and zero extras while launch readiness is closed', async () => {
+    const user = await account(true)
+    sub.items.data.push({ id: 'si_extra', quantity: 1, price: price('p_five_month'), current_period_start: start, current_period_end: end })
+    vi.stubEnv('NEXORA_PAID_LAUNCH_ENABLED', 'false'); vi.mocked(catalog.creativeOfferIsPreview).mockReturnValue(true)
+    await changeMonthlyScenes(user.id, { scenes: 1, requestId: requestA })
+    await changeMonthlyScenes(user.id, { scenes: 0, requestId: requestB })
+    const calls = vi.mocked(stripe.subscriptionSchedules.update).mock.calls
+    expect(calls[0][1]!.phases?.[1].items).toEqual([{ price: 'p_focus', quantity: 1 }, { price: 'p_scene_month', quantity: 1 }])
+    expect(calls[1][1]!.phases?.[1].items).toEqual([{ price: 'p_focus', quantity: 1 }])
+    expect(sub.cancel_at_period_end).toBe(false)
+  })
+  it('allows lowering an already scheduled increase even above the current quantity when purchases are closed', async () => {
+    const user = await account(true); sub.schedule = 'sched_creative'
+    vi.mocked(stripe.subscriptionSchedules.retrieve).mockResolvedValue({ ...schedule(), phases: [{ start_date: end, items: [{ price: 'p_focus', quantity: 1 }, { price: 'p_five_month', quantity: 2 }] }] } as never)
+    vi.stubEnv('NEXORA_PAID_LAUNCH_ENABLED', 'false')
+    await changeMonthlyScenes(user.id, { scenes: 5, requestId: requestA })
+    expect(stripe.subscriptionSchedules.create).not.toHaveBeenCalled()
+    expect(vi.mocked(stripe.subscriptionSchedules.update).mock.calls[0][1]!.phases?.[1].items).toEqual([{ price: 'p_focus', quantity: 1 }, { price: 'p_five_month', quantity: 1 }])
+    expect(sub.items.data).toHaveLength(1)
+  })
+  it('blocks increasing a scheduled reduction even below the current quantity when purchases are closed', async () => {
+    const user = await account(true); sub.schedule = 'sched_creative'
+    sub.items.data.push({ id: 'si_extra', quantity: 2, price: price('p_five_month'), current_period_start: start, current_period_end: end })
+    vi.mocked(stripe.subscriptionSchedules.retrieve).mockResolvedValue({ ...schedule(), phases: [{ start_date: end, items: [{ price: 'p_focus', quantity: 1 }] }] } as never)
+    vi.stubEnv('NEXORA_PAID_LAUNCH_ENABLED', 'false')
+    await expect(changeMonthlyScenes(user.id, { scenes: 5, requestId: requestA })).rejects.toMatchObject({ code: 'BILLING_UNAVAILABLE' })
+    expect(stripe.subscriptionSchedules.update).not.toHaveBeenCalled()
+    expect(stripe.prices.retrieve).not.toHaveBeenCalled()
+  })
+  it('keeps unchanged bundled renewals and completed request replays idempotent while purchases are closed', async () => {
+    const user = await account(true); await changeMonthlyScenes(user.id, { scenes: 5, requestId: requestA })
+    vi.mocked(stripe.subscriptionSchedules.retrieve).mockResolvedValue({ ...schedule(), phases: [{ start_date: end, items: [{ price: 'p_focus', quantity: 1 }, { price: 'p_five_month', quantity: 1 }] }] } as never)
+    vi.stubEnv('NEXORA_PAID_LAUNCH_ENABLED', 'false')
+    await changeMonthlyScenes(user.id, { scenes: 5, requestId: requestA })
+    expect(stripe.subscriptionSchedules.update).toHaveBeenCalledTimes(1)
+    await changeMonthlyScenes(user.id, { scenes: 4, requestId: requestB })
+    expect(vi.mocked(stripe.subscriptionSchedules.update).mock.calls[1][1]!.phases?.[1].items).toEqual([{ price: 'p_focus', quantity: 1 }, { price: 'p_five_month', quantity: 1 }])
+  })
+  it('keeps existing paid access and cancellation available when new purchases are closed', async () => {
+    const user = await account(true); sub.schedule = 'sched_creative'
+    vi.stubEnv('NEXORA_PAID_LAUNCH_ENABLED', 'false'); vi.mocked(catalog.creativeOfferIsPreview).mockReturnValue(true)
+    expect(await readCreativeSubscription(user.id, sub as unknown as Stripe.Subscription, stripe)).toMatchObject({ plan: 'focus', paid: true, canChange: true, canCancel: true })
+    await cancelCreativeRenewal(user.id, { requestId: requestA })
+    expect(stripe.subscriptionSchedules.release).toHaveBeenCalledTimes(1)
+    expect(stripe.subscriptions.update).toHaveBeenCalledWith(sub.id, { cancel_at_period_end: true }, expect.anything())
+    expect(await readCreativeSubscription(user.id, sub as unknown as Stripe.Subscription, stripe)).toMatchObject({ paid: true, cancelAtPeriodEnd: true })
+  })
   it('cancels an existing schedule before stopping renewal at the paid period end', async () => {
     const user = await account(true); sub.schedule = 'sched_creative'
     await cancelCreativeRenewal(user.id, { requestId: requestA })

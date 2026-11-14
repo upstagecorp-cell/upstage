@@ -19,6 +19,7 @@ import { WorkspaceOverview } from './WorkspaceOverview'
 import { CheckHandoff } from './CheckHandoff'
 import { BillingPanel } from './BillingPanel'
 import { ApiError, ErrorText, friendlyError, requestJson, type Mutation } from './shared'
+import { authHref } from '@/lib/auth-destination'
 
 const sections=[
   {id:'overview',label:'My next move',icon:House,group:'main'},
@@ -93,7 +94,10 @@ export function WorkspaceApp({initialSection='overview'}:{initialSection?:Sectio
   function openPlan(assessmentId:string,actionId:string){setSelectedAssessmentId(assessmentId);setSelectedActionId(actionId);setSelectedGoalId(null);navigate('goals',{assessmentId,actionId,goalId:null})}
   function openResults(assessmentId:string,actionId:string,goalId:string|null=null){setSelectedAssessmentId(assessmentId);setSelectedActionId(actionId);setSelectedGoalId(goalId);navigate('results',{assessmentId,actionId,goalId})}
   if(loading)return <div className="nx-page" role="status">Opening your workspace…</div>
-  if(!user)return <div className="nx-page !max-w-3xl !py-20"><Link href="/" className="nx-logo"><BrandMark/>nexora.</Link><p className="nx-eyebrow mt-16">Your business, a little clearer</p><h1 className="nx-heading mt-6">Find your next move.<br/>Keep building from there.</h1><p className="nx-copy mt-6 max-w-lg">Start with a few questions about what feels stuck. You can see a first direction before creating an account.</p><ErrorText error={error}/><div className="mt-8 flex flex-wrap gap-3"><Link href="/start" className="nx-button">Start my business check <ArrowUpRight size={16}/></Link><Link href="/login" className="nx-button nx-button-secondary">Log in to my workspace</Link></div>{error&&<button className="nx-button mt-5" onClick={()=>void load()}>Try again</button>}</div>
+  if(!user){
+    const destination=typeof window==='undefined'?'/workspace':`${window.location.pathname}${window.location.search}${window.location.hash}`
+    return <div className="nx-page !max-w-3xl !py-20"><Link href="/" className="nx-logo"><BrandMark/>nexora.</Link><p className="nx-eyebrow mt-16">Your business, a little clearer</p><h1 className="nx-heading mt-6">Find your next move.<br/>Keep building from there.</h1><p className="nx-copy mt-6 max-w-lg">Start with a few questions about what feels stuck. You can see a first direction before creating an account.</p><ErrorText error={error}/><div className="mt-8 flex flex-wrap gap-3"><Link href="/start" className="nx-button">Start my business check <ArrowUpRight size={16}/></Link><Link href={authHref('/login',destination)} className="nx-button nx-button-secondary">Log in to my workspace</Link></div>{error&&<button className="nx-button mt-5" onClick={()=>void load()}>Try again</button>}</div>
+  }
   if(!data)return <div className="nx-page"><ErrorText error={error||'Your workspace could not be loaded.'}/><button className="nx-button mt-5" onClick={()=>void load()}>Retry loading workspace</button></div>
   const selectedAssessment=data.assessments.find(item=>item.id===selectedAssessmentId)??data.assessments.at(-1)??null
   const selectedGoal=data.weeklyPlans.find(item=>item.id===selectedGoalId&&item.assessmentId===selectedAssessmentId&&item.actionId===selectedActionId)

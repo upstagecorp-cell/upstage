@@ -13,6 +13,7 @@ type MenuId = typeof NAV_GROUPS[number]['id']
 export function Navbar() {
   const pathname=usePathname(),{resolvedTheme,setTheme}=useTheme(),mounted=useMounted()
   const [open,setOpen]=useState<MenuId|null>(null),[mobile,setMobile]=useState(false),[paused,setPaused]=useState(false)
+  const [announcementVisible,setAnnouncementVisible]=useState(true)
   const shell=useRef<HTMLElement>(null),closeTimer=useRef<ReturnType<typeof setTimeout>|null>(null),mobileButton=useRef<HTMLButtonElement>(null)
   const triggerRefs=useRef<Partial<Record<MenuId,HTMLButtonElement|null>>>({})
   const openedByHover=useRef(false)
@@ -35,6 +36,7 @@ export function Navbar() {
   if(['/workspace','/goals','/metrics','/history'].includes(pathname))return null
   const selected=NAV_GROUPS.find(group=>group.id===open)
   return <header ref={shell} className={`nx-nav-shell ${checking?'nx-nav-checking':''} ${home?'nx-nav-home':''} ${open||mobile?'nx-nav-expanded':''}`} onBlur={event=>{if(!event.currentTarget.contains(event.relatedTarget as Node|null))close()}}>
+    {home&&announcementVisible&&<div className="nx-launch-announcement"><Link href="/product#image-studio">Your photos. Your message. Explore the image tools we’re building. <strong>See what’s available <ArrowRight size={12}/></strong></Link><button type="button" aria-label="Dismiss product announcement" onClick={()=>setAnnouncementVisible(false)}><X size={14}/></button></div>}
     <div className="nx-nav-inner"><Link href="/" aria-label="NEXORA home" className="nx-logo"><BrandMark/>nexora<span className="nx-brand-period">.</span></Link>
       {!checking&&<nav className="nx-primary-nav" aria-label="Main navigation" onPointerLeave={scheduleClose}>
         {NAV_GROUPS.map(group=><button type="button" key={group.id} ref={node=>{triggerRefs.current[group.id]=node}} aria-expanded={open===group.id} aria-controls={`nx-menu-${group.id}`} onPointerEnter={event=>{if(event.pointerType==='mouse'){cancelClose();openedByHover.current=true;setOpen(group.id)}}} onClick={event=>{cancelClose();if(open===group.id&&openedByHover.current&&event.detail>0){openedByHover.current=false;return}openedByHover.current=false;setOpen(open===group.id?null:group.id)}} onKeyDown={event=>keyOpen(event,group.id)}>{group.label}<ChevronDown size={12}/></button>)}

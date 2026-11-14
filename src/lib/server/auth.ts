@@ -3,6 +3,7 @@ import { promisify } from 'node:util'
 import type { AppLocale, SessionUser } from '@/lib/business/types'
 import { database, transaction } from './database'
 import { HttpError, invalid, objectInput } from './errors'
+import { sessionCookiePolicy } from './session-policy'
 
 const scrypt = promisify(scryptCallback)
 const COOKIE = 'nexora_session'
@@ -114,15 +115,15 @@ export function sessionCookie(request: Request, userId: string): string {
   db.prepare('DELETE FROM sessions WHERE expires_at<=?').run(new Date().toISOString())
   db.prepare('INSERT INTO sessions(token_hash,user_id,expires_at) VALUES(?,?,?)')
     .run(digest(token), userId, new Date(Date.now() + SESSION_SECONDS * 1000).toISOString())
-  return `${COOKIE}=${token}; Path=/; HttpOnly; SameSite=Strict; Max-Age=${SESSION_SECONDS}${secure(request)}`
+  return `${COOKIE}=${token}; Path=/; HttpOnly; ${cookiePolicy(request)}; Max-Age=${SESSION_SECONDS}`
 }
 
-function secure(request: Request): string {
-  return process.env.NODE_ENV === 'production' || new URL(request.url).protocol === 'https:' ? '; Secure' : ''
+function cookiePolicy(request: Request): string {
+  return sessionCookiePolicy(request.url, { appOrigin: process.env.APP_ORIGIN, managedProject: process.env.MANUS_PROJECT_ID })
 }
 
 export function logout(request: Request): string {
   const token = cookieToken(request)
   if (token) database().prepare('DELETE FROM sessions WHERE token_hash=?').run(digest(token))
-  return `${COOKIE}=; Path=/; HttpOnly; SameSite=Strict; Max-Age=0${secure(request)}`
+  return `${COOKIE}=; Path=/; HttpOnly; ${cookiePolicy(request)}; Max-Age=0`
 }

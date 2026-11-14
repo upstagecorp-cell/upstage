@@ -1,34 +1,74 @@
-'use client'
-
 import Link from 'next/link'
-import { ArrowRight, ArrowUpRight, BarChart3, Check, ChevronRight, Compass, Layers3, MessageSquareText, ShieldCheck, ShoppingBag, Sparkles, Store, Target } from 'lucide-react'
-import { BUSINESS_PATHS } from '@/lib/marketing/catalog'
+import { ArrowRight, ArrowUpRight, Check, Compass, MessageSquareText, ShoppingBag, Sparkles, Store, Target } from 'lucide-react'
 import { CREATIVE_PLANS, FIRST_CAMPAIGN } from '@/lib/marketing/creative-plans'
-import { CreativeOverview } from './CreativeOverview'
-import { ExampleStudio } from './ProductVisuals'
-import { BusinessArtwork, ConnectedWorkflow, HeroWorkspace, ProductExplorer, ResourceCards } from './PlatformExperience'
+import { VISUAL_ASSETS } from '@/lib/marketing/visual-assets'
+import { CapabilityGrid } from './CapabilityGrid'
+import { ConnectedWorkflow } from './PlatformExperience'
+import { LandingHelp } from './LandingHelp'
 
-export function LandingExperience(){return <div className="nx-platform">
-  <section className="nx-platform-hero" aria-labelledby="hero-title"><div className="nx-spectrum-field" aria-hidden="true"><span/><span/><span/><span/></div><div className="nx-platform-guide-lines" aria-hidden="true"><i/><i/><i/><i/></div><div className="nx-platform-container nx-platform-hero-grid"><div className="nx-platform-hero-copy"><Link href="/product" className="nx-hero-announcement"><span>Image & video plans · coming soon</span><ChevronRight size={14}/></Link><h1 id="hero-title">From big questions<br/>to your next<br/><em>business move.</em></h1><p>Understand your business and plan your next campaign. Explore our upcoming workflow for ad copy, images, and finished short videos.</p><div className="nx-platform-hero-actions"><Link href="/start" className="nx-platform-button">Start my business check <ArrowRight size={16}/></Link><Link href="/product" className="nx-platform-text-link">Explore the product <ArrowRight size={15}/></Link></div><span className="nx-hero-reassurance"><Check size={13}/>See a first direction before creating an account.</span></div><HeroWorkspace/></div></section>
+const businessTypes = [
+  { name: 'Services', icon: MessageSquareText, href: '/solutions?business=services' },
+  { name: 'Online shops', icon: ShoppingBag, href: '/solutions?business=ecommerce' },
+  { name: 'Creators', icon: Sparkles, href: '/solutions?business=creator' },
+  { name: 'Local businesses', icon: Store, href: '/start?focus=retention' },
+  { name: 'Your next idea', icon: Target, href: '/start' },
+]
 
-  <section className="nx-business-band nx-platform-container" aria-label="Built for independent businesses"><p>A clearer way forward.<br/><strong>For the business you’re building.</strong></p><div>{[{name:'Service businesses',icon:MessageSquareText},{name:'Online shops',icon:ShoppingBag},{name:'Creators',icon:Sparkles},{name:'Local businesses',icon:Store}].map(({name,icon:Icon})=><span key={name}><Icon size={24} strokeWidth={1.5}/>{name}</span>)}</div></section>
+export function LandingExperience() {
+  return (
+    <div className="nx-platform nx-ribbon-home">
+      <section className="nx-ribbon-hero" aria-labelledby="hero-title">
+        <div className="nx-ribbon-field" style={{ backgroundImage: `url('${VISUAL_ASSETS.spectrum}')` }} aria-hidden="true" />
+        <div className="nx-ribbon-rails" aria-hidden="true" />
+        <div className="nx-platform-container nx-ribbon-copy">
+          <Link href="/guide" className="nx-ribbon-kicker">Your business. Your judgment. <span>Your next move.</span> <ArrowUpRight size={14} /></Link>
+          <h1 id="hero-title"><strong>A connected workspace to grow your business.</strong> <span>Understand what matters, create with context, and turn your next good idea into a move you can measure.</span></h1>
+          <div className="nx-ribbon-actions">
+            <Link href="/start" className="nx-platform-button">Start my free check <ArrowRight size={16} /></Link>
+            <Link href="/demo" className="nx-ribbon-secondary"><Compass size={17} /> Explore an example</Link>
+          </div>
+          <p className="nx-ribbon-reassurance"><Check size={13} /> A first direction before signup. No credit card needed.</p>
+        </div>
+        <div className="nx-business-types nx-platform-container" aria-label="Built for independent businesses">
+          {businessTypes.map(({ name, icon: Icon, href }) => <Link key={name} href={href}><Icon size={24} strokeWidth={1.7} /><span>{name}</span></Link>)}
+        </div>
+      </section>
 
-  <div className="nx-platform-container"><CreativeOverview/></div>
+      <section className="nx-capabilities nx-platform-container" id="products" aria-labelledby="capabilities-title">
+        <h2 id="capabilities-title"><strong>Flexible tools for every next move.</strong> <span>Bring your business context, creative work, and real measurements together — useful on their own, better connected.</span></h2>
+        <CapabilityGrid />
+        <p className="nx-capability-disclosure">Fictional product previews, not customer results. Photo-based image tools are implemented; new creative purchases, AI visuals, and finished videos are not yet available.</p>
+      </section>
 
-  <section className="nx-platform-section nx-platform-product-section" id="products"><div className="nx-platform-container"><div className="nx-platform-section-heading"><div><p className="nx-platform-eyebrow">ONE CONNECTED WORKSPACE</p><h2>Less scattered work.<br/>More ways to move forward.</h2></div><p>Business checks, weekly planning, reviewed drafts, and real measurements. Useful on their own. Better with the context kept together.</p></div><ProductExplorer/></div></section>
+      <section className="nx-platform-container nx-story-section" aria-labelledby="story-title">
+        <div className="nx-story-banner">
+          <div className="nx-story-waves" aria-hidden="true"><i /><i /><i /><i /></div>
+          <div className="nx-story-copy"><span>THE NEXORA APPROACH</span><h2 id="story-title">A little more context.<br />A much clearer next move.</h2><Link href="/demo" className="nx-story-button">Explore the walkthrough <ArrowRight size={15} /></Link></div>
+          <div className="nx-story-note" aria-hidden="true"><Compass size={24} /><small>A QUESTION WORTH ASKING</small><strong>What happens between<br />interest and a sale?</strong><span>Start with one customer journey.</span><div><i /> Context → action</div></div>
+          <span className="nx-story-wordmark">nexora <span>in practice</span></span>
+        </div>
+      </section>
 
-  <section className="nx-platform-section nx-platform-solutions" id="solutions"><div className="nx-platform-container"><div className="nx-platform-section-heading"><div><p className="nx-platform-eyebrow">BUILT AROUND YOUR BUSINESS</p><h2>Different work.<br/>A clear place to begin.</h2></div><div><p>Start with the context closest to yours. Find the questions worth asking before choosing the next action.</p><Link href="/solutions" className="nx-platform-text-link">Explore solutions <ArrowRight size={15}/></Link></div></div><div className="nx-business-cards">{BUSINESS_PATHS.map(business=><Link href={`/solutions?business=${business.id}`} key={business.id} className="nx-business-card"><BusinessArtwork business={business.id}/><div className="nx-business-card-copy"><span>{business.name}<ArrowUpRight size={17}/></span><h3>{business.caption}.</h3><p>{business.description}</p></div></Link>)}</div></div></section>
+      <section className="nx-business-backbone" aria-labelledby="backbone-title">
+        <div className="nx-platform-container">
+          <p className="nx-backbone-eyebrow">ONE CONNECTED WORKSPACE</p>
+          <h2 id="backbone-title">The foundation for<br />your next business move.</h2>
+          <div className="nx-backbone-steps">
+            {[{ n: '01', title: 'Understand', text: 'Your context. Your actual records.' }, { n: '02', title: 'Create', text: 'An action with a reason behind it.' }, { n: '03', title: 'Review', text: 'Your exact version. Your approval.' }, { n: '04', title: 'Learn', text: 'Real outcomes, never assumed.' }].map(step => <div key={step.n}><small>{step.n}</small><h3>{step.title}</h3><p>{step.text}</p></div>)}
+          </div>
+          <ConnectedWorkflow />
+          <p className="nx-backbone-note">A completed task is an activity, not a sale. Your measurements keep their source, reporting period, and currency.</p>
+        </div>
+      </section>
 
-  <section className="nx-platform-dark"><div className="nx-platform-container nx-platform-section"><div className="nx-platform-section-heading"><div><p className="nx-platform-eyebrow">CONTEXT IS THE CONNECTION</p><h2>Your next move needs<br/>more than an answer.</h2></div><p>The offer behind a draft. The reason behind an action. The source behind a result. Keep them connected, with your judgment at the center.</p></div><ConnectedWorkflow/><div className="nx-platform-principles">{[{icon:Compass,title:'Start with your facts.',text:'Your business context and actual records come first. Missing information stays unknown.'},{icon:ShieldCheck,title:'Keep your approval.',text:'Check claims, edit the wording, and approve the exact version you want to use.'},{icon:BarChart3,title:'Learn from real outcomes.',text:'Your measurements keep their period and source. A completed task is not recorded as a sale.'}].map(({icon:Icon,title,text})=><article key={title}><Icon size={24}/><h3>{title}</h3><p>{text}</p></article>)}</div></div></section>
+      <section className="nx-platform-container nx-home-plans" aria-labelledby="plans-title">
+        <div className="nx-home-plans-heading"><p className="nx-platform-eyebrow">A ROUTINE THAT FITS YOUR BUSINESS</p><h2 id="plans-title">Start with a question.<br />Build from there.</h2><p>Free checks and planning are available now. Explore the creative plans we’re preparing, with clear allowances and no automatic overages.</p><Link href="/pricing" className="nx-platform-text-link">See plans & availability <ArrowRight size={16} /></Link></div>
+        <div className="nx-home-plan-cards"><article><span>EXPLORE · AVAILABLE NOW</span><h3>$0<small> / month</small></h3><p>Business checks, weekly planning,<br />and your own records.</p><Link href="/start">Start a free check <ArrowRight size={14} /></Link></article>{CREATIVE_PLANS.map(plan => <article key={plan.id}><span>{plan.name.toUpperCase()} · PLANNED</span><h3>${plan.monthlyUsd}<small> / month</small></h3><p>{plan.campaigns} campaign kits · {plan.images} images<br />{plan.videos} short videos · planned allowances.</p><Link href="/pricing">Preview the plan <ArrowRight size={14} /></Link></article>)}</div>
+        <p className="nx-home-plan-note">First campaign: ${FIRST_CAMPAIGN.oneTimeUsd} once, no subscription. Planned USD prices before tax. Focus/Growth renew monthly until canceled. New creative checkout remains closed; final image and video delivery is in development.</p>
+      </section>
 
-  <section className="nx-platform-section nx-platform-example"><div className="nx-platform-container"><div className="nx-platform-section-heading"><div><p className="nx-platform-eyebrow">GET A FEEL FOR THE PRODUCT</p><h2>Don’t just picture it.<br/>Try a next move.</h2></div><p>Choose a fictional business, compare message directions, and preview the wording. Nothing is uploaded or generated by this sample.</p></div><ExampleStudio/><Link href="/demo" className="nx-platform-text-link nx-example-more">See the complete fictional walkthrough <ArrowRight size={15}/></Link></div></section>
-
-  <section className="nx-platform-section nx-platform-foundation"><div className="nx-platform-container nx-foundation-grid"><div><p className="nx-platform-eyebrow">A ROUTINE THAT BUILDS ON ITSELF</p><h2>Keep the work.<br/>Bring the learning.</h2><p>Return to the question, draft, or weekly action that needs your attention. Your earlier work stays available while your business keeps moving.</p><Link href="/workspace" className="nx-platform-button">Open my workspace <ArrowRight size={15}/></Link></div><div className="nx-foundation-steps">{[{n:'01',icon:Target,title:'A direction, with its context.',text:'Your assessment keeps the business snapshot and evidence behind it.'},{n:'02',icon:ShieldCheck,title:'Wording you chose to approve.',text:'Use approved language as an optional style reference for another draft.'},{n:'03',icon:Layers3,title:'A place to pick up the next action.',text:'Return to a saved plan or review what you actually measured.'}].map(({n,icon:Icon,title,text})=><article key={n}><span className="nx-foundation-number">{n}</span><div><span className="nx-foundation-icon"><Icon size={21}/></span><h3>{title}</h3><p>{text}</p></div><ArrowUpRight size={16}/></article>)}</div></div></section>
-
-  <section className="nx-platform-section nx-platform-container"><div className="nx-platform-section-heading"><div><p className="nx-platform-eyebrow">EXPLORE, LEARN, GET STARTED</p><h2>A little more perspective.<br/>A useful next step.</h2></div><Link href="/resources" className="nx-platform-text-link">Visit the resource library <ArrowRight size={15}/></Link></div><ResourceCards/></section>
-
-  <section className="nx-platform-pricing-band"><div className="nx-platform-container"><div><p className="nx-platform-eyebrow">CREATIVE PLANS · COMING SOON</p><h2>One campaign first.<br/>A routine when it fits.</h2><Link href="/pricing" className="nx-platform-text-link">Preview plans & allowances <ArrowRight size={15}/></Link></div><div className="nx-pricing-mini"><span>EXPLORE · AVAILABLE NOW</span><strong>$0<small>/ month</small></strong><p>Business checks, planning,<br/>and your own records.</p></div>{CREATIVE_PLANS.map(plan=><div className="nx-pricing-mini" key={plan.id}><span>{plan.name.toUpperCase()} · PLANNED</span><strong>${plan.monthlyUsd}<small>/ month</small></strong><p>{plan.images} ad images · {plan.videos} short videos.<br/>{plan.campaigns} campaign kits · optional AI motion.</p></div>)}</div><p className="nx-platform-container nx-pricing-band-note">First campaign: ${FIRST_CAMPAIGN.oneTimeUsd} once, with no subscription. Focus/Growth auto-renew monthly until canceled. Choose recurring AI scenes or one-time extras; quantity changes apply next billing date. Planned USD prices before tax. Image/video offers are in development and cannot be purchased yet.</p></section>
-
-  <section className="nx-platform-container nx-platform-final"><div><p className="nx-platform-eyebrow">A QUESTION WORTH STARTING WITH</p><h2>Your business.<br/><span>Your next move.</span></h2><p>Start with what feels stuck. See a first direction before you decide to save it.</p></div><div><Link href="/start" className="nx-platform-button">Start my business check <ArrowRight size={16}/></Link><Link href="/demo" className="nx-platform-text-link">Explore an example first <ArrowRight size={15}/></Link></div></section>
-  
-</div>}
+      <section className="nx-platform-container nx-home-final"><div><h2>Your business.<br /><span>Your next move.</span></h2><p>Start with what feels stuck. Find a useful place to begin.</p></div><Link href="/start" className="nx-platform-button">Start my free check <ArrowRight size={16} /></Link></section>
+      <LandingHelp />
+    </div>
+  )
+}

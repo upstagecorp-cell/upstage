@@ -5,6 +5,7 @@ import { tmpdir } from 'node:os'
 import { randomUUID } from 'node:crypto'
 import { DatabaseSync } from 'node:sqlite'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { nextMediaExportIntent } from '@/lib/media-export-intent'
 import { authenticate, sessionCookie } from './auth'
 import { closeDatabases, database, getRecord, saveRecord } from './database'
 import { listMediaFiles, mediaRoot, readMediaFile, uploadImage } from './media-files'
@@ -128,11 +129,20 @@ describe('private product files and exact-version image exports', () => {
   })
   it('releases confirmed local failures and marks interrupted jobs without paid retries', async () => {
     const { user } = await account('paid@example.com', true), { project, photo } = await design(user.id)
-    const job = enqueueImageExport(user.id, project.id, { version: 1, ratio: '1:1', format: 'png', requestId: randomUUID() })
+    const signature = `${project.id}:1:1:1:png`, intent = nextMediaExportIntent(null, signature, [], randomUUID)
+    const request = { version: 1, ratio: '1:1', format: 'png', requestId: intent.id }
+    const job = enqueueImageExport(user.id, project.id, request); intent.jobId = job.id
+    expect(nextMediaExportIntent(intent, signature, imageJobs(user.id), randomUUID)).toBe(intent)
     await writeFile(join(mediaRoot(), photo.objectName), 'corrupted QA fixture')
     vi.spyOn(console, 'error').mockImplementation(() => {})
     expect(await processImageJob()).toMatchObject({ status: 'failed' }); expect(imageUsage(user.id).reserved).toBe(0)
-    const retry = enqueueImageExport(user.id, project.id, { version: 1, ratio: '1:1', format: 'png', requestId: randomUUID() })
+    expect(enqueueImageExport(user.id, project.id, request)).toMatchObject({ id: job.id, status: 'failed' })
+    expect(imageJobs(user.id)).toHaveLength(1)
+    const retryIntent = nextMediaExportIntent(intent, signature, imageJobs(user.id), randomUUID)
+    expect(retryIntent.id).not.toBe(intent.id)
+    expect(nextMediaExportIntent(retryIntent, signature, imageJobs(user.id), randomUUID)).toBe(retryIntent)
+    const retry = enqueueImageExport(user.id, project.id, { ...request, requestId: retryIntent.id })
+    expect(enqueueImageExport(user.id, project.id, { ...request, requestId: retryIntent.id }).id).toBe(retry.id)
     database().prepare("UPDATE media_jobs SET status='running',lease_until=0 WHERE id=?").run(retry.id)
     await processImageJob(); expect(imageJobs(user.id).find(item => item.id === retry.id)).toMatchObject({ status: 'failed', errorCode: 'WORKER_INTERRUPTED' })
     expect(imageUsage(user.id)).toMatchObject({ used: 0, reserved: 0 }); expect(job.id).not.toBe(retry.id); expect(fetch).not.toHaveBeenCalled()
