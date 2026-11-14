@@ -11,7 +11,7 @@ function measurement(metric: EvidenceInput['metric'], value: number, overrides: 
     periodStart: '2026-10-01', periodEnd: '2026-10-07', source: 'manual', sourceNote: 'My store report', ...overrides }
 }
 function check(evidence: EvidenceInput[] = [], focus: FirstCheck['focus'] = 'profitability'): FirstCheck {
-  return { version: 1, id: 'first_check_01', focus, businessType: 'retail', stage: 'operating', offering: 'Local goods', timeZone: 'America/New_York', evidence }
+  return { version: 1, id: 'first_check_01', focus, businessType: 'retail', stage: 'operating', offering: 'Local goods', channel: 'Storefront', timeZone: 'America/New_York', evidence }
 }
 
 describe('first-check number drafts', () => {

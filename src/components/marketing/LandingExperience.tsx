@@ -11,7 +11,7 @@ const businessTypes = [
   { name: 'Online shops', icon: ShoppingBag, href: '/solutions?business=ecommerce' },
   { name: 'Creators', icon: Sparkles, href: '/solutions?business=creator' },
   { name: 'Local businesses', icon: Store, href: '/start?focus=retention' },
-  { name: 'Your next idea', icon: Target, href: '/start' },
+  { name: 'Independent operators', icon: Target, href: '/start' },
 ]
 
 export function LandingExperience() {
@@ -35,7 +35,7 @@ export function LandingExperience() {
       </section>
 
       <section className="nx-capabilities nx-platform-container" id="products" aria-labelledby="capabilities-title">
-        <h2 id="capabilities-title"><strong>A clear place for every next move.</strong> <span>Bring the question, the work, and the evidence together — useful on their own, better connected.</span></h2>
+        <h2 id="capabilities-title"><strong>A clear place for one useful next move.</strong> <span>Bring one business question, one action, and the evidence together — useful on their own, better connected.</span></h2>
         <CapabilityGrid />
         <p className="nx-capability-disclosure">Fictional product previews, not customer results. Photo-based image tools are implemented; new creative purchases, AI visuals, and finished videos are not yet available.</p>
       </section>

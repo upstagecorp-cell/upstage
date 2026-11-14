@@ -9,7 +9,7 @@ import { saveFirstCheck } from './first-check'
 import { updateProfile } from './operations'
 
 const origin='http://localhost:3000'
-const draft:FirstCheck={version:1,id:'check_test_1234',focus:'awareness',businessType:'services',stage:'operating',offering:'Brand design',timeZone:'America/New_York',evidence:[]}
+const draft:FirstCheck={version:1,id:'check_test_1234',focus:'awareness',businessType:'services',stage:'operating',offering:'Brand design',channel:'Website',timeZone:'America/New_York',evidence:[]}
 const request=(path:string,body:unknown,cookie='',from=origin)=>new Request(`${origin}${path}`,{method:'POST',headers:{'Content-Type':'application/json',Origin:from,Cookie:cookie},body:JSON.stringify(body)})
 async function account(email:string){const response=await register(request('/api/auth/register',{email,password:'Only-for-local-testing-123'}));expect(response.status).toBe(200);return {user:(await response.json()).user as SessionUser,cookie:response.headers.get('set-cookie')!.split(';')[0]}}
 beforeEach(()=>{closeDatabases();vi.stubEnv('NEXORA_DB_PATH',':memory:');vi.stubEnv('APP_ORIGIN',origin)})
@@ -28,6 +28,11 @@ describe('first direction and explicit account handoff',()=>{
     expect(()=>parseFirstCheck({...draft,evidence:[measurement,measurement]})).toThrow('one value per metric')
     const profitability=createAssessment({...profile,goal:'profitability'},[])
     expect(firstDirection(profitability).action?.metric).toBe('cost')
+  })
+  it('keeps legacy checks without a channel readable',()=>{
+    const legacy={...draft} as Record<string,unknown>
+    delete legacy.channel
+    expect(parseFirstCheck(legacy).channel).toBe('')
   })
   it('uses measured losses to prioritize costs over an awareness goal',()=>{
     const profile:BusinessProfile={...firstCheckProfile(draft),id:'p',version:1,updatedAt:'2026-01-01T12:00:00Z'}
@@ -55,6 +60,7 @@ describe('first direction and explicit account handoff',()=>{
     expect(workspace(user.id).assessments).toEqual([])
     const saved=saveFirstCheck(user.id,{check:draft,confirmed:true,expectedVersion:0})
     expect(saved.profile?.offering).toBe('Brand design')
+    expect(saved.profile?.salesChannels).toEqual(['Website'])
     expect(saved.assessments).toHaveLength(1)
     expect(saved.assessments[0].facts).toEqual([])
     expect(saved.executions).toEqual([])
