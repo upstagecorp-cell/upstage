@@ -29,7 +29,6 @@ browser.stderr.on('data', data => { browserError = `${browserError}${data}`.slic
 browser.on('error', error => { browserError = error.message })
 const pending = new Map()
 const runtimeErrors = []
-let activePage = 'about:blank'
 let socket
 let nextId = 0
 
@@ -59,7 +58,6 @@ async function evaluate(expression) {
 }
 
 async function navigate(path, expectedText) {
-  activePage = path
   await command('Page.navigate', { url: `${baseUrl}${path}` })
   await until(() => evaluate(`document.readyState === 'complete' && document.body.innerText.includes(${JSON.stringify(expectedText)})`), `Page did not render: ${path}`)
   await sleep(250)
@@ -75,16 +73,6 @@ async function expectEnglish(name) {
 async function click(text) {
   const found = await evaluate(`(() => {const element=[...document.querySelectorAll('button'),...document.querySelectorAll('a,summary')].find(item=>item.getClientRects().length&&(item.innerText.trim()===${JSON.stringify(text)}||item.getAttribute('aria-label')===${JSON.stringify(text)}||item.querySelector('.nx-choice-title')?.innerText===${JSON.stringify(text)}));if(!element)return false;element.click();return true})()`)
   if (!found) throw new Error(`Clickable control missing: ${text}`)
-}
-
-async function fillLabel(label, value) {
-  const found = await evaluate(`(() => {const label=[...document.querySelectorAll('label')].find(item=>item.firstElementChild?.textContent.trim()===${JSON.stringify(label)});const field=label?.querySelector('input,textarea,select');if(!field)return false;const prototype=field.tagName==='TEXTAREA'?HTMLTextAreaElement.prototype:field.tagName==='SELECT'?HTMLSelectElement.prototype:HTMLInputElement.prototype;Object.getOwnPropertyDescriptor(prototype,'value').set.call(field,${JSON.stringify(value)});field.dispatchEvent(new Event('input',{bubbles:true}));field.dispatchEvent(new Event('change',{bubbles:true}));return true})()`)
-  if (!found) throw new Error(`Input label missing: ${label}`)
-}
-
-async function fillSelector(selector, value) {
-  const found = await evaluate(`(() => {const field=document.querySelector(${JSON.stringify(selector)});if(!field)return false;Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(field,${JSON.stringify(value)});field.dispatchEvent(new Event('input',{bubbles:true}));field.dispatchEvent(new Event('change',{bubbles:true}));return true})()`)
-  if (!found) throw new Error(`Input missing: ${selector}`)
 }
 
 async function screenshot(name) {
