@@ -1,0 +1,9 @@
+{
+  "entry": "main.typ",
+  "mode": "markdown",
+  "source": {
+    "original_path": "/home/ubuntu/upstage-source/NEXORA_BUSINESS_PLAN_2026-11-15.md",
+    "prepared_path": "source.md"
+  },
+  "theme": "report-theme.typ"
+}

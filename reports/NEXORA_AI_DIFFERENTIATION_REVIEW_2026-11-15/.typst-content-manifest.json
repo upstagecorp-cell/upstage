@@ -1,0 +1,11 @@
+{
+  "task_kind": "markdown-to-pdf",
+  "output": "pdf",
+  "signals": ["professional-report", "cjk"],
+  "hard_constraints": ["Korean language", "A4 portrait", "strict PDF verification"],
+  "content_features": {
+    "code_blocks": 7,
+    "defined_terms": 12,
+    "portrait_images": 0
+  }
+}

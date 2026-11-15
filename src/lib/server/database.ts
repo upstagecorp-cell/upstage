@@ -4,6 +4,7 @@ import { dirname, resolve } from 'node:path'
 import { randomUUID } from 'node:crypto'
 import type { ExecutionJob, UsageRecord, WorkspaceData } from '@/lib/business/types'
 import { billingSummary } from './billing'
+import { providerConfigured } from './provider'
 
 const databases = new Map<string, DatabaseSync>()
 
@@ -90,7 +91,7 @@ export function listRecords<T>(owner: string, kind: string): T[] {
 }
 
 export function generationConfigured(): boolean {
-  return Boolean(process.env.OPENAI_API_KEY?.trim() && process.env.OPENAI_MODEL?.trim())
+  return providerConfigured()
 }
 
 export function workspace(owner: string): WorkspaceData {

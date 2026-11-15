@@ -155,6 +155,26 @@ describe('real provider protocol and duplicate handling', () => {
     expect(sent.tools).toBeUndefined()
   })
 
+  it('uses the selected Google adapter and normalizes Gemini structured output', async () => {
+    const { user } = await account('google-provider@example.com')
+    const input = prepare(user.id)
+    vi.stubEnv('AI_PROVIDER', 'google')
+    vi.stubEnv('AI_API_KEY', 'test-gemini-key')
+    vi.stubEnv('AI_MODEL', 'gemini-test-model')
+    const fetchMock = vi.fn().mockResolvedValue(new Response(JSON.stringify({
+      candidates: [{ content: { parts: [{ text: JSON.stringify(packageValue()) }] } }],
+      usageMetadata: { promptTokenCount: 21, candidatesTokenCount: 17 },
+    }), { status: 200 }))
+    vi.stubGlobal('fetch', fetchMock)
+    const result = await generate(user.id, input)
+    expect(result.jobs[0]).toMatchObject({ provider: 'google', model: 'gemini-test-model', status: 'succeeded' })
+    expect(result.usage[0]).toMatchObject({ inputTokens: 21, outputTokens: 17, estimated: false })
+    expect(String(fetchMock.mock.calls[0][0])).toContain('/v1beta/models/gemini-test-model:generateContent')
+    const sent = JSON.parse((fetchMock.mock.calls[0][1] as RequestInit).body as string)
+    expect(sent.generationConfig.responseMimeType).toBe('application/json')
+    expect(sent.generationConfig.responseSchema).toBeDefined()
+  })
+
   it('records missing configuration as failure, preserves failed idempotency keys, and never fakes assets', async () => {
     const { user, cookie } = await account()
     const input = prepare(user.id)

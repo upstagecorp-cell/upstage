@@ -1,0 +1,13 @@
+{
+  "task_kind": "markdown-to-pdf",
+  "output": "pdf",
+  "signals": ["professional-report", "cjk"],
+  "hard_constraints": ["Korean text", "business plan", "tables", "portrait PDF"],
+  "content_features": {
+    "code_blocks": 0,
+    "defined_terms": 25,
+    "portrait_images": 0,
+    "tables": 16,
+    "longform_sections": 13
+  }
+}

@@ -8,7 +8,7 @@ import { getLocalDateKey, isDateKey } from '@/lib/date-time'
 import { database, getRecord, listRecords, saveRecord, transaction, workspace } from './database'
 import { limit } from './auth'
 import { HttpError, invalid, objectInput, textInput, versionInput } from './errors'
-import { boundedConfig, generateFromProvider, ProviderError, type TokenUsage } from './provider'
+import { activeProvider, boundedConfig, generateFromProvider, ProviderError, providerModel, type TokenUsage } from './provider'
 import { missingGenerationFields } from '@/lib/business/industry'
 import { approvedWordingForProfile } from '@/lib/business/approved-wording'
 import { requireGenerationAllowance } from './billing'
@@ -98,7 +98,7 @@ export async function generate(owner: string, raw: unknown): Promise<WorkspaceDa
     const running = listRecords<ExecutionJob>(owner, 'job').find(item => item.status === 'running' && Date.now() - Date.parse(item.createdAt) <= 10 * 60_000)
     if (running) throw new HttpError(409, 'JOB_RUNNING', 'A package is already being generated. Wait for it to finish.')
     requireGenerationAllowance(owner, Object.values(input.counts).reduce((sum, count) => sum + count, 0))
-    const fresh: ExecutionJob = { id: randomUUID(), assessmentId: assessment.id, actionId: action.id, status: 'running', provider: 'openai', model: process.env.OPENAI_MODEL?.trim() || 'not-configured', idempotencyKey: input.idempotencyKey, createdAt: now(), completedAt: null, errorCode: null, referenceAnalysis: null, referenceSource: input.referenceSource || null, replacesJobId: input.replacesJobId || null }
+    const fresh: ExecutionJob = { id: randomUUID(), assessmentId: assessment.id, actionId: action.id, status: 'running', provider: activeProvider(), model: providerModel(), idempotencyKey: input.idempotencyKey, createdAt: now(), completedAt: null, errorCode: null, referenceAnalysis: null, referenceSource: input.referenceSource || null, replacesJobId: input.replacesJobId || null }
     if (input.useApprovedContext) fresh.approvedWordingReferences = approvedWordingForProfile(listRecords<Asset>(owner, 'asset'), assessment.profileId)
     database().prepare('INSERT INTO generation_keys(owner_id,key,payload_hash,job_id) VALUES(?,?,?,?)').run(owner, input.idempotencyKey, hash, fresh.id)
     saveRecord(owner, 'job', fresh.id, fresh)

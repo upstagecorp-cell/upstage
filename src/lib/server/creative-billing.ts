@@ -7,6 +7,7 @@ import { missingGenerationFields } from '@/lib/business/industry'
 import { database, getRecord, listRecords, saveRecord, transaction } from './database'
 import { billingOrigin, checkoutIntent, customerFor, stripeClient, withBillingLock } from './billing-shared'
 import { HttpError, objectInput } from './errors'
+import { providerConfigured } from './provider'
 
 const VERSION = CREATIVE_CATALOG_VERSION
 const envNames = {
@@ -63,7 +64,7 @@ export function creativeCheckoutAvailable() {
   if (creativeOfferIsPreview()) return false
   if (process.env.NODE_ENV === 'production' && !/^(sk|rk)_live_/.test(process.env.STRIPE_SECRET_KEY?.trim() || '')) return false
   return ['NEXORA_PAID_LAUNCH_ENABLED', 'NEXORA_LEGAL_APPROVED', 'NEXORA_LIVE_TESTS_APPROVED'].every(key => process.env[key] === 'true') &&
-    ['STRIPE_SECRET_KEY', 'STRIPE_WEBHOOK_SECRET', 'STRIPE_PORTAL_CONFIGURATION', 'OPENAI_API_KEY', 'OPENAI_MODEL', 'RESEND_API_KEY', 'NEXORA_EMAIL_FROM', 'NEXORA_LEGAL_NAME', 'NEXORA_LEGAL_ADDRESS', 'NEXT_PUBLIC_SUPPORT_EMAIL', ...Object.values(envNames)].every(key => Boolean(process.env[key]?.trim())) && Boolean(process.env.APP_ORIGIN?.startsWith('https://'))
+    ['STRIPE_SECRET_KEY', 'STRIPE_WEBHOOK_SECRET', 'STRIPE_PORTAL_CONFIGURATION', 'RESEND_API_KEY', 'NEXORA_EMAIL_FROM', 'NEXORA_LEGAL_NAME', 'NEXORA_LEGAL_ADDRESS', 'NEXT_PUBLIC_SUPPORT_EMAIL', ...Object.values(envNames)].every(key => Boolean(process.env[key]?.trim())) && providerConfigured() && Boolean(process.env.APP_ORIGIN?.startsWith('https://'))
 }
 function requirePurchaseAvailable() {
   if (!creativeCheckoutAvailable()) throw new HttpError(503, 'BILLING_UNAVAILABLE', 'Creative purchases are not open yet. You have not been charged.')
