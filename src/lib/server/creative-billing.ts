@@ -1,7 +1,7 @@
 import Stripe from 'stripe'
 import { createHash } from 'node:crypto'
-import { CREATIVE_CATALOG_VERSION, CREATIVE_PLANS, MOTION_PACKS, creativeOfferIsPreview, quoteCreativeOffer, type MotionBilling } from '@/lib/marketing/creative-plans'
-import { isPaidPlan, type CreativeBillingSummary, type PaidPlanId } from '@/lib/billing/plans'
+import { CREATIVE_CATALOG_VERSION, CREATIVE_PLANS, LONG_VIDEO_PACKS, MOTION_PACKS, creativeOfferIsPreview, longVideoPack, quoteCreativeOffer, type CreativePlanId, type LongVideoPackId, type MotionBilling } from '@/lib/marketing/creative-plans'
+import type { CreativeBillingSummary } from '@/lib/billing/plans'
 import type { Assessment, BusinessProfile, SessionUser } from '@/lib/business/types'
 import { missingGenerationFields } from '@/lib/business/industry'
 import { database, getRecord, listRecords, saveRecord, transaction } from './database'
@@ -10,39 +10,45 @@ import { HttpError, objectInput } from './errors'
 
 const VERSION = CREATIVE_CATALOG_VERSION
 const envNames = {
-  focus: 'STRIPE_PRICE_CREATIVE_FOCUS', growth: 'STRIPE_PRICE_CREATIVE_GROWTH',
+  focus: 'STRIPE_PRICE_CREATIVE_FOCUS', growth: 'STRIPE_PRICE_CREATIVE_GROWTH', pro: 'STRIPE_PRICE_CREATIVE_PRO',
   'motion-scene:monthly': 'STRIPE_PRICE_MOTION_SCENE_MONTHLY', 'motion-five:monthly': 'STRIPE_PRICE_MOTION_FIVE_MONTHLY',
   'motion-scene:one_time': 'STRIPE_PRICE_MOTION_SCENE_ONCE', 'motion-five:one_time': 'STRIPE_PRICE_MOTION_FIVE_ONCE',
+  'video-30:one_time': 'STRIPE_PRICE_VIDEO_30_ONCE', 'video-30-plus:one_time': 'STRIPE_PRICE_VIDEO_30_PLUS_ONCE',
+  'video-45:one_time': 'STRIPE_PRICE_VIDEO_45_ONCE', 'video-45-plus:one_time': 'STRIPE_PRICE_VIDEO_45_PLUS_ONCE',
+  'video-60:one_time': 'STRIPE_PRICE_VIDEO_60_ONCE', 'video-60-plus:one_time': 'STRIPE_PRICE_VIDEO_60_PLUS_ONCE',
+  'video-90:one_time': 'STRIPE_PRICE_VIDEO_90_ONCE', 'video-90-plus:one_time': 'STRIPE_PRICE_VIDEO_90_PLUS_ONCE',
 } as const
 type Sku = keyof typeof envNames
 const priceId = (sku: Sku) => process.env[envNames[sku]]?.trim() || ''
 const idOf = (value: string | { id: string } | null | undefined) => typeof value === 'string' ? value : value?.id
 const review = () => new HttpError(503, 'BILLING_REVIEW_REQUIRED', 'Billing needs a review. Refresh your account or contact support; no new purchase was made.')
-const planFor = (id: PaidPlanId) => CREATIVE_PLANS.find(plan => plan.id === id)!
+const planFor = (id: CreativePlanId) => CREATIVE_PLANS.find(plan => plan.id === id)!
 type Items = Array<{ price: string; quantity: number }>
 interface Command { fingerprint: string; state: 'pending' | 'complete'; effectiveAt: string; periodEnd: number }
 interface TopUp { id: string; scenes: number; consumed: number; expiresAt: string; paymentIntent: string | null; refunded: boolean }
+interface VideoTopUp { id: string; packId: LongVideoPackId; seconds: number; paymentIntent: string | null; refunded: boolean; expiresAt: string }
 
-function quote(plan: PaidPlanId, scenes: unknown, mode: MotionBilling = 'monthly') {
+function quote(plan: CreativePlanId, scenes: unknown, mode: MotionBilling = 'monthly') {
   if (typeof scenes !== 'number') throw new HttpError(400, 'INVALID_QUANTITY', 'Choose a whole number of scenes.')
   try { return quoteCreativeOffer(plan, scenes, mode) }
   catch { throw new HttpError(400, 'INVALID_QUANTITY', 'Choose 0–50 whole scenes and a valid billing option.') }
 }
 function skuAmount(sku: Sku) {
-  if (sku === 'focus' || sku === 'growth') return planFor(sku).monthlyUsd
+  if (sku === 'focus' || sku === 'growth' || sku === 'pro') return planFor(sku).monthlyUsd
+  if (sku.startsWith('video-')) return LONG_VIDEO_PACKS.find(pack => `${pack.id}:one_time` === sku)!.oneTimeUsd
   const pack = MOTION_PACKS.find(pack => sku.startsWith(pack.id + ':'))!
   return sku.endsWith(':monthly') ? pack.monthlyUsd : pack.oneTimeUsd
 }
 function matchesPrice(price: Stripe.Price, sku: Sku) {
   const monthly = !sku.endsWith(':one_time')
   return Boolean(priceId(sku)) && price.id === priceId(sku) && price.currency === 'usd' &&
-    price.unit_amount === skuAmount(sku) * 100 && price.tax_behavior === 'exclusive' &&
+    price.unit_amount === Math.round(skuAmount(sku) * 100) && price.tax_behavior === 'exclusive' &&
     (monthly ? price.recurring?.interval === 'month' && price.recurring.interval_count === 1 : !price.recurring)
 }
-async function validatedItems(stripe: Stripe, plan: PaidPlanId, scenes: number, mode: MotionBilling, includeBase: boolean) {
+async function validatedItems(stripe: Stripe, plan: CreativePlanId, scenes: number, mode: MotionBilling, includeBase: boolean) {
   const selection = quote(plan, scenes, mode)
   const skus: Array<{ sku: Sku; quantity: number }> = [
-    ...(includeBase ? [{ sku: plan, quantity: 1 }] : []),
+    ...(includeBase ? [{ sku: plan as Sku, quantity: 1 }] : []),
     ...selection.items.map(item => ({ sku: `${item.packId}:${mode}` as Sku, quantity: item.quantity })),
   ]
   const items = await Promise.all(skus.map(async item => {
@@ -65,9 +71,9 @@ function requirePurchaseAvailable() {
 function requireVerified(user: SessionUser) {
   if (!getRecord(user.id, 'email_verified', 'current')) throw new HttpError(403, 'EMAIL_VERIFICATION_REQUIRED', 'Verify your email before purchasing.')
 }
-function requiredPlan(raw: unknown): PaidPlanId {
-  if (!isPaidPlan(raw)) throw new HttpError(400, 'INVALID_PLAN', 'Choose Focus or Growth.')
-  return raw
+function requiredPlan(raw: unknown): CreativePlanId {
+  if (typeof raw !== 'string' || !CREATIVE_PLANS.some(plan => plan.id === raw)) throw new HttpError(400, 'INVALID_PLAN', 'Choose Core, Plus, or Pro.')
+  return raw as CreativePlanId
 }
 async function ensureCustomer(user: SessionUser, stripe: Stripe) {
   let row = customerFor(user.id)
@@ -87,6 +93,7 @@ export async function createCreativeCheckout(user: SessionUser, raw: unknown): P
   const input = objectInput(raw), plan = requiredPlan(input.plan)
   const mode = (input.motionBilling ?? 'monthly') as MotionBilling
   const selection = quote(plan, input.scenes ?? 0, mode)
+  const videoPack = input.videoPackId ? (() => { try { return longVideoPack(input.videoPackId as LongVideoPackId) } catch { throw new HttpError(400, 'INVALID_VIDEO_PACK', 'Choose a listed long-video pack.') } })() : null
   if (mode === 'one_time' && selection.purchasedScenes > 0) throw new HttpError(400, 'ONE_TIME_FROM_ACCOUNT', 'Subscribe to the base plan first, then buy one-time extras from Plan & billing.')
   requirePurchaseAvailable(); requireVerified(user)
   const profile = getRecord<BusinessProfile>(user.id, 'profile', 'current'), assessment = listRecords<Assessment>(user.id, 'assessment').at(-1)
@@ -95,15 +102,22 @@ export async function createCreativeCheckout(user: SessionUser, raw: unknown): P
   }
   return withBillingLock(user.id, async () => {
     const stripe = stripeClient(), verified = await validatedItems(stripe, plan, selection.requestedScenes, mode, true)
+    if (videoPack) {
+      const videoSku = `${videoPack.id}:one_time` as Sku
+      if (!priceId(videoSku)) throw review()
+      const videoPrice = await stripe.prices.retrieve(priceId(videoSku))
+      if (!videoPrice.active || !matchesPrice(videoPrice, videoSku)) throw new HttpError(503, 'BILLING_CATALOG_MISMATCH', 'The configured video price does not match this offer. You have not been charged.')
+      verified.items.push({ price: videoPrice.id, quantity: 1 })
+    }
     const customer = await ensureCustomer(user, stripe)
     const existing = await stripe.subscriptions.list({ customer: customer.customer_id, status: 'all', limit: 100 })
     if (existing.has_more || existing.data.some(item => !['canceled', 'incomplete_expired'].includes(item.status))) throw new HttpError(409, 'SUBSCRIPTION_EXISTS', 'Manage your existing subscription instead of starting another.')
     const intent = checkoutIntent(user.id, `creative:${plan}:${mode}:${selection.purchasedScenes}`)
-    const metadata = { nexora_owner: user.id, nexora_catalog: VERSION, nexora_plan: plan, nexora_intent: intent.key }
+    const metadata = { nexora_owner: user.id, nexora_catalog: VERSION, nexora_plan: plan, nexora_intent: intent.key, ...(videoPack ? { nexora_video_pack: videoPack.id } : {}) }
     const session = await stripe.checkout.sessions.create({ ...checkoutParams(user.id, customer.customer_id), mode: 'subscription',
       line_items: verified.items, payment_method_collection: 'always', metadata,
       subscription_data: { metadata }, expires_at: intent.expires / 1000,
-      custom_text: { submit: { message: `Your subscription renews automatically at $${selection.renewalUsd}/month before tax until you cancel. ${mode === 'one_time' && selection.motionUsd ? `$${selection.motionUsd} of motion packs is charged only once.` : 'Selected monthly scene packs renew with your plan.'}` } },
+      custom_text: { submit: { message: `Your subscription renews automatically at $${selection.renewalUsd}/month before tax until you cancel. ${videoPack ? `$${videoPack.oneTimeUsd} for the ${videoPack.seconds}-second video is charged once on this first payment and does not renew. ` : ''}${mode === 'one_time' && selection.motionUsd ? `$${selection.motionUsd} of motion packs is charged only once.` : 'Selected monthly scene packs renew with your plan.'}` } },
     }, { idempotencyKey: `nexora-creative-checkout-${intent.key}` })
     if (!session.url) throw review()
     return session.url
@@ -113,14 +127,14 @@ export async function createCreativeCheckout(user: SessionUser, raw: unknown): P
 /** Validate an entire subscription; unknown extra items never grant allowances. */
 function decodeItems(subscription: Stripe.Subscription, owner: string) {
   if (subscription.metadata?.nexora_catalog !== VERSION || subscription.metadata.nexora_owner !== owner || subscription.collection_method !== 'charge_automatically' || subscription.items.has_more) return null
-  let plan: PaidPlanId | null = null, base: Stripe.SubscriptionItem | null = null, scenes = 0, monthlyUsd = 0
+  let plan: CreativePlanId | null = null, base: Stripe.SubscriptionItem | null = null, scenes = 0, monthlyUsd = 0
   const seen = new Set<string>()
   for (const item of subscription.items.data) {
     if (seen.has(item.price.id) || !Number.isSafeInteger(item.quantity) || item.quantity! < 1) return null
     seen.add(item.price.id)
     const sku = (Object.keys(envNames) as Sku[]).find(key => !key.endsWith(':one_time') && matchesPrice(item.price, key))
     if (!sku) return null
-    if (isPaidPlan(sku)) { if (plan || item.quantity !== 1) return null; plan = sku; base = item }
+    if (sku === 'focus' || sku === 'growth' || sku === 'pro') { if (plan || item.quantity !== 1) return null; plan = sku; base = item }
     else scenes += MOTION_PACKS.find(pack => sku.startsWith(pack.id + ':'))!.scenes * item.quantity!
     monthlyUsd += skuAmount(sku) * item.quantity!
   }
@@ -139,7 +153,7 @@ function scheduledRenewal(schedule: Stripe.SubscriptionSchedule, decoded: NonNul
   for (const item of phase.items) {
     const sku = (Object.keys(envNames) as Sku[]).find(key => !key.endsWith(':one_time') && priceId(key) && priceId(key) === idOf(item.price))
     if (!sku || !Number.isSafeInteger(item.quantity) || item.quantity! < 1) throw review()
-    if (isPaidPlan(sku)) { if (sku !== decoded.plan || item.quantity !== 1) throw review(); bases++ }
+    if (sku === 'focus' || sku === 'growth' || sku === 'pro') { if (sku !== decoded.plan || item.quantity !== 1) throw review(); bases++ }
     else scenes += MOTION_PACKS.find(pack => sku.startsWith(pack.id + ':'))!.scenes * item.quantity!
     monthlyUsd += skuAmount(sku) * item.quantity!
   }
@@ -161,11 +175,12 @@ export async function readCreativeSubscription(owner: string, subscription: Stri
     }
   }
   const oneTimeScenes = listRecords<TopUp>(owner, 'creative_topup').filter(item => !item.refunded && Date.parse(item.expiresAt) > Date.now()).reduce((sum, item) => sum + Math.max(0, item.scenes - item.consumed), 0)
+  const longVideoSeconds = listRecords<VideoTopUp>(owner, 'creative_video_topup').filter(item => !item.refunded && Date.parse(item.expiresAt) > Date.now()).reduce((sum, item) => sum + item.seconds, 0)
   return { plan: decoded.plan, status: subscription.status, paid, monthlyScenes: decoded.scenes, monthlyUsd: decoded.monthlyUsd,
     periodStart: new Date(decoded.base.current_period_start * 1000).toISOString(), periodEnd: new Date(decoded.base.current_period_end * 1000).toISOString(),
     cancelAtPeriodEnd: subscription.cancel_at_period_end, canChange: managed && paid && subscription.status === 'active' && !subscription.cancel_at_period_end,
     canCancel: managed && !['canceled', 'incomplete_expired'].includes(subscription.status) && !subscription.cancel_at_period_end,
-    pending, oneTimeScenes }
+    pending, oneTimeScenes, longVideoSeconds }
 }
 async function ownedSubscription(owner: string, stripe: Stripe) {
   const customer = customerFor(owner), saved = getRecord<{ id: string }>(owner, 'billing', 'current')
@@ -261,6 +276,28 @@ export async function createMotionTopUp(user: SessionUser, raw: unknown) {
     return session.url
   })
 }
+export async function createLongVideoTopUp(user: SessionUser, raw: unknown) {
+  const input = objectInput(raw)
+  const packId = input.packId as LongVideoPackId
+  const pack = (() => { try { return longVideoPack(packId) } catch { throw new HttpError(400, 'INVALID_VIDEO_PACK', 'Choose a listed long-video pack.') } })()
+  requirePurchaseAvailable(); requireVerified(user)
+  return withBillingLock(user.id, async () => {
+    const stripe = stripeClient(), { subscription, customer } = await ownedSubscription(user.id, stripe)
+    if (subscription.status !== 'active' || !subscription.latest_invoice || typeof subscription.latest_invoice === 'string' || subscription.latest_invoice.status !== 'paid') throw new HttpError(409, 'SUBSCRIPTION_NOT_ACTIVE', 'Long-video extras require an active paid creative plan.')
+    const sku = `${pack.id}:one_time` as Sku
+    if (!priceId(sku)) throw review()
+    const price = await stripe.prices.retrieve(priceId(sku))
+    if (!price.active || !matchesPrice(price, sku)) throw new HttpError(503, 'BILLING_CATALOG_MISMATCH', 'The configured long-video price does not match this offer. You have not been charged.')
+    const intent = checkoutIntent(user.id, `video:${pack.id}`)
+    const session = await stripe.checkout.sessions.create({ ...checkoutParams(user.id, customer.customer_id), mode: 'payment', line_items: [{ price: price.id, quantity: 1 }],
+      metadata: { nexora_owner: user.id, nexora_catalog: VERSION, nexora_kind: 'long_video_topup', nexora_video_pack: pack.id, nexora_intent: intent.key },
+      expires_at: intent.expires / 1000,
+      custom_text: { submit: { message: `One-time purchase for a ${pack.seconds}-second ${pack.tier === 'plus' ? 'audio and caption' : 'basic'} promotion video. This does not renew and does not include advertising spend.` } },
+    }, { idempotencyKey: `nexora-video-checkout-${intent.key}` })
+    if (!session.url) throw review()
+    return session.url
+  })
+}
 /** Signed webhooks fetch current Stripe payment state; return URLs never grant extras. */
 export async function reconcileCreativeCheckout(owner: string, sessionId: string, stripe: Stripe) {
   const session = await stripe.checkout.sessions.retrieve(sessionId)
@@ -289,6 +326,17 @@ export async function reconcileCreativeCheckout(owner: string, sessionId: string
       if (!getRecord<TopUp>(owner, 'creative_topup', session.id)) saveRecord(owner, 'creative_topup', session.id, { id: session.id, scenes, consumed: 0, expiresAt: new Date((paidAt + 30 * 86400) * 1000).toISOString(), paymentIntent: intent, refunded: false } satisfies TopUp)
     })
   }
+  if (session.mode === 'payment' && session.metadata.nexora_kind === 'long_video_topup') {
+    const packId = session.metadata.nexora_video_pack as LongVideoPackId
+    const pack = (() => { try { return longVideoPack(packId) } catch { throw review() } })()
+    const intent = idOf(session.payment_intent)
+    if (!intent) throw review()
+    const payment = await stripe.paymentIntents.retrieve(intent)
+    if (payment.status !== 'succeeded' || idOf(payment.customer) !== idOf(session.customer)) return
+    const charge = typeof payment.latest_charge === 'string' ? await stripe.charges.retrieve(payment.latest_charge) : payment.latest_charge
+    if (!charge) throw review()
+    if (!charge.refunded && !getRecord<VideoTopUp>(owner, 'creative_video_topup', session.id)) saveRecord(owner, 'creative_video_topup', session.id, { id: session.id, packId: pack.id, seconds: pack.seconds, paymentIntent: intent, refunded: false, expiresAt: new Date((charge.created + 30 * 86400) * 1000).toISOString() } satisfies VideoTopUp)
+  }
   if (session.metadata.nexora_intent) database().prepare('UPDATE billing_customers SET checkout_key=NULL,checkout_plan=NULL,checkout_expires=NULL WHERE owner_id=? AND checkout_key=?').run(owner, session.metadata.nexora_intent)
 }
 export function recordCreativeRefund(owner: string, charge: Stripe.Charge) {
@@ -298,6 +346,9 @@ export function recordCreativeRefund(owner: string, charge: Stripe.Charge) {
     if (intent) saveRecord(owner, 'creative_refund', intent, { refunded: true })
     for (const grant of listRecords<TopUp>(owner, 'creative_topup')) {
       if (grant.paymentIntent === intent) saveRecord(owner, 'creative_topup', grant.id, { ...grant, refunded: true })
+    }
+    for (const grant of listRecords<VideoTopUp>(owner, 'creative_video_topup')) {
+      if (grant.paymentIntent === intent) saveRecord(owner, 'creative_video_topup', grant.id, { ...grant, refunded: true })
     }
   })
 }

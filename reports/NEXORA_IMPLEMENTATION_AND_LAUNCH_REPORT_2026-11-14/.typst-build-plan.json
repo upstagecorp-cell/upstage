@@ -1,0 +1,51 @@
+{
+  "base": {
+    "auto_apply": true,
+    "conflict_group": "document-base",
+    "id": "report-entry",
+    "kind": "asset",
+    "ownership": "global",
+    "path": "assets/report-entry.typ",
+    "reason": "General professional document fallback.",
+    "status": "ready"
+  },
+  "catalog_version": "2026-07-17-affiliated-formats-v3",
+  "channel": "typst-pdf",
+  "confirmation_candidates": [],
+  "enhancements": [
+    {
+      "adoption": "A",
+      "auto_apply": true,
+      "conflict_group": null,
+      "id": "cheq",
+      "kind": "universe-package",
+      "ownership": "semantic",
+      "reason": "Content evidence satisfies {\"checklists\": 1}",
+      "status": "ready",
+      "universe_ref": "@preview/cheq:0.4.0",
+      "version": "0.4.0"
+    },
+    {
+      "adoption": "A",
+      "auto_apply": true,
+      "conflict_group": null,
+      "id": "glossarium",
+      "kind": "universe-package",
+      "ownership": "semantic",
+      "reason": "Content evidence satisfies {\"defined_terms\": 5}",
+      "status": "ready",
+      "universe_ref": "@preview/glossarium:0.5.10",
+      "version": "0.5.10"
+    }
+  ],
+  "exclusions": [],
+  "fingerprint": "sha256:114c0d754635754715bd81869b5217706455957377186a48cdb42a19f99d8baf",
+  "next_action": "minimal-compile-preflight",
+  "optional_idea": null,
+  "question": null,
+  "reused": false,
+  "schema_version": 1,
+  "state": "ready",
+  "style_owner": "report-entry",
+  "typst_version": "typst 0.15.1 (9dfd3a08)"
+}

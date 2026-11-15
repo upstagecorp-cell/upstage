@@ -7,8 +7,11 @@ export const MAX_CREATIVE_VIDEO_SECONDS = catalog.maxVideoSeconds
 export const CREATIVE_CATALOG_VERSION = catalog.version
 export const FIRST_CAMPAIGN = catalog.entryOffer
 export const MOTION_PACKS = catalog.motionPacks
+export const LONG_VIDEO_PACKS = catalog.longVideoPacks
 export const MOTION_SCENE_SECONDS = catalog.motionSceneSeconds
-export type CreativeOfferId = 'first-campaign' | 'focus' | 'growth'
+export type CreativePlanId = (typeof catalog.plans)[number]['id']
+export type LongVideoPackId = (typeof catalog.longVideoPacks)[number]['id']
+export type CreativeOfferId = 'first-campaign' | CreativePlanId
 export type MotionBilling = 'monthly' | 'one_time'
 
 // Fail closed for unknown release states as well as unfinished delivery/billing.
@@ -16,6 +19,12 @@ export type MotionBilling = 'monthly' | 'one_time'
 export function creativeOfferIsPreview(): boolean {
   return String(catalog.status) !== 'available' ||
     !catalog.releaseReadiness.mediaDelivery || !catalog.releaseReadiness.versionedBilling
+}
+
+export function longVideoPack(packId: LongVideoPackId) {
+  const pack = LONG_VIDEO_PACKS.find(item => item.id === packId)
+  if (!pack) throw new RangeError('Choose a listed long-video pack.')
+  return pack
 }
 
 /** Public estimate only. No payment, entitlement, reservation, or provider call. */

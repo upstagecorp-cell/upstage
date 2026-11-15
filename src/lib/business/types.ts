@@ -116,6 +116,7 @@ export interface GenerationInput {
   referenceSource?: string
   replacesJobId?: string
   useApprovedContext?: boolean
+  longVideoSeconds?: 30 | 45 | 60 | 90
 }
 export interface ApprovedWordingReference {
   assetId: string

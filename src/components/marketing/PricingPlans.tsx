@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { ArrowUpRight, Check, Layers, Sparkles } from 'lucide-react'
-import { CREATIVE_PLANS, MAX_CREATIVE_VIDEO_SECONDS } from '@/lib/marketing/creative-plans'
+import { CREATIVE_PLANS } from '@/lib/marketing/creative-plans'
 
 export function PricingPlans() {
   return <div className="nx-price-grid mt-5">
@@ -22,16 +22,16 @@ export function PricingPlans() {
       <p className="nx-price-description">{plan.description}</p>
       <button className={`nx-button mt-7 w-full ${plan.id === 'growth' ? 'nx-button-lime' : ''}`} disabled>Creative plans coming soon <ArrowUpRight size={15}/></button>
       <ul>{[
-        `${plan.campaigns} campaign kits with hooks, copy, and storyboards`,
+        `${plan.campaigns} promotion${plan.campaigns === 1 ? '' : 's'} with one offer, goal, and channel at a time`,
         `${plan.images} new image designs · shared monthly pool`,
-        `${plan.videos} finished photo-based videos · up to ${MAX_CREATIVE_VIDEO_SECONDS}s each`,
+        `${plan.videos} short finished videos · up to 8s each`,
         'AI-generated images or your own product photos',
         'Captions, voiceover, brand colors, and logo',
         '1:1, 4:5, and 9:16 image exports from the same design',
         'Edit and re-export existing media without a new generation',
-        'Optional AI motion · separately priced scene packs',
+        '30s+ promotion videos available as one-time purchases',
       ].map(item => <li key={item}><Check size={15}/>{item}</li>)}</ul>
-      <p className="nx-price-note">Planned monthly auto-renewal until you cancel · one business · one owner. Images and videos are totals across all campaign kits. Extra AI scenes can renew monthly or be bought once. Change recurring quantities from your next billing date. USD before tax. Not available for purchase yet.</p>
+      <p className="nx-price-note">Planned monthly auto-renewal until you cancel · one business · one owner. Long-video packs are charged once and expire after 30 days. Advertising budget is not included; you pay Meta, Google, TikTok, or another platform directly. USD before tax. Not available for purchase yet.</p>
     </article>)}
   </div>
 }

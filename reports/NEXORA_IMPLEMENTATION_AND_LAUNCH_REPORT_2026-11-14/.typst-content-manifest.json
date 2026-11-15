@@ -1,0 +1,14 @@
+{
+  "task_kind": "new-document",
+  "output": "pdf",
+  "signals": [],
+  "hard_constraints": ["Korean text", "professional implementation and launch report"],
+  "content_features": {
+    "code_blocks": 2,
+    "defined_terms": 12,
+    "portrait_images": 0,
+    "tables": 8,
+    "checklists": 5,
+    "architecture_diagram": 1
+  }
+}

@@ -1,48 +1,69 @@
 {
   "status": "preview",
-  "version": "creative-v3-2026-11-12",
+  "version": "creative-v5-2026-11-15-price-aligned",
   "renewal": "automatic_until_canceled",
   "quantityChanges": "next_billing_period",
   "motionBilling": ["monthly", "one_time"],
   "releaseReadiness": { "mediaDelivery": false, "versionedBilling": false },
   "currency": "USD",
-  "maxVideoSeconds": 30,
+  "maxVideoSeconds": 90,
   "entryOffer": {
     "id": "first-campaign",
-    "name": "First campaign",
-    "oneTimeUsd": 19,
+    "name": "First promotion",
+    "oneTimeUsd": 59,
     "campaigns": 1,
-    "images": 4,
+    "images": 8,
     "videos": 2,
     "expiryDays": 30
   },
   "motionSceneSeconds": 8,
   "motionPacks": [
-    { "id": "motion-scene", "name": "One AI scene", "scenes": 1, "oneTimeUsd": 15, "monthlyUsd": 15 },
-    { "id": "motion-five", "name": "Five AI scenes", "scenes": 5, "oneTimeUsd": 59, "monthlyUsd": 59 }
+    { "id": "motion-scene", "name": "One short AI scene", "scenes": 1, "oneTimeUsd": 5, "monthlyUsd": 5 },
+    { "id": "motion-five", "name": "Five short AI scenes", "scenes": 5, "oneTimeUsd": 19, "monthlyUsd": 19 }
+  ],
+  "longVideoPacks": [
+    { "id": "video-30", "name": "30-second promotion video", "seconds": 30, "tier": "basic", "oneTimeUsd": 29.99 },
+    { "id": "video-30-plus", "name": "30-second promotion video with audio", "seconds": 30, "tier": "plus", "oneTimeUsd": 39.99 },
+    { "id": "video-45", "name": "45-second promotion video", "seconds": 45, "tier": "basic", "oneTimeUsd": 39.99 },
+    { "id": "video-45-plus", "name": "45-second promotion video with audio", "seconds": 45, "tier": "plus", "oneTimeUsd": 49.99 },
+    { "id": "video-60", "name": "60-second promotion video", "seconds": 60, "tier": "basic", "oneTimeUsd": 49.99 },
+    { "id": "video-60-plus", "name": "60-second promotion video with audio", "seconds": 60, "tier": "plus", "oneTimeUsd": 64.99 },
+    { "id": "video-90", "name": "90-second promotion video", "seconds": 90, "tier": "basic", "oneTimeUsd": 69.99 },
+    { "id": "video-90-plus", "name": "90-second promotion video with audio", "seconds": 90, "tier": "plus", "oneTimeUsd": 89.99 }
   ],
   "plans": [
     {
       "id": "focus",
-      "name": "Focus",
-      "monthlyUsd": 79,
-      "campaigns": 4,
-      "images": 40,
-      "videos": 12,
+      "name": "Core",
+      "monthlyUsd": 29,
+      "campaigns": 1,
+      "images": 8,
+      "videos": 2,
       "motionSeconds": 0,
-      "headline": "One campaign each week.",
-      "description": "Four offers or message directions, with matching images and photo-based videos."
+      "headline": "One promotion at a time.",
+      "description": "One offer, one goal, one channel, with ready-to-review text, image directions, and short videos."
     },
     {
       "id": "growth",
-      "name": "Growth",
-      "monthlyUsd": 149,
-      "campaigns": 8,
-      "images": 80,
-      "videos": 24,
+      "name": "Plus",
+      "monthlyUsd": 59,
+      "campaigns": 2,
+      "images": 20,
+      "videos": 4,
       "motionSeconds": 0,
-      "headline": "Two directions each week.",
-      "description": "Eight campaigns for comparing offers, hooks, and audiences across the month."
+      "headline": "A repeatable monthly rhythm.",
+      "description": "Two promotions with saved brand context, channel-ready variations, and measured results."
+    },
+    {
+      "id": "pro",
+      "name": "Pro",
+      "monthlyUsd": 99,
+      "campaigns": 4,
+      "images": 40,
+      "videos": 8,
+      "motionSeconds": 0,
+      "headline": "A fuller month of promotion.",
+      "description": "Four promotions, two channels, approval history, and a monthly results summary."
     }
   ]
 }

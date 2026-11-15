@@ -1,0 +1,3 @@
+    [#block(fill: white, inset: 8pt, radius: 4pt)[*웹 UI*\\ 공개 홈 · /start · /media · /product · /pricing · /guide]],
+  [작업], [경로: /media · /dashboard · /goals · /history · /metrics · /action], [#okay],
+  [미디어], [경로: /media#media 및 관련 API], [#partial],

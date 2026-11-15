@@ -10,8 +10,8 @@ import { syncBilling, billingSummary } from './billing'
 
 const start = Math.floor(Date.now() / 1000) - 3600, end = start + 30 * 86400
 const requestA = 'aaaaaaaa-aaaa-4aaa-aaaa-aaaaaaaaaaaa', requestB = 'bbbbbbbb-bbbb-4bbb-bbbb-bbbbbbbbbbbb'
-const ids = { STRIPE_PRICE_CREATIVE_FOCUS: 'p_focus', STRIPE_PRICE_CREATIVE_GROWTH: 'p_growth', STRIPE_PRICE_MOTION_SCENE_MONTHLY: 'p_scene_month', STRIPE_PRICE_MOTION_FIVE_MONTHLY: 'p_five_month', STRIPE_PRICE_MOTION_SCENE_ONCE: 'p_scene_once', STRIPE_PRICE_MOTION_FIVE_ONCE: 'p_five_once' }
-function price(id: string) { return { id, active: true, currency: 'usd', unit_amount: id.includes('focus') ? 7900 : id.includes('growth') ? 14900 : id.includes('five') ? 5900 : 1500, tax_behavior: 'exclusive', recurring: id.endsWith('once') ? null : { interval: 'month', interval_count: 1 } } }
+const ids = { STRIPE_PRICE_CREATIVE_FOCUS: 'p_focus', STRIPE_PRICE_CREATIVE_GROWTH: 'p_growth', STRIPE_PRICE_CREATIVE_PRO: 'p_pro', STRIPE_PRICE_MOTION_SCENE_MONTHLY: 'p_scene_month', STRIPE_PRICE_MOTION_FIVE_MONTHLY: 'p_five_month', STRIPE_PRICE_MOTION_SCENE_ONCE: 'p_scene_once', STRIPE_PRICE_MOTION_FIVE_ONCE: 'p_five_once', STRIPE_PRICE_VIDEO_30_ONCE: 'p_video_30', STRIPE_PRICE_VIDEO_30_PLUS_ONCE: 'p_video_30_plus', STRIPE_PRICE_VIDEO_45_ONCE: 'p_video_45', STRIPE_PRICE_VIDEO_45_PLUS_ONCE: 'p_video_45_plus', STRIPE_PRICE_VIDEO_60_ONCE: 'p_video_60', STRIPE_PRICE_VIDEO_60_PLUS_ONCE: 'p_video_60_plus', STRIPE_PRICE_VIDEO_90_ONCE: 'p_video_90', STRIPE_PRICE_VIDEO_90_PLUS_ONCE: 'p_video_90_plus' }
+	function price(id: string) { const amount = id.includes('focus') ? 2900 : id.includes('growth') ? 5900 : id.includes('pro') ? 9900 : id.includes('five') ? 1900 : id.includes('scene') ? 500 : id.includes('video_30_plus') ? 3999 : id.includes('video_30') ? 2999 : id.includes('video_45_plus') ? 4999 : id.includes('video_45') ? 3999 : id.includes('video_60_plus') ? 6499 : id.includes('video_60') ? 4999 : id.includes('video_90_plus') ? 8999 : id.includes('video_90') ? 6999 : 500; return { id, active: true, currency: 'usd', unit_amount: amount, tax_behavior: 'exclusive', recurring: id.endsWith('once') ? null : { interval: 'month', interval_count: 1 } } }
 function subscription(owner: string) { return { id: 'sub_creative', created: start, customer: 'cus_creative', collection_method: 'charge_automatically', status: 'active', cancel_at_period_end: false, schedule: null as string | null, metadata: { nexora_owner: owner, nexora_catalog: catalog.CREATIVE_CATALOG_VERSION }, latest_invoice: { status: 'paid' }, items: { has_more: false, data: [{ id: 'si_base', quantity: 1, price: price('p_focus'), current_period_start: start, current_period_end: end }] } } }
 let stripe: Stripe, sub: ReturnType<typeof subscription>, ownerId: string
 function schedule() { return { id: 'sched_creative', customer: 'cus_creative', status: 'active', metadata: { nexora_owner: ownerId, nexora_catalog: catalog.CREATIVE_CATALOG_VERSION }, current_phase: { start_date: start, end_date: end }, phases: [] } }
@@ -47,7 +47,7 @@ describe('recurring creative subscription lifecycle', () => {
   it('creates automatic monthly base plus monthly extras with server-owned prices', async () => {
     const user = await account()
     await createCreativeCheckout(user, { plan: 'focus', scenes: 4, motionBilling: 'monthly', amount: 1, price: 'attacker' })
-    expect(stripe.checkout.sessions.create).toHaveBeenCalledWith(expect.objectContaining({ mode: 'subscription', line_items: [{ price: 'p_focus', quantity: 1 }, { price: 'p_five_month', quantity: 1 }], subscription_data: { metadata: expect.objectContaining({ nexora_owner: user.id }) }, custom_text: { submit: { message: expect.stringContaining('$138/month') } } }), expect.anything())
+    expect(stripe.checkout.sessions.create).toHaveBeenCalledWith(expect.objectContaining({ mode: 'subscription', line_items: [{ price: 'p_focus', quantity: 1 }, { price: 'p_five_month', quantity: 1 }], subscription_data: { metadata: expect.objectContaining({ nexora_owner: user.id }) }, custom_text: { submit: { message: expect.stringContaining('$48/month') } } }), expect.anything())
     expect(vi.mocked(stripe.checkout.sessions.create).mock.calls[0][0]!.subscription_data).not.toHaveProperty('cancel_at')
   })
   it('routes one-time extras to the account after subscribing instead of silently recurring them', async () => {
@@ -61,7 +61,7 @@ describe('recurring creative subscription lifecycle', () => {
     await expect(createCreativeCheckout(user, { plan: 'growth', scenes: 1 })).rejects.toMatchObject({ code: 'CHECKOUT_PENDING' })
   })
   it('rejects catalog mismatch and unfinished release without making a checkout', async () => {
-    const user = await account(); vi.mocked(stripe.prices.retrieve).mockResolvedValue({ ...price('p_focus'), unit_amount: 14900 } as never)
+    const user = await account(); vi.mocked(stripe.prices.retrieve).mockResolvedValue({ ...price('p_focus'), unit_amount: 1900 } as never)
     await expect(createCreativeCheckout(user, { plan: 'focus', scenes: 0 })).rejects.toMatchObject({ code: 'BILLING_CATALOG_MISMATCH' })
     vi.mocked(catalog.creativeOfferIsPreview).mockReturnValue(true)
     await expect(createCreativeCheckout(user, { plan: 'focus', scenes: 0 })).rejects.toMatchObject({ code: 'BILLING_UNAVAILABLE' })
@@ -164,7 +164,7 @@ describe('recurring creative subscription lifecycle', () => {
   })
   it('syncs creative rights independently from the old text contract', async () => {
     const user = await account(true); await syncBilling(user.id, stripe)
-    expect(billingSummary(user.id)).toMatchObject({ plan: 'focus', packagesLimit: 4, creative: { monthlyUsd: 79, monthlyScenes: 0, canChange: true } })
+    expect(billingSummary(user.id)).toMatchObject({ plan: 'focus', packagesLimit: 1, creative: { monthlyUsd: 29, monthlyScenes: 0, canChange: true } })
     sub.latest_invoice.status = 'open'; await syncBilling(user.id, stripe); expect(billingSummary(user.id).plan).toBe('free')
   })
   it('creates only a one-time payment for account top-ups without touching renewal', async () => {

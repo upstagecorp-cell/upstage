@@ -1,0 +1,7 @@
+{
+  "task_kind": "new-document",
+  "output": "pdf",
+  "signals": ["professional-report"],
+  "hard_constraints": ["Korean", "launch checklist", "status tables"],
+  "content_features": {"code_blocks": 1, "defined_terms": 8, "portrait_images": 0}
+}

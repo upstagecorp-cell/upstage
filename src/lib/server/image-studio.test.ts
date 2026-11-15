@@ -31,7 +31,7 @@ async function account(email = 'photo@example.com', paid = false) {
   const user = await authenticate({ email, password: 'fixture-password-12345' }, true)
   if (paid) {
     const periodStart = new Date(Date.now() - 60000).toISOString(), periodEnd = new Date(Date.now() + 30 * 86400000).toISOString()
-    saveRecord(user.id, 'billing', 'current', { id: 'sub_fixture', plan: 'focus', status: 'active', paid: true, periodStart, periodEnd, cancelAtPeriodEnd: false, creative: { plan: 'focus', status: 'active', paid: true, monthlyScenes: 0, monthlyUsd: 79, periodStart, periodEnd, cancelAtPeriodEnd: false, canChange: false, canCancel: true, pending: null, oneTimeScenes: 0 } })
+    saveRecord(user.id, 'billing', 'current', { id: 'sub_fixture', plan: 'focus', status: 'active', paid: true, periodStart, periodEnd, cancelAtPeriodEnd: false, creative: { plan: 'focus', status: 'active', paid: true, monthlyScenes: 0, monthlyUsd: 29, periodStart, periodEnd, cancelAtPeriodEnd: false, canChange: false, canCancel: true, pending: null, oneTimeScenes: 0, longVideoSeconds: 0 } })
   }
   return { user, cookie: sessionCookie(new Request(origin), user.id).split(';')[0] }
 }
@@ -105,7 +105,7 @@ describe('private product files and exact-version image exports', () => {
       const metadata = await sharp(output.bytes).metadata()
       expect(metadata.width).toBe(1080); expect(metadata.height).toBe(height); expect(metadata.format).toBe(format === 'jpg' ? 'jpeg' : 'png')
     }
-    expect(imageUsage(user.id)).toMatchObject({ limit: 40, used: 1, reserved: 0, remaining: 39 })
+    expect(imageUsage(user.id)).toMatchObject({ limit: 8, used: 1, reserved: 0, remaining: 7 })
     expect(fetch).not.toHaveBeenCalled()
   })
   it('does not grant free or legacy text accounts the paid image allowance', async () => {
@@ -113,10 +113,10 @@ describe('private product files and exact-version image exports', () => {
     expect(() => enqueueImageExport(user.id, project.id, { version: 1, ratio: '1:1', format: 'png', requestId: randomUUID() })).toThrow('active paid creative')
     expect(imageJobs(user.id)).toHaveLength(0)
   })
-  it('enforces the unchanged 40-image cap before any work or filesystem output', async () => {
+  it('enforces the Core 8-image cap before any work or filesystem output', async () => {
     const { user } = await account('paid@example.com', true), { project } = await design(user.id)
     const billing = getRecord<{ periodStart: string; periodEnd: string }>(user.id, 'billing', 'current')!
-    for (let i = 0; i < 40; i++) saveRecord(user.id, 'image_allowance', `fixture-${i}`, { status: 'reserved', periodStart: billing.periodStart, periodEnd: billing.periodEnd })
+    for (let i = 0; i < 8; i++) saveRecord(user.id, 'image_allowance', `fixture-${i}`, { status: 'reserved', periodStart: billing.periodStart, periodEnd: billing.periodEnd })
     expect(() => enqueueImageExport(user.id, project.id, { version: 1, ratio: '1:1', format: 'png', requestId: randomUUID() })).toThrow('fully used or reserved')
     expect(imageJobs(user.id)).toHaveLength(0)
   })

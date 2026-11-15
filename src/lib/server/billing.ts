@@ -4,13 +4,13 @@ import { missingGenerationFields } from '@/lib/business/industry'
 import { PAID_PLANS, isPaidPlan, type PaidPlanId, type BillingSummary, type CreativeBillingSummary } from '@/lib/billing/plans'
 import { database, generationConfigured, getRecord, listRecords, saveRecord, transaction } from './database'
 import { HttpError, objectInput } from './errors'
-import { creativeOfferIsPreview, CREATIVE_PLANS } from '@/lib/marketing/creative-plans'
+import { creativeOfferIsPreview, CREATIVE_PLANS, type CreativePlanId } from '@/lib/marketing/creative-plans'
 import { billingOrigin as origin, customerFor, stripeClient } from './billing-shared'
 import { creativeCheckoutAvailable, readCreativeSubscription, reconcileCreativeCheckout, recordCreativeRefund } from './creative-billing'
 export { stripeClient } from './billing-shared'
 
 interface SubscriptionState {
-  id: string; plan: PaidPlanId | null; status: string; paid: boolean
+  id: string; plan: PaidPlanId | CreativePlanId | null; status: string; paid: boolean
   periodStart: string | null; periodEnd: string | null; cancelAtPeriodEnd: boolean
   creative?: CreativeBillingSummary | null
 }
@@ -29,7 +29,7 @@ export function billingSummary(owner: string): BillingSummary {
     Date.parse(saved.periodStart) <= Date.now() && Date.parse(saved.periodEnd) > Date.now()
   const plan = active ? saved.plan! : 'free'
   const creative = saved?.creative ?? null
-  const allowance = plan === 'free' ? null : creative ? { packages: CREATIVE_PLANS.find(item => item.id === plan)!.campaigns, assetsPerPackage: 12 } : PAID_PLANS[plan]
+  const allowance = plan === 'free' ? null : creative ? { packages: CREATIVE_PLANS.find(item => item.id === creative.plan)!.campaigns, assetsPerPackage: 12 } : isPaidPlan(plan) ? PAID_PLANS[plan] : null
   const used = active ? listRecords<ExecutionJob>(owner, 'job').filter(job =>
     job.status !== 'failed' && Date.parse(job.createdAt) >= Date.parse(saved.periodStart!) && Date.parse(job.createdAt) < Date.parse(saved.periodEnd!)).length : 0
   return { plan, status: saved?.status || 'free', packagesUsed: used, packagesLimit: allowance?.packages ?? 0,

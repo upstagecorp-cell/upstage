@@ -83,7 +83,9 @@ export function parseGenerationInput(value: unknown): GenerationInput {
   const referenceSource = string(v.referenceSource ?? '', 'reference source', 2000, true)
   if (referenceText && !referenceSource) throw new InputError('Describe the source of the reference material.')
   if (v.useApprovedContext !== undefined && typeof v.useApprovedContext !== 'boolean') throw new InputError('Choose whether to use approved wording.')
-  return { assessmentId: string(v.assessmentId, 'assessment ID', 200), actionId: string(v.actionId, 'action ID', 200), idempotencyKey, counts, referenceText: referenceText || undefined, referenceSource: referenceText ? referenceSource : undefined, replacesJobId: v.replacesJobId ? string(v.replacesJobId, 'previous job ID', 200) : undefined, useApprovedContext: v.useApprovedContext === true ? true : undefined }
+  const longVideoSeconds = v.longVideoSeconds == null ? undefined : integer(v.longVideoSeconds, 'long video length')
+  if (longVideoSeconds !== undefined && ![30, 45, 60, 90].includes(longVideoSeconds)) throw new InputError('Choose a 30, 45, 60, or 90 second video.')
+  return { assessmentId: string(v.assessmentId, 'assessment ID', 200), actionId: string(v.actionId, 'action ID', 200), idempotencyKey, counts, referenceText: referenceText || undefined, referenceSource: referenceText ? referenceSource : undefined, replacesJobId: v.replacesJobId ? string(v.replacesJobId, 'previous job ID', 200) : undefined, useApprovedContext: v.useApprovedContext === true ? true : undefined, longVideoSeconds: longVideoSeconds as GenerationInput['longVideoSeconds'] }
 }
 export function validateGeneratedPackage(value: unknown, counts: AssetCounts, expectedLocale: AppLocale, hasReference = false): GeneratedPackage {
   const v = object(value)

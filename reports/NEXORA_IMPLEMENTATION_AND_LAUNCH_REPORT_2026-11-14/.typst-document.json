@@ -1,0 +1,10 @@
+{
+  "entry": "main.typ",
+  "metadata": {
+    "author": "Manus AI",
+    "subtitle": "2026년 11월 14일 기준",
+    "title": "NEXORA 구현 현황 및 실제 출시 준비 보고서"
+  },
+  "mode": "report",
+  "theme": "report-theme.typ"
+}
