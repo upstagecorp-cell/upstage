@@ -22,16 +22,13 @@ export function PricingPlans() {
       <p className="nx-price-description">{plan.description}</p>
       <button className={`nx-button mt-7 w-full ${plan.id === 'growth' ? 'nx-button-lime' : ''}`} disabled>Creative plans coming soon <ArrowUpRight size={15}/></button>
       <ul>{[
-        `${plan.campaigns} promotion${plan.campaigns === 1 ? '' : 's'} with one offer, goal, and channel at a time`,
-        `${plan.images} new image designs · shared monthly pool`,
-        `${plan.videos} short finished videos · up to 8s each`,
-        'AI-generated images or your own product photos',
-        'Captions, voiceover, brand colors, and logo',
-        '1:1, 4:5, and 9:16 image exports from the same design',
-        'Edit and re-export existing media without a new generation',
-        '30s+ promotion videos available as one-time purchases',
+        ...plan.publicHighlights,
+        `${plan.images} image designs · shared monthly pool`,
+        `${plan.videos} short video edits · up to 8s each`,
+        'Direct edits, exact-version approval, and existing-result reuse',
+        '30s+ finished promotion videos available as one-time purchases',
       ].map(item => <li key={item}><Check size={15}/>{item}</li>)}</ul>
-      <p className="nx-price-note">Planned monthly auto-renewal until you cancel · one business · one owner. Long-video packs are charged once and expire after 30 days. Advertising budget is not included; you pay Meta, Google, TikTok, or another platform directly. USD before tax. Not available for purchase yet.</p>
+      <p className="nx-price-note">{plan.usageNote} Monthly auto-renewal until you cancel · one business · one owner. Long-video packs are charged once and expire after 30 days. Advertising budget is not included; you pay Meta, Google, TikTok, or another platform directly. USD before tax. Not available for purchase yet.</p>
     </article>)}
   </div>
 }

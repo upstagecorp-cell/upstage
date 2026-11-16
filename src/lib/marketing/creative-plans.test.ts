@@ -4,7 +4,8 @@ import { creativeOfferIsPreview, quoteCreativeOffer } from './creative-plans'
 
 describe('customer creative offer estimates', () => {
   it('does not force a subscription or motion purchase on the first campaign', () => {
-    expect(quoteCreativeOffer('first-campaign', 0)).toMatchObject({ recurring: false, baseUsd: 59, motionUsd: 0, totalUsd: 59, purchasedScenes: 0, items: [] })
+    expect(quoteCreativeOffer('first-campaign', 0)).toMatchObject({ recurring: false, baseUsd: 19, motionUsd: 0, totalUsd: 19, purchasedScenes: 0, items: [] })
+    expect(() => quoteCreativeOffer('first-campaign', 1)).toThrow('does not include AI motion scenes')
   })
 
   it('separates the monthly renewal from optional one-time motion', () => {

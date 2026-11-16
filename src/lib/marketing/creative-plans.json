@@ -1,6 +1,6 @@
 {
   "status": "preview",
-  "version": "creative-v5-2026-11-15-price-aligned",
+  "version": "creative-v6-2026-11-16-product-rules-draft",
   "renewal": "automatic_until_canceled",
   "quantityChanges": "next_billing_period",
   "motionBilling": ["monthly", "one_time"],
@@ -9,12 +9,18 @@
   "maxVideoSeconds": 90,
   "entryOffer": {
     "id": "first-campaign",
-    "name": "First promotion",
-    "oneTimeUsd": 59,
-    "campaigns": 1,
-    "images": 8,
-    "videos": 2,
-    "expiryDays": 30
+    "name": "First Promotion Starter",
+    "oneTimeUsd": 19,
+    "type": "optional_one_time_entry",
+    "briefs": 1,
+    "hooks": 3,
+    "copyVariants": 3,
+    "ctas": 1,
+    "images": 0,
+    "videos": 0,
+    "expiryDays": 14,
+    "headline": "Clarify the first marketing move before subscribing.",
+    "description": "A one-time business context summary, promotion brief, hooks, copy variants, and CTA. No automatic subscription and no media production included."
   },
   "motionSceneSeconds": 8,
   "motionPacks": [
@@ -40,8 +46,10 @@
       "images": 8,
       "videos": 2,
       "motionSeconds": 0,
-      "headline": "One promotion at a time.",
-      "description": "One offer, one goal, one channel, with ready-to-review text, image directions, and short videos."
+      "headline": "Finish the next marketing move.",
+      "description": "Connect business context, a priority marketing question, a reviewable result, actual use, and the next question in one self-serve workflow.",
+      "publicHighlights": ["Business and marketing problem framing", "AI drafts, direct edits, and exact-version approval", "Actual use and measured-result records", "Basic monthly AI and media allowance"],
+      "usageNote": "Best for one owner building a repeatable marketing habit. Allowances are preview limits until cost and usage are validated."
     },
     {
       "id": "growth",
@@ -51,8 +59,10 @@
       "images": 20,
       "videos": 4,
       "motionSeconds": 0,
-      "headline": "A repeatable monthly rhythm.",
-      "description": "Two promotions with saved brand context, channel-ready variations, and measured results."
+      "headline": "Improve the message through more iterations.",
+      "description": "Keep the same problem-to-result workflow while adding more AI variations, channel-ready versions, and media capacity.",
+      "publicHighlights": ["Everything in Core", "More AI drafts, variations, and re-analysis", "Channel-specific copy and CTA variants", "Larger image, short-video, and history allowance"],
+      "usageNote": "Best for testing more than one execution path without turning every variation into a new subscription."
     },
     {
       "id": "pro",
@@ -62,8 +72,10 @@
       "images": 40,
       "videos": 8,
       "motionSeconds": 0,
-      "headline": "A fuller month of promotion.",
-      "description": "Four promotions, two channels, approval history, and a monthly results summary."
+      "headline": "Run a higher-volume learning loop.",
+      "description": "Operate the full problem-to-result workflow across more messages and channels with the highest preview usage capacity.",
+      "publicHighlights": ["Everything in Core", "Highest AI and media usage capacity", "More channel and message variations", "Longer work, approval, and usage history"],
+      "usageNote": "Best for owners who repeatedly create, review, use, and learn from multiple marketing executions."
     }
   ]
 }

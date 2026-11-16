@@ -32,6 +32,9 @@ export function quoteCreativeOffer(offerId: CreativeOfferId, requestedScenes: nu
   if (!Number.isSafeInteger(requestedScenes) || requestedScenes < 0 || requestedScenes > 50) {
     throw new RangeError('Choose between 0 and 50 whole AI scenes.')
   }
+  if (offerId === FIRST_CAMPAIGN.id && requestedScenes !== 0) {
+    throw new RangeError('First Promotion Starter does not include AI motion scenes. Choose a monthly plan or buy a one-time pack after subscribing.')
+  }
   const offer = offerId === FIRST_CAMPAIGN.id ? FIRST_CAMPAIGN : CREATIVE_PLANS.find(plan => plan.id === offerId)
   if (!offer) throw new RangeError('Choose a listed creative offer.')
   if (!['monthly', 'one_time'].includes(motionBilling) || (offerId === 'first-campaign' && motionBilling === 'monthly')) {

@@ -11,6 +11,7 @@ import { HttpError, invalid, objectInput, textInput, versionInput } from './erro
 import { activeProvider, boundedConfig, generateFromProvider, ProviderError, providerModel, type TokenUsage } from './provider'
 import { missingGenerationFields } from '@/lib/business/industry'
 import { approvedWordingForProfile } from '@/lib/business/approved-wording'
+import { buildSecondWorkContext } from '@/lib/business/second-work'
 import { requireGenerationAllowance } from './billing'
 
 function requiredRecord<T>(owner: string, kind: string, id: string): T {
@@ -114,7 +115,14 @@ export async function generate(owner: string, raw: unknown): Promise<WorkspaceDa
     limit(`generation:${owner}`, boundedConfig('NEXORA_GENERATIONS_PER_HOUR', 10, 1, 1000), 60 * 60_000)
     const assessment = requiredRecord<Assessment>(owner, 'assessment', job.assessmentId)
     const action = assessment.recommendedActions.find(item => item.id === job.actionId)!
-    const request = buildGenerationRequest(assessment.profileSnapshot, assessment, action, input, job.approvedWordingReferences ?? [])
+    const secondWorkContext = buildSecondWorkContext({
+      assessment,
+      previousAssessments: listRecords<Assessment>(owner, 'assessment'),
+      assets: listRecords<Asset>(owner, 'asset'),
+      executions: listRecords<AssetExecution>(owner, 'execution'),
+      results: listRecords<Result>(owner, 'result'),
+    })
+    const request = buildGenerationRequest(assessment.profileSnapshot, assessment, action, input, job.approvedWordingReferences ?? [], secondWorkContext)
     const response = await generateFromProvider(request)
     tokenUsage = response.usage
     let generated: GeneratedPackage
