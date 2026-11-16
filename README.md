@@ -50,7 +50,7 @@ Text generation is the only AI-provider integration; the provider adapter curren
 
 ## Storage and compatibility
 
-The server creates an additive schema migration in .data/nexora.sqlite (ignored by Git). SQLite WAL mode is enabled. Use persistent storage with a single Node.js application instance; ephemeral hosting or separate disks across instances will not preserve a consistent account database.
+The server creates an additive schema migration in .data/nexora.sqlite (ignored by Git). SQLite WAL mode is enabled. Supabase is now connected through server-only variables; `/api/health/supabase` verifies the REST gateway, the initial PostgreSQL schema is prepared with RLS enabled, and the private `nexora-private` Storage bucket is prepared. The request path remains SQLite until the asynchronous repository conversion is completed. Use `npm run supabase:import-sqlite` only after backing up a real SQLite file. Use persistent storage with a single Node.js application instance until that conversion is complete; ephemeral hosting or separate disks across instances will not preserve a consistent account database.
 
 Existing startup-platform-store browser records are not deleted, rewritten, automatically uploaded, or converted to USD. The workspace offers explicit backup and import into a read-only legacy archive. Historic money stays KRW. Historic scores are not interpreted as validated health or mixed into new assessments. Raw source text stays intact while the interface stays English.
 
