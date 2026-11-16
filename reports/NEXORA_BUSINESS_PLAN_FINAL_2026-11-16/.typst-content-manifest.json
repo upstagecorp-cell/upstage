@@ -1,0 +1,13 @@
+{
+  "task_kind": "markdown-to-pdf",
+  "output": "pdf",
+  "signals": ["korean-business-plan"],
+  "hard_constraints": ["Korean CJK typography", "professional report", "current implementation and launch plan"],
+  "content_features": {
+    "code_blocks": 4,
+    "defined_terms": 24,
+    "portrait_images": 0,
+    "tables": 18,
+    "long_document": true
+  }
+}
