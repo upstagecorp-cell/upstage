@@ -1,126 +1,133 @@
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { Text, View } from 'react-native';
-import { Button, C, Card, Copy, Eyebrow, Heading, Logo, Page, SectionTitle, s } from '@/components/nexora/ui';
-import { WorkspaceState } from '@/components/nexora/workspace-state';
-import { useNexora } from '@/lib/nexora/context';
+import { Pressable, Text, View } from 'react-native';
+import { C, Copy, Eyebrow, Logo, Page, s } from '@/components/nexora/ui';
+import { WorkspaceState, WorkspaceUnavailable } from '@/components/nexora/workspace-state';
+import { client, useNexora } from '@/lib/nexora/context';
 import { approvedAssets, currentWeekStart, formatPlanDate, plansForCurrentWeek, weekProgress } from '@/lib/nexora/planning';
 
-function StatusPill({ label, completed = false }: { label: string; completed?: boolean }) {
-  return <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5, alignSelf: 'flex-start', paddingHorizontal: 9, paddingVertical: 5, borderRadius: 20, backgroundColor: completed ? '#eaf2df' : '#f1f3ef' }}>
-    <Ionicons name={completed ? 'checkmark-circle' : 'time-outline'} size={13} color={completed ? C.green : C.muted} />
-    <Text style={{ color: completed ? C.green : C.muted, fontSize: 11, fontWeight: '700', textTransform: 'capitalize' }}>{label.replace('_', ' ')}</Text>
-  </View>;
+function todayLabel() {
+  return new Intl.DateTimeFormat('en-US', { weekday: 'long', month: 'long', day: 'numeric' }).format(new Date());
+}
+
+function QuietAction({ title, onPress }: { title: string; onPress: () => void }) {
+  return <Pressable accessibilityRole="button" onPress={onPress} style={({ pressed }) => ({ minHeight: 44, flexDirection: 'row', alignItems: 'center', gap: 7, opacity: pressed ? 0.72 : 1 })}>
+    <Text style={{ color: C.green, fontSize: 13, fontWeight: '800' }}>{title}</Text>
+    <Ionicons name="arrow-forward" size={17} color={C.green} />
+  </Pressable>;
 }
 
 export default function Home() {
   const { workspace, session, loading } = useNexora();
-  const assessment = workspace?.assessments.at(-1);
-  const action = assessment?.recommendedActions[0];
+  const action = workspace?.assessments.at(-1)?.recommendedActions[0];
   const weekGoals = workspace ? plansForCurrentWeek(workspace.weeklyPlans) : [];
   const progress = weekProgress(weekGoals);
-  const approved = workspace ? approvedAssets(workspace.assets).slice(0, 2) : [];
-  const directionLabel = workspace?.profile?.name?.trim();
-  const canNavigateToOnboarding = !session || (!!workspace && !loading);
+  const approved = workspace ? approvedAssets(workspace.assets).slice(0, 1) : [];
+  const canStartCheck = !!client.origin && !!session && !!workspace && !loading;
 
-  function openDirection() {
-    router.push(session ? '/onboarding' : '/login');
-  }
+  if (!session || !workspace) return <Page>
+    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+      <Logo />
+      <Text style={{ color: C.muted, fontSize: 10, fontWeight: '800', letterSpacing: 1 }}>{todayLabel().toUpperCase()}</Text>
+    </View>
+    <View style={{ gap: 8, paddingTop: 6 }}>
+      <Text accessibilityRole="header" style={{ color: C.ink, fontSize: 32, lineHeight: 38, fontWeight: '700', letterSpacing: -1.3 }}>A clearer week{ '\n' }starts with focus.</Text>
+      <Copy>Less second-guessing. One useful step at a time.</Copy>
+    </View>
+    <WorkspaceUnavailable />
+    <View style={{ gap: 7, paddingTop: 2 }}>
+      <Eyebrow>THE NEXORA RHYTHM</Eyebrow>
+      {[
+        ['01', 'Find your focus', 'Name the business question that matters now.'],
+        ['02', 'Choose one next move', 'Turn your priority into a step for this week.'],
+        ['03', 'Learn from what you do', 'Bring real use and results back into your plan.'],
+      ].map(([number, title, description], index) => <View key={number} style={{ minHeight: 65, flexDirection: 'row', alignItems: 'center', gap: 13, borderTopWidth: 1, borderTopColor: '#e6e9e2', marginTop: index === 0 ? 5 : 0 }}>
+        <Text style={{ width: 27, color: '#84927f', fontSize: 11, fontWeight: '800' }}>{number}</Text>
+        <View style={{ flex: 1, gap: 2 }}>
+          <Text style={{ color: C.ink, fontSize: 13, lineHeight: 18, fontWeight: '700' }}>{title}</Text>
+          <Text style={{ color: C.muted, fontSize: 12, lineHeight: 17 }}>{description}</Text>
+        </View>
+      </View>)}
+    </View>
+  </Page>;
 
   return <Page>
-    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
+    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
       <Logo />
-      <Text numberOfLines={1} style={{ maxWidth: '58%', fontSize: 10, fontWeight: '800', color: C.muted, letterSpacing: 1.2 }}>YOUR WORKSPACE</Text>
-    </View>
-
-    <View style={{ gap: 8, paddingTop: 3 }}>
-      <Eyebrow>{directionLabel ? `A SPACE FOR ${directionLabel.toUpperCase()}` : 'MAKE SPACE FOR PROGRESS'}</Eyebrow>
-      <Heading>Small moves.{ '\n' }Real momentum.</Heading>
-      <Copy>Keep your next thoughtful step close, and make this week count.</Copy>
-    </View>
-
-    <View style={{ backgroundColor: C.dark, borderRadius: 25, padding: 23, gap: 15, overflow: 'hidden' }}>
-      <View pointerEvents="none" style={{ position: 'absolute', right: -44, top: -62, width: 188, height: 188, borderRadius: 100, borderWidth: 1, borderColor: '#ffffff22' }} />
-      <View pointerEvents="none" style={{ position: 'absolute', right: -11, top: -30, width: 124, height: 124, borderRadius: 70, borderWidth: 1, borderColor: '#ffffff22' }} />
-      <Eyebrow light>YOUR NEXT MOVE</Eyebrow>
-      <Text accessibilityRole="header" style={{ maxWidth: 300, color: '#f6f8ef', fontSize: 24, lineHeight: 30, fontWeight: '700', letterSpacing: -0.8 }}>
-        {action?.title ?? (workspace?.profile ? 'Bring your direction into focus.' : 'Find your next clear step.')}
-      </Text>
-      <Text style={{ color: '#d1ddd2', fontSize: 14, lineHeight: 21 }}>
-        {action?.reason ?? (workspace?.profile ? 'Run a business check to turn your current priority into one practical next move.' : 'Start with what is on your mind. A few details can help shape a useful first direction.')}
-      </Text>
-      <View style={{ alignSelf: 'flex-start', marginTop: 1 }}>
-        <Button
-          title={action ? 'Open your plan' : session ? 'Find your direction' : 'Sign in to begin'}
-          onPress={action ? () => router.push('/(tabs)/plan') : openDirection}
-          disabled={!action && !canNavigateToOnboarding}
-          icon="arrow-forward"
-        />
+      <View style={{ width: 38, height: 38, borderRadius: 14, backgroundColor: '#e8eddf', alignItems: 'center', justifyContent: 'center' }}>
+        <Ionicons name="leaf-outline" size={19} color={C.green} />
       </View>
+    </View>
+
+    <View style={{ gap: 8, paddingTop: 5 }}>
+      <Eyebrow>{todayLabel().toUpperCase()}</Eyebrow>
+      <Text accessibilityRole="header" style={{ color: C.ink, fontSize: 32, lineHeight: 37, fontWeight: '700', letterSpacing: -1.3 }}>Your week,{ '\n' }with more clarity.</Text>
+      <Copy>One thoughtful move can change the shape of a week.</Copy>
+    </View>
+
+    <View style={{ backgroundColor: C.dark, borderRadius: 25, padding: 22, gap: 13, overflow: 'hidden' }}>
+      <View pointerEvents="none" style={{ position: 'absolute', right: -70, top: -80, width: 210, height: 210, borderRadius: 110, borderWidth: 1, borderColor: '#d5ef9122' }} />
+      <View pointerEvents="none" style={{ position: 'absolute', right: -36, top: -46, width: 142, height: 142, borderRadius: 75, borderWidth: 1, borderColor: '#d5ef9122' }} />
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+        <View style={{ width: 7, height: 7, borderRadius: 4, backgroundColor: C.lime }} />
+        <Text style={{ color: '#c7d8bd', fontSize: 10, fontWeight: '800', letterSpacing: 1.5 }}>YOUR NEXT MOVE</Text>
+      </View>
+      <Text style={{ color: '#f6f8ef', fontSize: 23, lineHeight: 29, fontWeight: '700', letterSpacing: -0.55 }}>
+        {action?.title ?? (workspace?.profile ? 'Find the clearest opportunity.' : 'Your next step starts here.')}
+      </Text>
+      <Text style={{ color: '#d1ddd2', fontSize: 13, lineHeight: 20 }}>
+        {action?.reason ?? (workspace ? 'Your saved business direction is ready for a focused check.' : 'A focused recommendation will appear here when your workspace is connected.')}
+      </Text>
+      {action ? <View style={{ alignSelf: 'flex-start', paddingTop: 1 }}><QuietAction title="See the plan" onPress={() => router.push('/(tabs)/plan')} /></View> : canStartCheck ? <View style={{ alignSelf: 'flex-start', paddingTop: 1 }}><QuietAction title="Start a business check" onPress={() => router.push('/onboarding')} /></View> : null}
     </View>
 
     <WorkspaceState />
 
-    <View style={{ gap: 14 }}>
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end', gap: 10 }}>
-        <SectionTitle title="This week" subtitle="A manageable step is still progress." />
-        <Ionicons accessibilityElementsHidden name="calendar-outline" color={C.green} size={23} />
+    <View style={{ gap: 13 }}>
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+        <View style={{ gap: 4 }}>
+          <Text accessibilityRole="header" style={s.section}>This week</Text>
+          <Copy>{progress.total ? `${progress.completed} of ${progress.total} steps complete` : 'Choose one meaningful thing to move forward.'}</Copy>
+        </View>
+        <Pressable accessibilityRole="button" accessibilityLabel="Open your weekly plan" onPress={() => router.push('/(tabs)/plan')} style={{ minWidth: 44, minHeight: 44, alignItems: 'center', justifyContent: 'center' }}>
+          <Ionicons name="arrow-forward-circle-outline" size={27} color={C.green} />
+        </Pressable>
       </View>
-      <Card style={{ gap: 15 }}>
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
+
+      <View style={{ backgroundColor: C.white, borderWidth: 1, borderColor: C.border, borderRadius: 21, padding: 17, gap: 14 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 13 }}>
+          <View accessibilityLabel={progress.total ? `${progress.completed} of ${progress.total} goals complete` : 'No goals saved for this week'} style={{ width: 54, height: 54, borderRadius: 27, borderWidth: 4, borderColor: progress.total && progress.completed === progress.total ? '#9cbd70' : '#e8eddf', alignItems: 'center', justifyContent: 'center' }}>
+            <Text style={{ color: C.green, fontSize: 12, fontWeight: '800' }}>{progress.total ? `${Math.round(progress.fraction * 100)}%` : '—'}</Text>
+          </View>
           <View style={{ flex: 1, gap: 4 }}>
-            <Text style={s.cardTitle}>{progress.total ? `${progress.completed} of ${progress.total} goals complete` : 'Make room for one meaningful action'}</Text>
-            <Copy>{workspace ? `Week of ${formatPlanDate(currentWeekStart())}` : 'Your saved weekly goals will appear here.'}</Copy>
-          </View>
-          <View accessibilityLabel={progress.total ? `${progress.completed} of ${progress.total} weekly goals complete` : 'No weekly goals yet'} style={{ width: 44, height: 44, borderRadius: 15, backgroundColor: '#edf2e6', alignItems: 'center', justifyContent: 'center' }}>
-            <Ionicons name={progress.total && progress.completed === progress.total ? 'checkmark-done-outline' : 'leaf-outline'} size={22} color={C.green} />
+            <Text style={s.cardTitle}>{progress.total ? 'Your weekly rhythm' : 'A fresh page'}</Text>
+            <Copy>{`Week of ${formatPlanDate(currentWeekStart())}`}</Copy>
           </View>
         </View>
-        {progress.total > 0 && <View accessibilityRole="progressbar" accessibilityLabel="Weekly goal progress" accessibilityValue={{ min: 0, max: progress.total, now: progress.completed }} style={{ height: 8, backgroundColor: '#e8ece5', borderRadius: 10, overflow: 'hidden' }}>
-          <View style={{ width: `${Math.round(progress.fraction * 100)}%`, height: '100%', backgroundColor: C.green, borderRadius: 10 }} />
+
+        {weekGoals.length ? <View style={{ borderTopWidth: 1, borderTopColor: C.border, paddingTop: 5 }}>
+          {weekGoals.slice(0, 3).map((goal, index) => <View key={goal.id} accessible accessibilityRole="text" accessibilityLabel={`${goal.title}. ${goal.status.replace('_', ' ')}. Due ${formatPlanDate(goal.dueDate)}.`} style={{ minHeight: 58, flexDirection: 'row', alignItems: 'center', gap: 11, borderBottomWidth: index < Math.min(weekGoals.length, 3) - 1 ? 1 : 0, borderBottomColor: '#edf0ea' }}>
+            <Ionicons name={goal.status === 'completed' ? 'checkmark-circle' : goal.status === 'in_progress' ? 'radio-button-on' : 'ellipse-outline'} size={19} color={goal.status === 'completed' ? C.green : '#879388'} />
+            <Text numberOfLines={2} style={{ flex: 1, color: C.ink, fontSize: 13, lineHeight: 18, fontWeight: '600' }}>{goal.title}</Text>
+            <Text style={{ color: C.muted, fontSize: 11 }}>{formatPlanDate(goal.dueDate)}</Text>
+          </View>)}
+          {weekGoals.length > 3 && <QuietAction title={`View all ${weekGoals.length} goals`} onPress={() => router.push('/(tabs)/plan')} />}
+        </View> : <View style={{ borderTopWidth: 1, borderTopColor: C.border, paddingTop: 11, gap: 2 }}>
+          <Text style={s.cardTitle}>{workspace ? 'No goals on the calendar yet' : client.origin && !session ? 'Your plan is ready when you are' : 'Your plan will take shape here'}</Text>
+          <Copy>{workspace ? 'Add one small, clear step when you’re ready.' : client.origin && !session ? 'Sign in to see your saved goals.' : 'Connect your workspace to load saved goals.'}</Copy>
+          {action && <QuietAction title="Add a weekly goal" onPress={() => router.push('/goal')} />}
+          {!action && canStartCheck && <QuietAction title="Set your direction" onPress={() => router.push('/onboarding')} />}
         </View>}
-        {weekGoals.length > 0 ? weekGoals.slice(0, 2).map(goal => <View key={goal.id} style={{ borderTopWidth: 1, borderTopColor: C.border, paddingTop: 12, gap: 7 }}>
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 }}>
-            <Text style={[s.cardTitle, { flex: 1 }]}>{goal.title}</Text>
-            <StatusPill label={goal.status} completed={goal.status === 'completed'} />
-          </View>
-          <Copy>Due {formatPlanDate(goal.dueDate)}{goal.evaluationMetric ? ` · ${goal.evaluationMetric}` : ''}</Copy>
-        </View>) : <Copy>{workspace ? (action ? 'No goals saved for this week yet. Add one when you are ready.' : 'Complete a business check to connect a weekly goal to your next move.') : 'Sign in to see your saved plans and goals.'}</Copy>}
-        <Button
-          title={weekGoals.length ? 'View weekly plan' : action ? 'Add a weekly goal' : 'Explore your plan'}
-          secondary
-          onPress={() => weekGoals.length || action ? router.push(action && !weekGoals.length ? '/goal' : '/(tabs)/plan') : openDirection()}
-          disabled={!!session && !workspace}
-        />
-      </Card>
+      </View>
     </View>
 
-    {approved.length > 0 && <View style={{ gap: 14 }}>
-      <SectionTitle title="Ready when you are" subtitle="Approved versions saved in this workspace." />
-      {approved.map(({ asset, version }) => <Card key={`${asset.id}-${version.version}`} style={{ flexDirection: 'row', alignItems: 'center', gap: 13 }}>
-        <View style={{ width: 42, height: 42, borderRadius: 14, backgroundColor: '#edf2e6', alignItems: 'center', justifyContent: 'center' }}>
-          <Ionicons name="checkmark-circle-outline" size={22} color={C.green} />
-        </View>
-        <View style={{ flex: 1, gap: 4 }}>
-          <Text style={s.cardTitle} numberOfLines={1}>{version.title || asset.kind}</Text>
-          <Text numberOfLines={2} style={s.copy}>{asset.channel} · Approved v{version.version}{version.body ? ` · ${version.body}` : ''}</Text>
-        </View>
-        <Ionicons accessibilityElementsHidden name="chevron-forward" size={18} color={C.muted} />
-      </Card>)}
-      <Button title="Review your work" secondary onPress={() => router.push('/(tabs)/create')} />
-    </View>}
-
-    <View style={{ flexDirection: 'row', gap: 12 }}>
-      <Card style={{ flex: 1, backgroundColor: '#edf2e6', padding: 16 }}>
-        <Ionicons name="compass-outline" size={21} color={C.green} />
-        <Text style={s.cardTitle}>Choose with clarity</Text>
-        <Copy>Turn a business question into a useful next step.</Copy>
-      </Card>
-      <Card style={{ flex: 1, padding: 16 }}>
-        <Ionicons name="trending-up-outline" size={21} color={C.green} />
-        <Text style={s.cardTitle}>Learn as you go</Text>
-        <Copy>Bring real use and results back into focus.</Copy>
-      </Card>
-    </View>
+    {approved.length > 0 && <Pressable accessibilityRole="button" accessibilityLabel="Review your approved work" onPress={() => router.push('/(tabs)/create')} style={({ pressed }) => ({ flexDirection: 'row', alignItems: 'center', gap: 13, minHeight: 78, paddingHorizontal: 15, borderRadius: 18, backgroundColor: '#e9efe1', opacity: pressed ? 0.8 : 1 })}>
+      <View style={{ width: 39, height: 39, borderRadius: 13, backgroundColor: '#ffffff', alignItems: 'center', justifyContent: 'center' }}><Ionicons name="checkmark-circle-outline" size={21} color={C.green} /></View>
+      <View style={{ flex: 1, gap: 4 }}>
+        <Text style={{ color: C.ink, fontSize: 13, fontWeight: '800' }}>Approved and ready</Text>
+        <Text numberOfLines={1} style={{ color: C.muted, fontSize: 12 }}>{approved[0].version.title || approved[0].asset.kind} · {approved[0].asset.channel}</Text>
+      </View>
+      <Ionicons name="chevron-forward" size={18} color={C.green} />
+    </Pressable>}
   </Page>;
 }

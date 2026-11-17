@@ -31,4 +31,14 @@ describe('security-sensitive screen wiring', () => {
     expect(account).toContain('mobile session family'); expect(account).toContain('other mobile families and web sessions');
     expect(account).not.toMatch(/all devices|sign out everywhere/i);
   });
+  it('does not offer email sign-in while the mobile API has no public origin', () => {
+    const state = source('components/nexora/workspace-state.tsx');
+    expect(state).toContain('!waiting && !error && !session && !disconnected');
+    expect(state).toContain('This preview is not connected to NEXORA’s mobile service');
+    const home = source('app/(tabs)/index.tsx');
+    expect(home).not.toContain('Sign in to begin');
+    expect(home).toContain('if (!session || !workspace) return <Page>');
+    const plan = source('app/(tabs)/plan.tsx');
+    expect(plan).toContain('if (!session || !workspace) return <Page>');
+  });
 });
