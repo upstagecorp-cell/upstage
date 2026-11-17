@@ -1,5 +1,9 @@
 # NEXORA
 
+> 2026-11-17: Mobile development lives in `apps/mobile` in this same repository. The Expo app and server-side repository/token foundations are **not yet connected to production**; see [mobile implementation status](MOBILE_IMPLEMENTATION_STATUS.md) and the [repository workflow](MOBILE_REPOSITORY_WORKFLOW.md) before using them.
+
+> Mobile auth HTTP routes are disabled in every environment: all seven Next-supported methods return a fixed 503 with no-store; the separate `handleAuth` function is for internal tests only. Unsupported methods such as TRACE may be rejected before the handler. Block the entire auth path at the network edge as a deployment prerequisite. The live web account store is SQLite; PostgreSQL account migration and distributed rate limiting are incomplete. See [mobile auth boundary and test restrictions](src/lib/server/mobile-api/README.md).
+
 > 2026-11-15: [Project review and improvements](PROJECT_REVIEW_2026-11-14.md): aligned Core $29 / Plus $59 / Pro $99 creative plans, separated 8-second AI motion source packs from finished 30–90 second video purchases, added channel-result CTAs, and disclosed that NEXORA does not pay ad spend or guarantee performance. Creative checkout remains closed until provider and Stripe verification.
 
 > 2026-11-12: [Launch checklist actions](LAUNCH_ACTIONS_2026-11-12.md): private photo/logo files, saved/approved image designs, real PNG/JPG exports, an image worker, online backups and isolated restore, and health checks. Prices, allowances, renewal contracts, and launch switches are unchanged. [Local operations](MEDIA_OPERATIONS.md).
@@ -50,7 +54,7 @@ Text generation is the only AI-provider integration; the provider adapter curren
 
 ## Storage and compatibility
 
-The server creates an additive schema migration in .data/nexora.sqlite (ignored by Git). SQLite WAL mode is enabled. Supabase is now connected through server-only variables; `/api/health/supabase` verifies the REST gateway, the initial PostgreSQL schema is prepared with RLS enabled, and the private `nexora-private` Storage bucket is prepared. The request path remains SQLite until the asynchronous repository conversion is completed. Use `npm run supabase:import-sqlite` only after backing up a real SQLite file. Use persistent storage with a single Node.js application instance until that conversion is complete; ephemeral hosting or separate disks across instances will not preserve a consistent account database.
+The server creates an additive schema migration in .data/nexora.sqlite (ignored by Git). SQLite WAL mode is enabled. Supabase adapters, a REST health check, an initial PostgreSQL schema and private Storage setup exist, but actual Supabase connectivity and permissions were not verified in this work. The request path remains SQLite until the asynchronous repository conversion is completed. Use `npm run supabase:import-sqlite` only after backing up a real SQLite file. Use persistent storage with a single Node.js application instance until that conversion is complete; ephemeral hosting or separate disks across instances will not preserve a consistent account database.
 
 Existing startup-platform-store browser records are not deleted, rewritten, automatically uploaded, or converted to USD. The workspace offers explicit backup and import into a read-only legacy archive. Historic money stays KRW. Historic scores are not interpreted as validated health or mixed into new assessments. Raw source text stays intact while the interface stays English.
 
@@ -67,6 +71,6 @@ npm.cmd run test:run
 npm.cmd run build
 ```
 
-Vitest uses its native config loader to avoid Windows sandbox ancestor scans. Provider/payment/email fixtures make no live charges or deliveries and do not prove external account connectivity. Current verification: 90 tests in 14 files, TypeScript, Next.js 16.4.6 production build, and Chromium desktop/mobile workflow checks including pricing, disabled unconfigured checkout, billing status, recovery errors, and 320–1440px pricing layouts. Runtime dependency audit: zero known vulnerabilities at this check; development tooling has seven moderate findings. See [launch verification](reviews/2026-11-10/launch/VERIFICATION.md) for results and limits, [SEVEN_DAY_LAUNCH_PLAN.md](SEVEN_DAY_LAUNCH_PLAN.md) for current release conditions, and the older reports for earlier work.
+Vitest uses its native config loader to avoid Windows sandbox ancestor scans. Provider/payment/email fixtures make no live charges or deliveries and do not prove external account connectivity. Earlier November 10 verification: 90 tests in 14 files, TypeScript, Next.js 16.4.6 production build, and Chromium desktop/mobile workflow checks including pricing, disabled unconfigured checkout, billing status, recovery errors, and 320–1440px pricing layouts. Runtime dependency audit: zero known vulnerabilities at this check; development tooling has seven moderate findings. See [launch verification](reviews/2026-11-10/launch/VERIFICATION.md) for results and limits, [SEVEN_DAY_LAUNCH_PLAN.md](SEVEN_DAY_LAUNCH_PLAN.md) for current release conditions, and the older reports for earlier work.
 
 Read current Next.js guides in node_modules/next/dist/docs/ before editing Next code, as AGENTS.md requires.

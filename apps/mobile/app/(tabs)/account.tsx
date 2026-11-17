@@ -1,0 +1,13 @@
+import { router } from 'expo-router';
+import { useState } from 'react';
+import { Text, View } from 'react-native';
+import { Button, Card, Copy, ErrorText, Eyebrow, Heading, Page, SectionTitle, s } from '@/components/nexora/ui';
+import { client, message, useNexora } from '@/lib/nexora/context';
+export default function Account(){const {session,signOut}=useNexora();const [busy,setBusy]=useState(false);const [confirm,setConfirm]=useState(false);const [error,setError]=useState('');
+ async function logout(all:boolean){setBusy(true);setError('');try{await signOut(all);}catch(e){setError(message(e));}finally{setBusy(false);setConfirm(false);}}
+ return <Page><View style={{gap:9}}><Eyebrow>YOUR ACCOUNT</Eyebrow><Heading>A space that’s{ '\n' }yours.</Heading><Copy>Your account and the settings that support your work.</Copy></View><Card><Text style={s.cardTitle}>{session ? 'Signed in' : 'Not signed in'}</Text><Copy>{session?.user.email ?? 'Sign in to access your saved workspace.'}</Copy>{!session&&<Button title="Sign in with email" onPress={()=>router.push('/login')}/>}</Card>{!!error&&<ErrorText>{error}</ErrorText>}
+ <SectionTitle title="Connection"/><Card><Text style={s.cardTitle}>{client.origin?'API origin configured':'Mobile service not connected'}</Text><Copy>{client.origin?'Your workspace connects through the mobile API. Feature availability depends on the server.':'The app operator must configure a public HTTPS API origin before sign-in or saving.'}</Copy></Card>
+ <SectionTitle title="Preferences & support"/><Card><Text style={s.cardTitle}>Notifications</Text><Copy>Notification settings are not available in the mobile app yet. No notification permission is requested here.</Copy></Card><Card><Text style={s.cardTitle}>Privacy, support & account deletion</Text><Copy>In-app policy links, support and account deletion requests are not available yet.</Copy></Card><Card><Text style={s.cardTitle}>Plans & billing</Text><Copy>Purchases and subscription management are not available in this app.</Copy></Card>
+ {session&&<><Button title="Sign out on this device" secondary busy={busy} onPress={()=>void logout(false)}/>{!confirm?<Button title="Sign out all mobile sessions in this family" secondary disabled={busy} onPress={()=>setConfirm(true)}/>:<Card><Text style={s.cardTitle}>Sign out all mobile sessions in this family?</Text><Copy>Only this mobile session family is revoked; other mobile families and web sessions may remain signed in. The server must confirm revocation. This app will sign out even if the request fails.</Copy><Button title="Confirm mobile sign out" busy={busy} onPress={()=>void logout(true)}/><Button title="Cancel" secondary onPress={()=>setConfirm(false)}/></Card>}</>}
+ </Page>;
+}
